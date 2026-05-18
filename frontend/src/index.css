@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap');
+
+@theme {
+  --color-primary-white: #FAFAF8;
+  --color-secondary-white: #F4F4F2;
+  --color-card-bg: rgba(255, 255, 255, 0.75);
+  --color-primary-text: #111111;
+  --color-secondary-text: #5F5F5F;
+  --color-luxury-gold: #C9A84C;
+  --color-soft-gold: #E8D39E;
+  --color-accent-black: #1A1A1A;
+  --color-border-light: rgba(0, 0, 0, 0.08);
+
+  --font-bebas: 'Bebas Neue', sans-serif;
+  --font-barlow: 'Barlow Condensed', sans-serif;
+  --font-inter: 'Inter', sans-serif;
+  --font-dmsans: 'DM Sans', sans-serif;
+}
+
+@layer base {
+  :root {
+    --primary-white: #FAFAF8;
+    --secondary-white: #F4F4F2;
+    --card-bg: rgba(255, 255, 255, 0.75);
+    --primary-text: #111111;
+    --secondary-text: #5F5F5F;
+    --luxury-gold: #C9A84C;
+    --soft-gold: #E8D39E;
+    --accent-black: #1A1A1A;
+    --border-light: rgba(0, 0, 0, 0.08);
+  }
+
+  body {
+    background-color: var(--primary-white);
+    color: var(--primary-text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.05em;
+  }
+
+  .text-barlow {
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .glass-dark {
+    background: rgba(26, 26, 26, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .gold-gradient {
+    background: linear-gradient(135deg, #C9A84C 0%, #E8D39E 100%);
+  }
+
+  .gold-text-gradient {
+    background: linear-gradient(135deg, #C9A84C 0%, #E8D39E 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .text-shadow-glow {
+    text-shadow: 0 0 20px rgba(232, 211, 158, 0.5);
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+
