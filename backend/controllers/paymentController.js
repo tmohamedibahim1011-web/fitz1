@@ -9,6 +9,128 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET?.trim()
 });
 
+/**
+ * Generates an editorial-style luxury HTML email template for orders
+ * @param {object} order - The complete MongoDB Order document
+ * @param {boolean} isAdmin - Whether the recipient is the administrator
+ * @returns {string} - Rich HTML content
+ */
+const generateOrderEmailHtml = (order, isAdmin = false) => {
+  const itemsHtml = order.items.map(item => `
+    <tr>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; text-align: left;">
+        <span style="font-weight: bold; color: #111;">${item.name}</span>
+      </td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; color: #555; text-align: left;">
+        ${item.color || 'Standard'}
+      </td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; color: #111; text-align: center;">
+        ${item.quantity}
+      </td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; color: #111; text-align: right;">
+        Rs. ${item.price.toLocaleString()}
+      </td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; font-weight: bold; color: #111; text-align: right;">
+        Rs. ${(item.price * item.quantity).toLocaleString()}
+      </td>
+    </tr>
+  `).join('');
+
+  return `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 0; background-color: #fafaf9; color: #1c1c1c; border: 1px solid #e5e5e0;">
+      <!-- Brand Header -->
+      <div style="background-color: #1a1a1a; padding: 30px; text-align: center; border-bottom: 3px solid #c9a84c;">
+        <h1 style="color: #fafaf9; font-size: 28px; font-weight: 800; letter-spacing: 2px; margin: 0; text-transform: uppercase; font-family: Arial, sans-serif;">FITZONE</h1>
+        <p style="color: #c9a84c; font-size: 11px; font-weight: bold; letter-spacing: 3px; margin: 5px 0 0 0; text-transform: uppercase;">Premium Training Equipment</p>
+      </div>
+
+      <!-- Main Body -->
+      <div style="padding: 40px 30px;">
+        <h2 style="font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #111; margin-top: 0; border-bottom: 1px solid #e5e5e0; padding-bottom: 15px;">
+          ${isAdmin ? '🔔 New Order Received!' : '✨ Order Confirmed'}
+        </h2>
+        
+        <p style="font-size: 15px; line-height: 1.6; color: #444;">
+          ${isAdmin 
+            ? `An order has been successfully placed and verified. Here are the full transaction details:` 
+            : `Hi ${order.customerInfo.firstName},<br><br>Thank you for shopping at FITZONE. Your order has been confirmed, paid for, and is now being prepared by our craftsmen.`}
+        </p>
+
+        <!-- Order Information Metadata -->
+        <div style="background-color: #f3f3f0; border-left: 4px solid #c9a84c; padding: 15px; margin: 25px 0; border-radius: 4px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="font-size: 13px; color: #666; padding: 4px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Order Number:</td>
+              <td style="font-size: 14px; color: #c9a84c; padding: 4px 0; font-weight: bold; font-family: monospace; text-align: left;">${order.orderId}</td>
+            </tr>
+            <tr>
+              <td style="font-size: 13px; color: #666; padding: 4px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Date:</td>
+              <td style="font-size: 14px; color: #111; padding: 4px 0; text-align: left;">${new Date(order.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</td>
+            </tr>
+            <tr>
+              <td style="font-size: 13px; color: #666; padding: 4px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Payment Status:</td>
+              <td style="font-size: 13px; color: #2e7d32; padding: 4px 0; font-weight: bold; text-transform: uppercase; text-align: left;">PAID (Razorpay)</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Items Table -->
+        <h3 style="font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #111; margin: 30px 0 10px 0; text-align: left;">Ordered Items</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+          <thead>
+            <tr style="background-color: #1a1a1a;">
+              <th style="padding: 10px 12px; color: #fafaf9; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: left; letter-spacing: 1px;">Item</th>
+              <th style="padding: 10px 12px; color: #fafaf9; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: left; letter-spacing: 1px;">Finish</th>
+              <th style="padding: 10px 12px; color: #fafaf9; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: center; letter-spacing: 1px;">Qty</th>
+              <th style="padding: 10px 12px; color: #fafaf9; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: right; letter-spacing: 1px;">Price</th>
+              <th style="padding: 10px 12px; color: #fafaf9; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: right; letter-spacing: 1px;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" style="padding: 15px 12px 5px 12px; text-align: right; font-size: 13px; color: #666; font-weight: bold; text-transform: uppercase;">Grand Total:</td>
+              <td colspan="2" style="padding: 15px 12px 5px 12px; text-align: right; font-size: 18px; font-weight: 800; color: #c9a84c;">Rs. ${order.totalAmount.toLocaleString()}</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <!-- Shipping & Customer details -->
+        <div style="border-top: 1px solid #e5e5e0; padding-top: 25px; margin-top: 25px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr style="vertical-align: top;">
+              <td style="width: 50%; padding-right: 15px; text-align: left;">
+                <h4 style="font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 10px 0;">Shipping Address</h4>
+                <p style="font-size: 14px; line-height: 1.5; color: #333; margin: 0;">
+                  <strong style="color: #111;">${order.customerInfo.firstName} ${order.customerInfo.lastName}</strong><br>
+                  ${order.shippingAddress.address}<br>
+                  ${order.shippingAddress.city}, ${order.shippingAddress.state} - ${order.shippingAddress.zip}<br>
+                  <span style="font-size: 13px; color: #666;">Method: ${order.shippingAddress.method || 'Standard Shipping'}</span>
+                </p>
+              </td>
+              <td style="width: 50%; padding-left: 15px; border-left: 1px solid #e5e5e0; text-align: left;">
+                <h4 style="font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 10px 0;">Customer Contact</h4>
+                <p style="font-size: 14px; line-height: 1.5; color: #333; margin: 0;">
+                  Email: <a href="mailto:${order.customerInfo.email}" style="color: #c9a84c; text-decoration: none;">${order.customerInfo.email}</a><br>
+                  Phone: ${order.customerInfo.phone}
+                </p>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- Email Footer -->
+      <div style="background-color: #1a1a1a; padding: 25px; text-align: center; border-top: 1px solid #c9a84c;">
+        <p style="color: #fafaf9; font-size: 12px; margin: 0 0 8px 0; font-weight: bold; letter-spacing: 1px;">Thank you for choosing FITZONE.</p>
+        <p style="color: #888; font-size: 11px; margin: 0;">This is an automated confirmation email. For support, reply directly to this mail or write to us at <a href="mailto:kavinath50@gmail.com" style="color: #c9a84c; text-decoration: none;">kavinath50@gmail.com</a>.</p>
+      </div>
+    </div>
+  `;
+};
+
 // Create Razorpay Order
 const createPaymentOrder = async (req, res) => {
   try {
@@ -103,55 +225,30 @@ const verifyPayment = async (req, res) => {
             order.paymentId = razorpay_payment_id;
             
             if (needsEmail) {
-              console.log('🔍 [DEBUG] Triggering email services...');
+              console.log('🔍 [DEBUG] Triggering email services in background...');
               
-              // Send email to Admin
-              const adminEmailContent = `
-                <h1>New Order Received!</h1>
-                <p><strong>Order ID:</strong> ${order.orderId}</p>
-                <p><strong>Customer:</strong> ${order.customerInfo.firstName} ${order.customerInfo.lastName}</p>
-                <p><strong>Email:</strong> ${order.customerInfo.email}</p>
-                <p><strong>Phone:</strong> ${order.customerInfo.phone}</p>
-                <p><strong>Amount:</strong> Rs. ${order.totalAmount}</p>
-                <p><strong>Status:</strong> Paid</p>
-              `;
+              // Generate modern HTML templates
+              const adminEmailContent = generateOrderEmailHtml(order, true);
+              const customerEmailContent = generateOrderEmailHtml(order, false);
               
-              // Send confirmation email to Customer
-              const customerEmailContent = `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-                  <h2 style="color: #111; text-align: center; border-bottom: 2px solid #b89047; padding-bottom: 10px;">Thank You for Your Order!</h2>
-                  <p>Hi ${order.customerInfo.firstName},</p>
-                  <p>Your order has been successfully placed and paid for. We are getting it ready for you!</p>
-                  
-                  <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                    <tr style="background: #f9f9f9;">
-                      <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Order ID:</td>
-                      <td style="padding: 10px; border: 1px solid #ddd;">${order.orderId}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Total Amount:</td>
-                      <td style="padding: 10px; border: 1px solid #ddd;">Rs. ${order.totalAmount}</td>
-                    </tr>
-                    <tr style="background: #f9f9f9;">
-                      <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Payment Status:</td>
-                      <td style="padding: 10px; border: 1px solid #ddd; color: #2e7d32; font-weight: bold;">Paid</td>
-                    </tr>
-                  </table>
-                  
-                  <p style="font-size: 14px; color: #555;">If you have any questions, feel free to reply to this email or contact our support team.</p>
-                  <p style="text-align: center; font-weight: bold; color: #b89047; margin-top: 30px;">FITZONE</p>
-                </div>
-              `;
-              
-              const adminSent = await sendEmail('New Order Confirmed - Fitzone', adminEmailContent);
-              const customerSent = await sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, order.customerInfo.email, `${order.customerInfo.firstName} ${order.customerInfo.lastName}`);
-              
-              if (adminSent || customerSent) {
-                console.log('✅ Emails successfully delivered, setting emailSent to true.');
-                order.emailSent = true;
-              } else {
-                console.warn('⚠️ SMTP send failed or skipped, leaving emailSent as false for next server retry.');
-              }
+              // Send emails in the background (asynchronously) to prevent delaying the redirect!
+              sendEmail('New Order Confirmed - Fitzone', adminEmailContent)
+                .then(adminSent => {
+                  if (adminSent) console.log('✅ Background: Admin order email sent successfully.');
+                })
+                .catch(err => console.error('❌ Background: Failed to send admin email:', err.message));
+
+              sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, order.customerInfo.email, `${order.customerInfo.firstName} ${order.customerInfo.lastName}`)
+                .then(customerSent => {
+                  if (customerSent) {
+                    console.log('✅ Background: Customer order confirmation email sent successfully.');
+                    // Once successfully sent, flag in database in background
+                    Order.findByIdAndUpdate(order._id, { emailSent: true })
+                      .then(() => console.log('✅ Background: Updated Order DB emailSent status to true.'))
+                      .catch(dbErr => console.error('❌ Background: Failed to update emailSent DB flag:', dbErr.message));
+                  }
+                })
+                .catch(err => console.error('❌ Background: Failed to send customer email:', err.message));
             }
             
             await order.save();
@@ -209,53 +306,29 @@ const razorpayWebhook = async (req, res) => {
           order.paymentId = paymentId;
           
           if (needsEmail) {
-            console.log(`✅ Webhook: Triggering confirmation emails for order ${order.orderId}`);
+            console.log(`✅ Webhook: Triggering confirmation emails in background for order ${order.orderId}`);
             
-            // Send email to Admin
-            const adminEmailContent = `
-              <h1>New Order Received (via Webhook)!</h1>
-              <p><strong>Order ID:</strong> ${order.orderId}</p>
-              <p><strong>Customer:</strong> ${order.customerInfo.firstName} ${order.customerInfo.lastName}</p>
-              <p><strong>Amount:</strong> Rs. ${order.totalAmount}</p>
-              <p><strong>Status:</strong> Paid</p>
-            `;
+            const adminEmailContent = generateOrderEmailHtml(order, true);
+            const customerEmailContent = generateOrderEmailHtml(order, false);
             
-            // Send confirmation email to Customer
-            const customerEmailContent = `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-                <h2 style="color: #111; text-align: center; border-bottom: 2px solid #b89047; padding-bottom: 10px;">Thank You for Your Order!</h2>
-                <p>Hi ${order.customerInfo.firstName},</p>
-                <p>Your order has been successfully placed and paid for. We are getting it ready for you!</p>
-                
-                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                  <tr style="background: #f9f9f9;">
-                    <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Order ID:</td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">${order.orderId}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Total Amount:</td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">Rs. ${order.totalAmount}</td>
-                  </tr>
-                  <tr style="background: #f9f9f9;">
-                    <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Payment Status:</td>
-                    <td style="padding: 10px; border: 1px solid #ddd; color: #2e7d32; font-weight: bold;">Paid</td>
-                  </tr>
-                </table>
-                
-                <p style="font-size: 14px; color: #555;">If you have any questions, feel free to reply to this email or contact our support team.</p>
-                <p style="text-align: center; font-weight: bold; color: #b89047; margin-top: 30px;">FITZONE</p>
-              </div>
-            `;
-            
-            const adminSent = await sendEmail('New Order Confirmed - Fitzone', adminEmailContent);
-            const customerSent = await sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, order.customerInfo.email, `${order.customerInfo.firstName} ${order.customerInfo.lastName}`);
-            
-            if (adminSent || customerSent) {
-              console.log('✅ Webhook: Emails successfully delivered, setting emailSent to true.');
-              order.emailSent = true;
-            } else {
-              console.warn('⚠️ Webhook: SMTP send failed or skipped, leaving emailSent as false for next server retry.');
-            }
+            // Asynchronous background email sending
+            sendEmail('New Order Confirmed - Fitzone', adminEmailContent)
+              .then(adminSent => {
+                if (adminSent) console.log('✅ Webhook Background: Admin order email sent.');
+              })
+              .catch(err => console.error('❌ Webhook Background: Admin email failed:', err.message));
+
+            sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, order.customerInfo.email, `${order.customerInfo.firstName} ${order.customerInfo.lastName}`)
+              .then(customerSent => {
+                if (customerSent) {
+                  console.log('✅ Webhook Background: Customer order email sent.');
+                  // Set database flag to true asynchronously
+                  Order.findByIdAndUpdate(order._id, { emailSent: true })
+                    .then(() => console.log('✅ Webhook Background: DB emailSent flag set to true.'))
+                    .catch(dbErr => console.error('❌ Webhook Background: DB flag save failed:', dbErr.message));
+                }
+              })
+              .catch(err => console.error('❌ Webhook Background: Customer email failed:', err.message));
           }
           
           await order.save();
