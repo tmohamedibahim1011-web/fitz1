@@ -7,7 +7,11 @@ const { getAllOrders, updateOrderStatus } = require('../controllers/orderControl
 // Admin login
 router.post('/login', (req, res) => {
   const { username, password } = req.body;
-  if (username === 'admin' && password === 'admin123') {
+  
+  const adminUsername = process.env.ADMIN_USERNAME || 'fitz1';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'kavinath@123';
+
+  if (username === adminUsername && password === adminPassword) {
     const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1d' });
     
     res.cookie('token', token, {
