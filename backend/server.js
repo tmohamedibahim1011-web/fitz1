@@ -87,6 +87,20 @@ const seedProducts = async () => {
       ],
       rating: 5,
       reviewCount: 89
+    },
+    {
+      name: 'Live Test Product',
+      description: 'Use this product to test a real Rs. 1 live transaction on Razorpay. It validates the full cart, checkout, payment gateway, and email workflows.',
+      basePrice: 1,
+      size: 'regular',
+      material: 'Test Material',
+      badge: 'Test Mode',
+      stock: 999,
+      colors: [
+        { id: 'natural', name: 'Standard', hex: '#E0E0E0', priceOffset: 0, image: '/products/regularnatural.jpeg', hoverImage: '/products/regularnatural.jpeg' }
+      ],
+      rating: 5,
+      reviewCount: 1
     }
   ];
   
