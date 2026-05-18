@@ -34,7 +34,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!assets/|favicon.png|.*\\..*$).*)",
+      "source": "/:path*",
       "destination": "/index.html"
     }
   ]
