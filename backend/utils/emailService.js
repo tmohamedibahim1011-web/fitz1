@@ -1,36 +1,48 @@
+const nodemailer = require('nodemailer');
+
+/**
+ * Sends an email using Nodemailer and Brevo SMTP Relay
+ * @param {string} subject - Email subject line
+ * @param {string} htmlContent - Rich HTML body content
+ * @param {string} toEmail - Recipient email address
+ * @param {string} toName - Recipient name
+ * @returns {Promise<boolean>} - Whether email sent successfully
+ */
 const sendEmail = async (subject, htmlContent, toEmail = 'kavinath50@gmail.com', toName = 'Admin') => {
-  const brevoApiKey = process.env.BREVO_API_KEY;
-  if (!brevoApiKey) {
-    console.warn('⚠️ Brevo API key not found. Skipping email.');
+  const smtpHost = process.env.SMTP_HOST || 'smtp-relay.brevo.com';
+  const smtpPort = process.env.SMTP_PORT || 587;
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+
+  if (!smtpUser || !smtpPass) {
+    console.warn('⚠️ SMTP credentials not found. Skipping email.');
     return false;
   }
 
   try {
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'api-key': brevoApiKey
-      },
-      body: JSON.stringify({
-        sender: { name: 'Fitzone', email: 'kavinath50@gmail.com' },
-        to: [{ email: toEmail, name: toName }],
-        subject: subject,
-        htmlContent: htmlContent
-      })
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: parseInt(smtpPort),
+      secure: false, // false for 587 (uses STARTTLS), true for 465
+      auth: {
+        user: smtpUser,
+        pass: smtpPass
+      }
     });
 
-    if (response.ok) {
-      console.log(`✅ Order confirmation email sent to ${toEmail}`);
-      return true;
-    } else {
-      const errorText = await response.text();
-      console.error('❌ Failed to send email via Brevo:', errorText);
-      return false;
-    }
+    const mailOptions = {
+      from: `"Fitzone" <kavinath50@gmail.com>`,
+      to: `"${toName}" <${toEmail}>`,
+      subject: subject,
+      html: htmlContent
+    };
+
+    console.log(`🔄 Sending email to ${toEmail} via Brevo SMTP Relay...`);
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ Email sent successfully: ${info.messageId}`);
+    return true;
   } catch (error) {
-    console.error('❌ Error sending email via Brevo:', error.message);
+    console.error('❌ Error sending email via SMTP:', error.message);
     return false;
   }
 };
