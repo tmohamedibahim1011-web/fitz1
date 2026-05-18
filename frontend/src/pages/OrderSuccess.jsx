@@ -60,7 +60,8 @@ const OrderSuccess = () => {
   useEffect(() => {
     clearCart();
     window.scrollTo(0, 0);
-  }, [clearCart]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="bg-primary-white min-h-screen pt-32 pb-32 relative overflow-hidden flex items-center justify-center">

@@ -14,7 +14,7 @@ const sendEmail = async (subject, htmlContent, toEmail = 'kavinath50@gmail.com',
         'api-key': brevoApiKey
       },
       body: JSON.stringify({
-        sender: { name: 'Fitzone', email: 'no-reply@fitzone.in' },
+        sender: { name: 'Fitzone', email: 'kavinath50@gmail.com' },
         to: [{ email: toEmail, name: toName }],
         subject: subject,
         htmlContent: htmlContent
