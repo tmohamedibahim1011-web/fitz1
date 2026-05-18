@@ -6,6 +6,45 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const INDIAN_STATES = [
+  "Tamil Nadu",
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chhattisgarh",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jammu & Kashmir",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+  "Andaman & Nicobar Islands",
+  "Chandigarh",
+  "Dadra & Nagar Haveli and Daman & Diu",
+  "Delhi",
+  "Lakshadweep",
+  "Puducherry",
+  "Ladakh"
+];
+
 const Checkout = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -278,9 +317,19 @@ const Checkout = () => {
                   <label className="block text-xs uppercase tracking-widest text-secondary-text mb-2 font-bold">City *</label>
                   <input type="text" value={formData.city} onChange={(e) => setFormData({...formData, city: e.target.value})} required className="w-full bg-secondary-white border border-black/10 p-3 focus:outline-none focus:border-luxury-gold transition-colors text-sm" placeholder="Chennai" />
                 </div>
-                <div>
+                 <div>
                   <label className="block text-xs uppercase tracking-widest text-secondary-text mb-2 font-bold">State *</label>
-                  <input type="text" value={formData.state} onChange={(e) => setFormData({...formData, state: e.target.value})} required className="w-full bg-secondary-white border border-black/10 p-3 focus:outline-none focus:border-luxury-gold transition-colors text-sm" placeholder="Tamil Nadu" />
+                  <select 
+                    value={formData.state} 
+                    onChange={(e) => setFormData({...formData, state: e.target.value})} 
+                    required 
+                    className="w-full bg-secondary-white border border-black/10 p-3 focus:outline-none focus:border-luxury-gold transition-colors text-sm"
+                  >
+                    <option value="">Select State</option>
+                    {INDIAN_STATES.map((state) => (
+                      <option key={state} value={state}>{state}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-secondary-text mb-2 font-bold">Zip Code *</label>
