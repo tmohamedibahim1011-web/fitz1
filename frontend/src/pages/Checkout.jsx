@@ -26,7 +26,11 @@ const Checkout = () => {
   const isTamilNadu = formData.state.toLowerCase().trim() === 'tamil nadu' || formData.state.toLowerCase().trim() === 'tn';
   
   const getShippingCost = () => {
+    // Default to Free Shipping if no state is entered yet
+    if (!formData.state.trim()) return 0;
+    
     if (isTamilNadu) return 0;
+    
     // Check if any item is "Mini" product
     const hasMini = cartItems.some(item => 
       item.name.toLowerCase().includes('mini')
@@ -220,6 +224,11 @@ const Checkout = () => {
                 {shipping === 0 ? 'Free' : `Rs. ${shipping}`}
               </span>
             </div>
+            {shipping === 0 && !formData.state.trim() && (
+              <p className="text-[11px] text-secondary-text text-right -mt-1 italic">
+                Free shipping in Tamil Nadu. Other states calculated upon entering address.
+              </p>
+            )}
             <div className="flex justify-between text-lg font-bold pt-2 border-t border-black/5">
               <span>Total</span>
               <span className="text-luxury-gold">Rs. {finalTotal.toLocaleString()}</span>
