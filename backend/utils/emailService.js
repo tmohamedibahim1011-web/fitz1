@@ -1,4 +1,4 @@
-const sendEmail = async (subject, htmlContent) => {
+const sendEmail = async (subject, htmlContent, toEmail = 'kavinath50@gmail.com', toName = 'Admin') => {
   const brevoApiKey = process.env.BREVO_API_KEY;
   if (!brevoApiKey) {
     console.warn('⚠️ Brevo API key not found. Skipping email.');
@@ -15,14 +15,14 @@ const sendEmail = async (subject, htmlContent) => {
       },
       body: JSON.stringify({
         sender: { name: 'Fitzone', email: 'no-reply@fitzone.in' },
-        to: [{ email: 'kavinath50@gmail.com', name: 'Admin' }],
+        to: [{ email: toEmail, name: toName }],
         subject: subject,
         htmlContent: htmlContent
       })
     });
 
     if (response.ok) {
-      console.log('✅ Order confirmation email sent to kavinath50@gmail.com');
+      console.log(`✅ Order confirmation email sent to ${toEmail}`);
       return true;
     } else {
       const errorText = await response.text();

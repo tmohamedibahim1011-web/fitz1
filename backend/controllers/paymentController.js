@@ -94,8 +94,8 @@ const verifyPayment = async (req, res) => {
           order.paymentId = razorpay_payment_id;
           await order.save();
           
-          // Send email
-          const emailContent = `
+          // Send email to Admin
+          const adminEmailContent = `
             <h1>New Order Received!</h1>
             <p><strong>Order ID:</strong> ${order.orderId}</p>
             <p><strong>Customer:</strong> ${order.customerInfo.firstName} ${order.customerInfo.lastName}</p>
@@ -104,7 +104,35 @@ const verifyPayment = async (req, res) => {
             <p><strong>Amount:</strong> Rs. ${order.totalAmount}</p>
             <p><strong>Status:</strong> Paid</p>
           `;
-          await sendEmail('New Order Confirmed - Fitzone', emailContent);
+          await sendEmail('New Order Confirmed - Fitzone', adminEmailContent);
+
+          // Send confirmation email to Customer
+          const customerEmailContent = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+              <h2 style="color: #111; text-align: center; border-bottom: 2px solid #b89047; padding-bottom: 10px;">Thank You for Your Order!</h2>
+              <p>Hi ${order.customerInfo.firstName},</p>
+              <p>Your order has been successfully placed and paid for. We are getting it ready for you!</p>
+              
+              <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr style="background: #f9f9f9;">
+                  <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Order ID:</td>
+                  <td style="padding: 10px; border: 1px solid #ddd;">${order.orderId}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Total Amount:</td>
+                  <td style="padding: 10px; border: 1px solid #ddd;">Rs. ${order.totalAmount}</td>
+                </tr>
+                <tr style="background: #f9f9f9;">
+                  <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Payment Status:</td>
+                  <td style="padding: 10px; border: 1px solid #ddd; color: #2e7d32; font-weight: bold;">Paid</td>
+                </tr>
+              </table>
+              
+              <p style="font-size: 14px; color: #555;">If you have any questions, feel free to reply to this email or contact our support team.</p>
+              <p style="text-align: center; font-weight: bold; color: #b89047; margin-top: 30px;">FITZONE</p>
+            </div>
+          `;
+          await sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, order.customerInfo.email, `${order.customerInfo.firstName} ${order.customerInfo.lastName}`);
         }
       }
       
@@ -154,15 +182,43 @@ const razorpayWebhook = async (req, res) => {
         
         console.log(`✅ Webhook: Order ${order.orderId} marked as paid`);
         
-        // Send email
-        const emailContent = `
+        // Send email to Admin
+        const adminEmailContent = `
           <h1>New Order Received (via Webhook)!</h1>
           <p><strong>Order ID:</strong> ${order.orderId}</p>
           <p><strong>Customer:</strong> ${order.customerInfo.firstName} ${order.customerInfo.lastName}</p>
           <p><strong>Amount:</strong> Rs. ${order.totalAmount}</p>
           <p><strong>Status:</strong> Paid</p>
         `;
-        await sendEmail('New Order Confirmed - Fitzone', emailContent);
+        await sendEmail('New Order Confirmed - Fitzone', adminEmailContent);
+
+        // Send confirmation email to Customer
+        const customerEmailContent = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+            <h2 style="color: #111; text-align: center; border-bottom: 2px solid #b89047; padding-bottom: 10px;">Thank You for Your Order!</h2>
+            <p>Hi ${order.customerInfo.firstName},</p>
+            <p>Your order has been successfully placed and paid for. We are getting it ready for you!</p>
+            
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+              <tr style="background: #f9f9f9;">
+                <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Order ID:</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">${order.orderId}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Total Amount:</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Rs. ${order.totalAmount}</td>
+              </tr>
+              <tr style="background: #f9f9f9;">
+                <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Payment Status:</td>
+                <td style="padding: 10px; border: 1px solid #ddd; color: #2e7d32; font-weight: bold;">Paid</td>
+              </tr>
+            </table>
+            
+            <p style="font-size: 14px; color: #555;">If you have any questions, feel free to reply to this email or contact our support team.</p>
+            <p style="text-align: center; font-weight: bold; color: #b89047; margin-top: 30px;">FITZONE</p>
+          </div>
+        `;
+        await sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, order.customerInfo.email, `${order.customerInfo.firstName} ${order.customerInfo.lastName}`);
       }
     }
 
