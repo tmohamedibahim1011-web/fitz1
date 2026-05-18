@@ -30,6 +30,7 @@ const OrderSchema = new mongoose.Schema({
   },
   paymentId: String,
   paymentStatus: { type: String, default: 'pending' },
+  emailSent: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 
