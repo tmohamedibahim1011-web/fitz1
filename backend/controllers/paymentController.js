@@ -158,8 +158,10 @@ const razorpayWebhook = async (req, res) => {
 
     const signature = req.headers['x-razorpay-signature'];
     
+    const rawBody = req.rawBody ? req.rawBody.toString('utf-8') : JSON.stringify(req.body);
+    
     const expectedSignature = crypto.createHmac('sha256', webhookSecret)
-      .update(JSON.stringify(req.body))
+      .update(rawBody)
       .digest('hex');
       
     if (signature !== expectedSignature) {
