@@ -1,122 +1,165 @@
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Check, Home as HomeIcon, Shield, Sparkles, Heart } from 'lucide-react';
+import aboutPhoto from '../assets/about_photo.PNG';
 
 const About = () => {
   return (
     <div className="bg-primary-white min-h-screen pt-24 pb-32">
-      {/* HERO */}
-      <section className="container mx-auto px-6 mb-32 text-center">
+      {/* HERO SECTION */}
+      <section className="container mx-auto px-6 mb-24 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
+          className="max-w-4xl mx-auto"
         >
-          <h1 className="text-6xl md:text-8xl font-bold uppercase tracking-tighter text-primary-text mb-6" style={{ fontFamily: 'var(--font-bebas)' }}>
-            OUR STORY
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <span className="w-12 h-[2px] bg-luxury-gold"></span>
+            <span className="text-xs font-bold uppercase tracking-[0.3em] text-secondary-text">The FITZ1 Philosophy</span>
+            <span className="w-12 h-[2px] bg-luxury-gold"></span>
+          </div>
+          <h1 className="text-6xl md:text-8xl font-bold uppercase tracking-tighter text-primary-text mb-8" style={{ fontFamily: 'var(--font-bebas)' }}>
+            FITNESS BEGINS AT HOME.
           </h1>
-          <p className="text-lg md:text-xl text-secondary-text max-w-2xl mx-auto font-light leading-relaxed">
-            Born from a desire for uncompromising quality. We build equipment that inspires movement and honors the craft of woodworking.
+          <p className="text-xl md:text-2xl font-serif text-primary-text max-w-3xl mx-auto leading-relaxed mb-6 font-medium">
+            "At FITZ1, we believe fitness should be easy, affordable, and accessible to everyone. You do not need high-tech machines or expensive gym memberships to stay healthy."
           </p>
         </motion.div>
       </section>
 
-      {/* IMAGE BREAK */}
-      <section className="w-full h-[60vh] relative mb-32">
-        <div className="absolute inset-0 bg-black/20 z-10" />
-        <img 
-          src="https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=2000&auto=format&fit=crop" 
-          alt="Workshop" 
-          className="w-full h-full object-cover object-center fixed-bg"
-        />
-      </section>
-
-      {/* THE FOUNDER */}
-      <section className="container mx-auto px-6 mb-32">
-        <div className="flex flex-col md:flex-row gap-16 items-center">
-          <div className="w-full md:w-1/2">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-luxury-gold mb-4 flex items-center gap-2">
-              <span className="w-8 h-[1px] bg-luxury-gold"></span> The Founder
-            </h2>
-            <h3 className="text-4xl font-bold uppercase tracking-tighter text-primary-text mb-6" style={{ fontFamily: 'var(--font-bebas)' }}>
-              Driven by Perfection
-            </h3>
-            <p className="text-secondary-text mb-6 leading-relaxed">
-              It started in a small garage in 2020. Dissatisfied with mass-produced, unstable metal parallettes, our founder, an avid calisthenics athlete and woodworker, set out to create the perfect pair.
-            </p>
-            <p className="text-secondary-text leading-relaxed">
-              "I wanted equipment that felt alive. Wood provides a natural grip that absorbs sweat and offers slight flex under heavy load, protecting the wrists. It had to perform flawlessly and look beautiful enough to leave in the living room."
-            </p>
-          </div>
-          <div className="w-full md:w-1/2 relative">
-            <div className="aspect-[3/4] bg-secondary-white overflow-hidden">
-              <img 
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop" 
-                alt="Founder" 
-                className="w-full h-full object-cover"
-              />
+      {/* CORE MESSAGE BANNER */}
+      <section className="bg-black text-white py-24 mb-32 relative overflow-hidden">
+        <div className="absolute inset-0 bg-luxury-gold/5 blur-3xl pointer-events-none"></div>
+        <div className="container mx-auto px-6 relative z-10 max-w-5xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div>
+              <span className="text-luxury-gold text-xs font-bold uppercase tracking-[0.3em] mb-4 block font-mono">// Our Niche</span>
+              <h2 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter leading-none mb-6" style={{ fontFamily: 'var(--font-bebas)' }}>
+                HOME WORKOUT EQUIPMENT.<br />NOT GYM CLUTTER.
+              </h2>
+              <p className="text-white/80 leading-relaxed font-light mb-6 text-base md:text-lg">
+                With simple workouts and the right basic equipment, anyone can begin their fitness journey from the comfort of home. Our brand focuses on providing quality home workout equipment designed for everyday fitness needs.
+              </p>
+              <p className="text-white/80 leading-relaxed font-light text-base md:text-lg">
+                Whether you are a beginner or someone looking to maintain an active lifestyle, FITZ1 helps you stay consistent with simple and effective workouts.
+              </p>
             </div>
-            <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-white p-4 border border-black/5 hidden md:block">
-              <img 
-                src="https://images.unsplash.com/photo-1598289431512-b97b0917affc?q=80&w=1000&auto=format&fit=crop" 
-                alt="Detail" 
-                className="w-full h-full object-cover"
-              />
+            <div className="bg-white/5 border border-white/10 p-10 rounded-3xl backdrop-blur-xl relative">
+              <div className="absolute -top-6 -right-6 w-16 h-16 bg-luxury-gold/20 rounded-full flex items-center justify-center text-luxury-gold border border-luxury-gold/40">
+                <HomeIcon size={28} />
+              </div>
+              <h3 className="text-2xl font-bold uppercase tracking-widest text-luxury-gold mb-4">Our Mission</h3>
+              <p className="text-white/90 leading-relaxed text-sm md:text-base italic mb-6">
+                "The FITZ1 page was created to inspire people to make fitness a part of daily life in an easy and practical way. Start small, stay active, and build a healthier lifestyle with FITZ1 — because fitness begins at home."
+              </p>
+              <div className="border-t border-white/10 pt-6 flex items-center justify-between text-xs font-mono text-white/60 uppercase tracking-widest">
+                <span>Accessibility</span>
+                <span>•</span>
+                <span>Affordability</span>
+                <span>•</span>
+                <span>Simplicity</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CRAFTSMANSHIP */}
-      <section className="bg-secondary-white py-32 mb-32">
-        <div className="container mx-auto px-6">
+      {/* THE FOUNDER SECTION */}
+      <section className="container mx-auto px-6 mb-32 max-w-6xl">
+        <div className="flex flex-col md:flex-row gap-16 items-center">
+          <div className="w-full md:w-1/2">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="w-8 h-[2px] bg-luxury-gold"></span>
+              <h2 className="text-xs font-bold uppercase tracking-[0.3em] text-secondary-text">The Founder</h2>
+            </div>
+            <h3 className="text-5xl md:text-7xl font-bold uppercase tracking-tighter text-primary-text mb-4" style={{ fontFamily: 'var(--font-bebas)' }}>
+              Meet Kavinath
+            </h3>
+            <p className="text-sm uppercase tracking-[0.2em] font-mono text-luxury-gold mb-8">Founder & Visionary behind FITZ1</p>
+            
+            <div className="space-y-6 text-secondary-text leading-relaxed text-base md:text-lg font-light">
+              <p>
+                Kavinath realized early on that modern fitness had become overly complicated. Commercial gyms, expensive subscriptions, and bulky, complex machines often created barriers rather than encouraging healthy habits.
+              </p>
+              <p className="p-6 bg-secondary-white border-l-4 border-luxury-gold text-primary-text font-serif italic text-lg shadow-sm">
+                "I wanted equipment that belonged in your living room. Equipment that feels natural, works flawlessly without complex setups, and makes staying consistent effortless."
+              </p>
+              <p>
+                By focusing strictly on premium wooden home workout tools like our signature wooden parallettes, Kavinath built FITZ1 to prove that real fitness doesn't require a gym membership. It requires consistency, basic high-quality tools, and the dedication to start at home.
+              </p>
+            </div>
+          </div>
+          
+          <div className="w-full md:w-1/2 relative">
+            <div className="relative aspect-[4/5] bg-secondary-white overflow-hidden rounded-3xl shadow-2xl border border-black/5 p-2 bg-gradient-to-br from-luxury-gold/10 to-transparent">
+              <img 
+                src={aboutPhoto} 
+                alt="Kavinath - Founder of FITZ1" 
+                className="w-full h-full object-cover rounded-2xl shadow-inner object-top"
+              />
+            </div>
+            {/* Decorative Badge */}
+            <div className="absolute -bottom-6 -left-6 bg-primary-text text-white p-6 rounded-2xl shadow-xl hidden sm:flex items-center gap-4 border border-luxury-gold/30">
+              <div className="w-12 h-12 rounded-full bg-luxury-gold/20 flex items-center justify-center text-luxury-gold">
+                <Sparkles size={24} />
+              </div>
+              <div>
+                <p className="text-xs font-mono uppercase tracking-widest text-luxury-gold">Established</p>
+                <p className="text-lg font-bold uppercase tracking-wider font-serif">Premium Quality</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* WHY HOME EQUIPMENT MATTERS */}
+      <section className="bg-secondary-white py-32 border-y border-black/5 mb-32">
+        <div className="container mx-auto px-6 max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-luxury-gold mb-4">Our Process</h2>
-            <h3 className="text-5xl font-bold uppercase tracking-tighter text-primary-text" style={{ fontFamily: 'var(--font-bebas)' }}>
-              The Craftsmanship
+            <h2 className="text-xs font-bold uppercase tracking-[0.3em] text-luxury-gold mb-3">The FITZ1 Advantage</h2>
+            <h3 className="text-5xl md:text-7xl font-bold uppercase tracking-tighter text-primary-text" style={{ fontFamily: 'var(--font-bebas)' }}>
+              Why Home Equipment?
             </h3>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { title: 'Material Selection', desc: 'We source only premium hardwoods—Walnut, Oak, and Baltic Birch—known for their density and grain structure.' },
-              { title: 'Precision Milling', desc: 'Each piece is CNC milled to exact specifications ensuring perfect balance and structural integrity before hand-finishing.' },
-              { title: 'Hand Finished', desc: 'Sanded through 5 grits and sealed with natural oils to preserve the wood\'s tactile feel while protecting against moisture.' }
-            ].map((step, idx) => (
-              <div key={idx} className="bg-white p-10 border border-black/5 hover:border-luxury-gold/30 transition-colors">
-                <span className="text-4xl font-bold text-luxury-gold/20 mb-6 block font-mono">0{idx + 1}</span>
-                <h4 className="text-lg font-bold uppercase tracking-widest text-primary-text mb-4">{step.title}</h4>
-                <p className="text-secondary-text leading-relaxed text-sm">{step.desc}</p>
+              { icon: HomeIcon, title: 'Living Room Ready', desc: 'Designed with beautiful, natural hardwoods that complement your home decor rather than turning your room into an industrial warehouse.' },
+              { icon: Heart, title: 'Everyday Consistency', desc: 'When your equipment is right at home and ready to use in seconds, building a daily workout habit becomes completely natural.' },
+              { icon: Shield, title: 'Affordable Mastery', desc: 'No monthly dues, no commute, and no waiting in line. Premium, lifetime-quality tools at a fraction of the cost of commercial gym memberships.' }
+            ].map((feature, idx) => (
+              <div key={idx} className="bg-white p-10 rounded-2xl border border-black/5 hover:border-luxury-gold/40 hover:shadow-xl transition-all duration-500 group">
+                <div className="w-14 h-14 rounded-2xl bg-luxury-gold/10 flex items-center justify-center text-luxury-gold mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <feature.icon size={28} />
+                </div>
+                <h4 className="text-xl font-bold uppercase tracking-wider text-primary-text mb-4 font-serif">{feature.title}</h4>
+                <p className="text-secondary-text leading-relaxed text-sm font-light">{feature.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* TIMELINE */}
-      <section className="container mx-auto px-6 text-center">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-luxury-gold mb-16">The Journey</h2>
-        <div className="space-y-24 relative before:absolute before:inset-0 before:ml-auto before:mr-auto before:w-[1px] before:bg-black/10">
-          {[
-            { year: '2020', title: 'The First Prototype', align: 'left' },
-            { year: '2022', title: 'Global Expansion', align: 'right' },
-            { year: '2024', title: 'The Pro Series Launch', align: 'left' }
-          ].map((item, idx) => (
-            <div key={idx} className={`relative flex items-center justify-between w-full ${item.align === 'left' ? 'flex-row-reverse' : ''}`}>
-              <div className="w-5/12 hidden md:block"></div>
-              <div className="z-20">
-                <div className="w-8 h-8 rounded-full bg-primary-white border-2 border-luxury-gold flex items-center justify-center">
-                  <div className="w-2 h-2 bg-luxury-gold rounded-full"></div>
-                </div>
-              </div>
-              <div className={`w-full md:w-5/12 ${item.align === 'left' ? 'md:text-right' : 'md:text-left'} text-center md:text-current px-4`}>
-                <h4 className="text-2xl font-bold uppercase tracking-widest text-primary-text mb-2">{item.year}</h4>
-                <p className="text-secondary-text">{item.title}</p>
-              </div>
-            </div>
-          ))}
+      {/* CALL TO ACTION */}
+      <section className="container mx-auto px-6 text-center max-w-4xl">
+        <div className="bg-primary-text text-white p-16 rounded-3xl relative overflow-hidden border border-luxury-gold/30 shadow-2xl">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-luxury-gold/20 via-transparent to-transparent"></div>
+          <div className="relative z-10">
+            <h2 className="text-5xl md:text-7xl font-bold uppercase tracking-tighter mb-6" style={{ fontFamily: 'var(--font-bebas)' }}>
+              Start Small. Stay Active.
+            </h2>
+            <p className="text-white/80 max-w-xl mx-auto mb-10 text-base md:text-lg font-light leading-relaxed">
+              Begin your home fitness journey today with our signature handcrafted wooden parallettes. Experience the perfect blend of woodworking and elite bodyweight training.
+            </p>
+            <a 
+              href="/products" 
+              className="inline-flex items-center gap-4 px-12 py-5 bg-luxury-gold text-black font-bold uppercase tracking-[0.2em] text-xs rounded-full hover:bg-white hover:shadow-[0_0_30px_rgba(212,175,55,0.5)] transition-all duration-300"
+            >
+              Explore Products <ArrowRight size={16} />
+            </a>
+          </div>
         </div>
       </section>
-
     </div>
   );
 };

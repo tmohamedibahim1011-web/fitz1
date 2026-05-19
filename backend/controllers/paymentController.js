@@ -223,35 +223,41 @@ const verifyPayment = async (req, res) => {
           if (order.paymentStatus !== 'paid' || needsEmail) {
             order.paymentStatus = 'paid';
             order.paymentId = razorpay_payment_id;
+            await order.save();
             
             if (needsEmail) {
               console.log('🔍 [DEBUG] Triggering email services in background...');
               
-              // Generate modern HTML templates
-              const adminEmailContent = generateOrderEmailHtml(order, true);
-              const customerEmailContent = generateOrderEmailHtml(order, false);
-              
-              // Send emails in the background (asynchronously) to prevent delaying the redirect!
-              sendEmail('New Order Confirmed - Fitzone', adminEmailContent)
-                .then(adminSent => {
-                  if (adminSent) console.log('✅ Background: Admin order email sent successfully.');
-                })
-                .catch(err => console.error('❌ Background: Failed to send admin email:', err.message));
+              // Atomically check and update emailSent flag to true to prevent race conditions
+              const updatedOrder = await Order.findOneAndUpdate(
+                { _id: order._id, emailSent: false },
+                { $set: { emailSent: true } },
+                { new: true }
+              );
 
-              sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, order.customerInfo.email, `${order.customerInfo.firstName} ${order.customerInfo.lastName}`)
-                .then(customerSent => {
-                  if (customerSent) {
-                    console.log('✅ Background: Customer order confirmation email sent successfully.');
-                    // Once successfully sent, flag in database in background
-                    Order.findByIdAndUpdate(order._id, { emailSent: true })
-                      .then(() => console.log('✅ Background: Updated Order DB emailSent status to true.'))
-                      .catch(dbErr => console.error('❌ Background: Failed to update emailSent DB flag:', dbErr.message));
-                  }
-                })
-                .catch(err => console.error('❌ Background: Failed to send customer email:', err.message));
+              if (updatedOrder) {
+                console.log('✅ Atomic update successful. Sending emails...');
+                const adminEmailContent = generateOrderEmailHtml(updatedOrder, true);
+                const customerEmailContent = generateOrderEmailHtml(updatedOrder, false);
+                const adminEmailAddress = process.env.ADMIN_EMAIL || 'kavinath50@gmail.com';
+                
+                // Asynchronously send Admin notification
+                sendEmail('New Order Confirmed - Fitzone', adminEmailContent, adminEmailAddress, 'Fitzone Admin', 'ADMIN_NOTIFICATION')
+                  .then(adminSent => {
+                    if (adminSent) console.log('✅ Background: Admin order email sent successfully.');
+                  })
+                  .catch(err => console.error('❌ Background: Failed to send admin email:', err.message));
+
+                // Asynchronously send Customer confirmation
+                sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, updatedOrder.customerInfo.email, `${updatedOrder.customerInfo.firstName} ${updatedOrder.customerInfo.lastName}`, 'CUSTOMER_CONFIRMATION')
+                  .then(customerSent => {
+                    if (customerSent) console.log('✅ Background: Customer order confirmation email sent successfully.');
+                  })
+                  .catch(err => console.error('❌ Background: Failed to send customer email:', err.message));
+              } else {
+                console.log('⚠️ Emails already processed by another worker/webhook.');
+              }
             }
-            
-            await order.save();
           }
         }
       }
@@ -304,34 +310,37 @@ const razorpayWebhook = async (req, res) => {
         if (order.paymentStatus !== 'paid' || needsEmail) {
           order.paymentStatus = 'paid';
           order.paymentId = paymentId;
+          await order.save();
           
           if (needsEmail) {
             console.log(`✅ Webhook: Triggering confirmation emails in background for order ${order.orderId}`);
             
-            const adminEmailContent = generateOrderEmailHtml(order, true);
-            const customerEmailContent = generateOrderEmailHtml(order, false);
-            
-            // Asynchronous background email sending
-            sendEmail('New Order Confirmed - Fitzone', adminEmailContent)
-              .then(adminSent => {
-                if (adminSent) console.log('✅ Webhook Background: Admin order email sent.');
-              })
-              .catch(err => console.error('❌ Webhook Background: Admin email failed:', err.message));
+            const updatedOrder = await Order.findOneAndUpdate(
+              { _id: order._id, emailSent: false },
+              { $set: { emailSent: true } },
+              { new: true }
+            );
 
-            sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, order.customerInfo.email, `${order.customerInfo.firstName} ${order.customerInfo.lastName}`)
-              .then(customerSent => {
-                if (customerSent) {
-                  console.log('✅ Webhook Background: Customer order email sent.');
-                  // Set database flag to true asynchronously
-                  Order.findByIdAndUpdate(order._id, { emailSent: true })
-                    .then(() => console.log('✅ Webhook Background: DB emailSent flag set to true.'))
-                    .catch(dbErr => console.error('❌ Webhook Background: DB flag save failed:', dbErr.message));
-                }
-              })
-              .catch(err => console.error('❌ Webhook Background: Customer email failed:', err.message));
+            if (updatedOrder) {
+              const adminEmailContent = generateOrderEmailHtml(updatedOrder, true);
+              const customerEmailContent = generateOrderEmailHtml(updatedOrder, false);
+              const adminEmailAddress = process.env.ADMIN_EMAIL || 'kavinath50@gmail.com';
+              
+              sendEmail('New Order Confirmed - Fitzone', adminEmailContent, adminEmailAddress, 'Fitzone Admin', 'WEBHOOK_ADMIN')
+                .then(adminSent => {
+                  if (adminSent) console.log('✅ Webhook Background: Admin order email sent.');
+                })
+                .catch(err => console.error('❌ Webhook Background: Admin email failed:', err.message));
+
+              sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, updatedOrder.customerInfo.email, `${updatedOrder.customerInfo.firstName} ${updatedOrder.customerInfo.lastName}`, 'WEBHOOK_CUSTOMER')
+                .then(customerSent => {
+                  if (customerSent) console.log('✅ Webhook Background: Customer order email sent.');
+                })
+                .catch(err => console.error('❌ Webhook Background: Customer email failed:', err.message));
+            } else {
+              console.log('⚠️ Webhook: Emails already processed by client verification.');
+            }
           }
-          
-          await order.save();
         }
       }
     }

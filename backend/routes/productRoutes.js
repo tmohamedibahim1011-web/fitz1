@@ -9,11 +9,13 @@ const {
   updateStock 
 } = require('../controllers/productController');
 
+const { protectAdmin } = require('../middleware/authMiddleware');
+
 router.get('/', getAllProducts);
 router.get('/:id', getProduct);
-router.post('/', createProduct);
-router.put('/:id', updateProduct);
-router.delete('/:id', deleteProduct);
-router.put('/:id/stock', updateStock);
+router.post('/', protectAdmin, createProduct);
+router.put('/:id', protectAdmin, updateProduct);
+router.delete('/:id', protectAdmin, deleteProduct);
+router.put('/:id/stock', protectAdmin, updateStock);
 
 module.exports = router;

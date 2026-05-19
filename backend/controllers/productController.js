@@ -21,10 +21,27 @@ const getProduct = async (req, res) => {
   }
 };
 
+// Helper to sanitize product body
+const sanitizeProductData = (data) => {
+  const sanitized = { ...data };
+  if (sanitized.colors && Array.isArray(sanitized.colors)) {
+    sanitized.colors = sanitized.colors.map(c => ({
+      ...c,
+      image: c.image || sanitized.image || '/products/regularnatural.jpeg',
+      hoverImage: c.hoverImage || sanitized.hoverImage || sanitized.image || '/products/regularnatural.jpeg'
+    }));
+  }
+  if (!sanitized.size) {
+    sanitized.size = 'regular';
+  }
+  return sanitized;
+};
+
 // Create product (admin)
 const createProduct = async (req, res) => {
   try {
-    const product = new Product(req.body);
+    const productData = sanitizeProductData(req.body);
+    const product = new Product(productData);
     await product.save();
     res.status(201).json({ success: true, product });
   } catch (error) {
@@ -35,9 +52,10 @@ const createProduct = async (req, res) => {
 // Update product (admin)
 const updateProduct = async (req, res) => {
   try {
+    const productData = sanitizeProductData(req.body);
     const product = await Product.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, updatedAt: Date.now() },
+      { ...productData, updatedAt: Date.now() },
       { new: true }
     );
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' });

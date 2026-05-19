@@ -33,6 +33,7 @@ const AdminDashboard = () => {
     name: '',
     description: '',
     price: '',
+    size: 'regular',
     material: '',
     image: '',
     hoverImage: '',
@@ -102,6 +103,7 @@ const AdminDashboard = () => {
         name: product.name || '',
         description: product.description || '',
         price: product.basePrice?.toString() || '',
+        size: product.size || 'regular',
         material: product.material || '',
         image: product.image || '',
         hoverImage: product.hoverImage || '',
@@ -118,6 +120,7 @@ const AdminDashboard = () => {
         name: '',
         description: '',
         price: '',
+        size: 'regular',
         material: '',
         image: '',
         hoverImage: '',
@@ -456,7 +459,32 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="bg-secondary-white min-h-screen flex pt-20">
+    <div className="bg-secondary-white min-h-screen flex flex-col lg:flex-row pt-20">
+      
+      {/* MOBILE TAB BAR */}
+      <div className="lg:hidden w-full bg-white border-b border-black/5 px-4 py-3 flex overflow-x-auto gap-2 sticky top-20 z-20 shadow-sm">
+        {[
+          { name: 'Dashboard', icon: LayoutDashboard, tab: 'dashboard' },
+          { name: 'Orders', icon: ShoppingCart, tab: 'orders' },
+          { name: 'Products', icon: Package, tab: 'products' },
+          { name: 'Settings', icon: Settings, tab: 'settings' },
+        ].map((item, i) => (
+          <button 
+            key={i} 
+            onClick={() => setActiveTab(item.tab)}
+            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-colors rounded
+              ${activeTab === item.tab ? 'bg-primary-text text-white' : 'bg-secondary-white text-secondary-text hover:bg-black/5 hover:text-primary-text'}`}
+          >
+            <item.icon size={16} /> {item.name}
+          </button>
+        ))}
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-widest whitespace-nowrap bg-red-50 text-red-600 rounded hover:bg-red-500 hover:text-white transition-colors ml-auto"
+        >
+          <LogOut size={16} /> Logout
+        </button>
+      </div>
       
       {/* SIDEBAR */}
       <aside className="w-64 bg-white border-r border-black/5 fixed h-[calc(100vh-80px)] hidden lg:flex flex-col z-10">
@@ -471,7 +499,7 @@ const AdminDashboard = () => {
             ].map((item, i) => (
               <button 
                 key={i} 
-                onClick={() => item.tab !== 'settings' && setActiveTab(item.tab)}
+                onClick={() => setActiveTab(item.tab)}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-colors rounded-sm
                   ${activeTab === item.tab ? 'bg-primary-text text-white' : 'text-secondary-text hover:bg-black/5 hover:text-primary-text'}`}
               >
@@ -819,6 +847,43 @@ const AdminDashboard = () => {
           </>
         )}
 
+        {/* SETTINGS TAB */}
+        {activeTab === 'settings' && (
+          <div className="max-w-4xl">
+            <header className="mb-10">
+              <h1 className="text-3xl font-bold uppercase tracking-widest text-primary-text mb-1" style={{ fontFamily: 'var(--font-bebas)' }}>Settings</h1>
+              <p className="text-secondary-text text-sm">Configure admin account and notification preferences.</p>
+            </header>
+
+            <div className="bg-white p-6 border border-black/5 shadow-sm space-y-6 mb-8">
+              <h2 className="text-lg font-bold uppercase tracking-widest text-primary-text pb-4 border-b border-black/5">System Preferences</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-2">Admin Notification Email</label>
+                  <input type="email" disabled value="kavinath50@gmail.com" className="w-full bg-secondary-white border border-black/10 px-4 py-3 text-xs font-mono text-secondary-text cursor-not-allowed" />
+                  <p className="text-[10px] text-secondary-text mt-1">Configured via environment variables (SMTP_USER / ADMIN_EMAIL).</p>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-2">SMTP Relay Host</label>
+                  <input type="text" disabled value="smtp-relay.brevo.com (Port 587)" className="w-full bg-secondary-white border border-black/10 px-4 py-3 text-xs font-mono text-secondary-text cursor-not-allowed" />
+                  <p className="text-[10px] text-secondary-text mt-1">Brevo transactional email service connected.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 border border-black/5 shadow-sm space-y-6">
+              <h2 className="text-lg font-bold uppercase tracking-widest text-primary-text pb-4 border-b border-black/5">Security & Session</h2>
+              <div>
+                <p className="text-xs font-bold text-primary-text mb-1">Active JWT Admin Session</p>
+                <p className="text-xs text-secondary-text mb-4">You are currently authenticated as super administrator. Your token is valid for 24 hours.</p>
+                <button onClick={handleLogout} className="bg-red-50 text-red-600 border border-red-200 px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-colors">
+                  Revoke Session & Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* PRODUCT MODAL */}
         {showProductModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -858,6 +923,19 @@ const AdminDashboard = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Size Type</label>
+                    <select value={productForm.size} onChange={(e) => setProductForm({...productForm, size: e.target.value})} className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none cursor-pointer bg-white">
+                      <option value="regular">Regular</option>
+                      <option value="mini">Mini</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Badge</label>
+                    <input type="text" value={productForm.badge} onChange={(e) => setProductForm({...productForm, badge: e.target.value})} placeholder="e.g., Signature Series" className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Image URL / Path</label>
                     <input type="text" value={productForm.image} onChange={(e) => setProductForm({...productForm, image: e.target.value})} className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                   </div>
@@ -865,10 +943,6 @@ const AdminDashboard = () => {
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Hover Image URL / Path</label>
                     <input type="text" value={productForm.hoverImage} onChange={(e) => setProductForm({...productForm, hoverImage: e.target.value})} className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                   </div>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Badge</label>
-                  <input type="text" value={productForm.badge} onChange={(e) => setProductForm({...productForm, badge: e.target.value})} placeholder="e.g., Signature Series" className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                 </div>
                 <div className="flex justify-end gap-3 pt-4 border-t border-black/10">
                   <button type="button" onClick={() => setShowProductModal(false)} className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-secondary-text hover:text-primary-text">Cancel</button>

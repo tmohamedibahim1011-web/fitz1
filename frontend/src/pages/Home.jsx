@@ -10,7 +10,7 @@ import ProductCard from '../components/ProductCard';
 import natural from "../assets/products/regularnatural.jpeg"
 import black from "../assets/products/regularblack.jpeg"
 import mininatural from "../assets/products/mininatural.jpeg"
-// import miniblack from "../assets/products/miniblack.jpeg"
+import miniblack from "../assets/products/miniblack.PNG"
 
 // Assets
 import bannerImg from '../assets/banner.png';
@@ -51,11 +51,11 @@ const Home = () => {
     id: 3,
     name: "Mini Natural",
     image: mininatural
-  } //, {
-  //   id: 4,
-  //   name: "Mini Black",
-  //   image: miniblack
-  // }
+  }, {
+    id: 4,
+    name: "Mini Black",
+    image: miniblack
+  }
   ]
   const [isLoading, setIsLoading] = useState(true);
 
