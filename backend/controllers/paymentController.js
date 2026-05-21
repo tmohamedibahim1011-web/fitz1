@@ -307,7 +307,7 @@ const verifyPayment = async (req, res) => {
             if (needsEmail) {
               console.log('🔍 [DEBUG] Triggering email services in background...');
               
-              // Atomically check and update emailSent flag to true to prevent race conditions
+              // Atomically claim the email send slot — prevents duplicate sends from concurrent webhooks
               const updatedOrder = await Order.findOneAndUpdate(
                 { _id: order._id, emailSent: false },
                 { $set: { emailSent: true } },
@@ -332,19 +332,37 @@ const verifyPayment = async (req, res) => {
                   console.error('❌ Failed to generate invoice PDF:', pdfErr.message);
                 }
 
-                // Asynchronously send Admin notification
-                sendEmail('New Order Confirmed - Fitzone', adminEmailContent, adminEmailAddress, 'Fitzone Admin', 'ADMIN_NOTIFICATION', attachments)
-                  .then(adminSent => {
-                    if (adminSent) console.log('✅ Background: Admin order email sent successfully.');
-                  })
-                  .catch(err => console.error('❌ Background: Failed to send admin email:', err.message));
+                // Send both emails and track results
+                // If BOTH fail, reset emailSent=false so the next Razorpay webhook retry can try again
+                Promise.all([
+                  sendEmail('New Order Confirmed - Fitzone', adminEmailContent, adminEmailAddress, 'Fitzone Admin', 'ADMIN_NOTIFICATION', attachments)
+                    .then(sent => {
+                      if (sent) console.log('✅ Background: Admin order email sent successfully.');
+                      else console.error('❌ Background: Admin email returned false (delivery failed).');
+                      return sent;
+                    })
+                    .catch(err => {
+                      console.error('❌ Background: Admin email threw error:', err.code, err.responseCode, err.message);
+                      return false;
+                    }),
 
-                // Asynchronously send Customer confirmation
-                sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, updatedOrder.customerInfo.email, `${updatedOrder.customerInfo.firstName} ${updatedOrder.customerInfo.lastName}`, 'CUSTOMER_CONFIRMATION', attachments)
-                  .then(customerSent => {
-                    if (customerSent) console.log('✅ Background: Customer order confirmation email sent successfully.');
-                  })
-                  .catch(err => console.error('❌ Background: Failed to send customer email:', err.message));
+                  sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, updatedOrder.customerInfo.email, `${updatedOrder.customerInfo.firstName} ${updatedOrder.customerInfo.lastName}`, 'CUSTOMER_CONFIRMATION', attachments)
+                    .then(sent => {
+                      if (sent) console.log('✅ Background: Customer order confirmation email sent successfully.');
+                      else console.error('❌ Background: Customer email returned false (delivery failed).');
+                      return sent;
+                    })
+                    .catch(err => {
+                      console.error('❌ Background: Customer email threw error:', err.code, err.responseCode, err.message);
+                      return false;
+                    })
+                ]).then(async ([adminSent, customerSent]) => {
+                  if (!adminSent && !customerSent) {
+                    // Both failed — reset the flag so Razorpay's retry webhook can try again
+                    console.warn('⚠️ Background: Both emails failed. Resetting emailSent=false for retry...');
+                    await Order.findByIdAndUpdate(updatedOrder._id, { $set: { emailSent: false } });
+                  }
+                });
               } else {
                 console.log('⚠️ Emails already processed by another worker/webhook.');
               }
@@ -406,6 +424,7 @@ const razorpayWebhook = async (req, res) => {
           if (needsEmail) {
             console.log(`✅ Webhook: Triggering confirmation emails in background for order ${order.orderId}`);
             
+            // Atomically claim the email send slot — prevents duplicate sends
             const updatedOrder = await Order.findOneAndUpdate(
               { _id: order._id, emailSent: false },
               { $set: { emailSent: true } },
@@ -426,20 +445,40 @@ const razorpayWebhook = async (req, res) => {
                   contentType: 'application/pdf'
                 });
               } catch (pdfErr) {
-                console.error('❌ Failed to generate invoice PDF:', pdfErr.message);
+                console.error('❌ Webhook: Failed to generate invoice PDF:', pdfErr.message);
               }
 
-              sendEmail('New Order Confirmed - Fitzone', adminEmailContent, adminEmailAddress, 'Fitzone Admin', 'WEBHOOK_ADMIN', attachments)
-                .then(adminSent => {
-                  if (adminSent) console.log('✅ Webhook Background: Admin order email sent.');
-                })
-                .catch(err => console.error('❌ Webhook Background: Admin email failed:', err.message));
+              // Send both emails and track results
+              // If BOTH fail, reset emailSent=false so Razorpay's next webhook retry can try again
+              Promise.all([
+                sendEmail('New Order Confirmed - Fitzone', adminEmailContent, adminEmailAddress, 'Fitzone Admin', 'WEBHOOK_ADMIN', attachments)
+                  .then(sent => {
+                    if (sent) console.log('✅ Webhook Background: Admin order email sent.');
+                    else console.error('❌ Webhook Background: Admin email returned false (delivery failed).');
+                    return sent;
+                  })
+                  .catch(err => {
+                    console.error('❌ Webhook Background: Admin email threw error:', err.code, err.responseCode, err.message);
+                    return false;
+                  }),
 
-              sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, updatedOrder.customerInfo.email, `${updatedOrder.customerInfo.firstName} ${updatedOrder.customerInfo.lastName}`, 'WEBHOOK_CUSTOMER', attachments)
-                .then(customerSent => {
-                  if (customerSent) console.log('✅ Webhook Background: Customer order email sent.');
-                })
-                .catch(err => console.error('❌ Webhook Background: Customer email failed:', err.message));
+                sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, updatedOrder.customerInfo.email, `${updatedOrder.customerInfo.firstName} ${updatedOrder.customerInfo.lastName}`, 'WEBHOOK_CUSTOMER', attachments)
+                  .then(sent => {
+                    if (sent) console.log('✅ Webhook Background: Customer order email sent.');
+                    else console.error('❌ Webhook Background: Customer email returned false (delivery failed).');
+                    return sent;
+                  })
+                  .catch(err => {
+                    console.error('❌ Webhook Background: Customer email threw error:', err.code, err.responseCode, err.message);
+                    return false;
+                  })
+              ]).then(async ([adminSent, customerSent]) => {
+                if (!adminSent && !customerSent) {
+                  // Both failed — reset the flag so Razorpay's retry webhook can try again
+                  console.warn('⚠️ Webhook Background: Both emails failed. Resetting emailSent=false for retry...');
+                  await Order.findByIdAndUpdate(updatedOrder._id, { $set: { emailSent: false } });
+                }
+              });
             } else {
               console.log('⚠️ Webhook: Emails already processed by client verification.');
             }

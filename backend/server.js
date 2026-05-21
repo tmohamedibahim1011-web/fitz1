@@ -45,6 +45,41 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ MongoDB Connected Successfully'))
   .catch((err) => console.error('❌ MongoDB Connection Error:', err));
 
+// Verify SMTP connection on startup so misconfigurations are caught immediately in logs
+const nodemailer = require('nodemailer');
+const verifySMTP = async () => {
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = parseInt(process.env.SMTP_PORT || '587');
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+
+  if (!smtpUser || !smtpPass) {
+    console.warn('⚠️ [SMTP] No credentials found — emails will be skipped.');
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpPort === 465,
+    auth: { user: smtpUser, pass: smtpPass },
+    tls: { rejectUnauthorized: false },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+  });
+
+  try {
+    await transporter.verify();
+    console.log(`✅ [SMTP] Connection verified: ${smtpHost}:${smtpPort} as ${smtpUser}`);
+  } catch (err) {
+    console.error(`❌ [SMTP] Connection FAILED: ${smtpHost}:${smtpPort}`);
+    console.error(`   Code: ${err.code} | ResponseCode: ${err.responseCode || 'N/A'}`);
+    console.error(`   Message: ${err.message}`);
+    console.error('   → Emails will fail until SMTP is fixed.');
+  }
+};
+verifySMTP();
+
 // Seed default products
 const seedProducts = async () => {
   try {
@@ -120,6 +155,25 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminRoutes);
+
+// Debug: Test email endpoint — only works with correct ADMIN_SECRET header
+// Call: POST /api/debug/test-email with header x-admin-secret: <your JWT secret>
+app.post('/api/debug/test-email', async (req, res) => {
+  const secret = req.headers['x-admin-secret'];
+  if (secret !== process.env.JWT_SECRET) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+  const { sendEmail } = require('./utils/emailService');
+  const to = req.body.to || process.env.SMTP_USER;
+  const sent = await sendEmail(
+    'Fitzone SMTP Test Email',
+    '<h2>✅ SMTP is working!</h2><p>If you received this, email delivery is configured correctly.</p>',
+    to,
+    'Test Recipient',
+    'SMTP_TEST'
+  );
+  res.json({ success: sent, to, smtpHost: process.env.SMTP_HOST, smtpPort: process.env.SMTP_PORT });
+});
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
