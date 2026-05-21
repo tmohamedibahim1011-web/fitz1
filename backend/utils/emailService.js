@@ -27,6 +27,7 @@ const getTransporter = () => {
     tls: {
       rejectUnauthorized: false // Required for many cloud hosts (Render, Railway, etc.)
     },
+    family: 4, // Force IPv4 to avoid ENETUNREACH IPv6 errors
     connectionTimeout: 15000,  // 15s to establish TCP connection
     greetingTimeout: 15000,    // 15s for SMTP greeting
     socketTimeout: 45000,      // 45s for idle socket (large for PDF attachments)

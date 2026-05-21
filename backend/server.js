@@ -64,6 +64,7 @@ const verifySMTP = async () => {
     secure: smtpPort === 465,
     auth: { user: smtpUser, pass: smtpPass },
     tls: { rejectUnauthorized: false },
+    family: 4, // Force IPv4 to avoid ENETUNREACH IPv6 errors
     connectionTimeout: 10000,
     greetingTimeout: 10000,
   });
