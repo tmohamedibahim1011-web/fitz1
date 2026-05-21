@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, ShoppingCart, Settings, 
+import {
+  LayoutDashboard, ShoppingCart, Settings,
   LogOut, Filter, FileSpreadsheet, FileText, ArrowUpRight, CheckSquare, Package, Plus, Pencil, Trash2, X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import fitzLogo from '../../assets/fitz1.png';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -15,13 +16,13 @@ const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Filters
   const [filterProduct, setFilterProduct] = useState('All');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [exactDate, setExactDate] = useState('');
-  
+
   // Bulk Selection
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [bulkStatus, setBulkStatus] = useState('');
@@ -145,9 +146,9 @@ const AdminDashboard = () => {
         stock: parseInt(productForm.stock)
       };
       delete productData.price;
-      
+
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      
+
       if (editingProduct) {
         await axios.put(`${import.meta.env.VITE_API_URL}/products/${editingProduct._id}`, productData, { headers, withCredentials: true });
         toast.success('Product updated successfully');
@@ -155,7 +156,7 @@ const AdminDashboard = () => {
         await axios.post(`${import.meta.env.VITE_API_URL}/products`, productData, { headers, withCredentials: true });
         toast.success('Product created successfully');
       }
-      
+
       setShowProductModal(false);
       fetchProducts();
     } catch (error) {
@@ -195,19 +196,19 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem('adminToken');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      
+
       // Update only selected orders that match the filter
       const ordersToUpdate = orders.filter(o => selectedOrders.includes(o._id) && filteredOrders.some(f => f._id === o._id));
-      
+
       if (ordersToUpdate.length === 0) {
         toast.error('No filtered orders selected');
         return;
       }
-      
-      await Promise.all(ordersToUpdate.map(o => 
+
+      await Promise.all(ordersToUpdate.map(o =>
         axios.put(`${import.meta.env.VITE_API_URL}/admin/orders/${o._id}/status`, { status: bulkStatus }, { headers, withCredentials: true })
       ));
-      
+
       setOrders(orders.map(o => selectedOrders.includes(o._id) ? { ...o, status: bulkStatus } : o));
       setSelectedOrders([]);
       setBulkStatus('');
@@ -230,7 +231,7 @@ const AdminDashboard = () => {
       toast.error('No orders to export');
       return;
     }
-    
+
     // Create CSV content
     const headers = ['Order ID', 'Date', 'Customer Name', 'Phone', 'Items', 'Total', 'Status'];
     const rows = filteredOrders.map(order => [
@@ -242,7 +243,7 @@ const AdminDashboard = () => {
       order.totalAmount,
       order.status
     ]);
-    
+
     const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -254,102 +255,100 @@ const AdminDashboard = () => {
     toast.success(`Exported ${filteredOrders.length} orders`);
   };
 
-  const generateInvoiceHTML = (order) => {
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; width: 380px; margin: 0 auto; background: white; color: black; }
-    .header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 15px; }
-    .company { font-size: 24px; font-weight: bold; font-family: 'Arial Black', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
-    .receipt-title { font-size: 14px; font-weight: bold; margin-top: 5px; }
-    .row-flex { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
-    .section { border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
-    .bold { font-weight: bold; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-    th { border-bottom: 1px solid #000; text-align: left; padding: 4px 0; }
-    td { padding: 4px 0; border-bottom: 1px dotted #ccc; }
-    .text-right { text-align: right; }
-    .totals { margin-top: 10px; font-size: 12px; }
-    .totals .row-flex { margin-bottom: 3px; }
-    .grand-total { font-size: 16px; font-weight: bold; border-top: 2px solid #000; padding-top: 5px; margin-top: 5px; }
-    .footer { text-align: center; font-size: 10px; margin-top: 20px; font-style: italic; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div class="company">FITZONE.</div>
-    <div class="receipt-title">SHIPPING SLIP / RECEIPT</div>
-  </div>
-  
-  <div class="section">
-    <div class="row-flex"><span class="bold">Order ID:</span> <span>${order.orderId}</span></div>
-    <div class="row-flex"><span class="bold">Date:</span> <span>${new Date(order.createdAt).toLocaleDateString()}</span></div>
-    <div class="row-flex"><span class="bold">Payment:</span> <span>${order.paymentStatus || 'Pending'}</span></div>
-  </div>
-  <div class="section">
-    <div class="bold" style="margin-bottom:5px;">SHIP TO:</div>
-    <div style="font-size:12px;">
-      <span class="bold">${order.customerInfo?.firstName || ''} ${order.customerInfo?.lastName || ''}</span><br>
-      ${order.customerInfo?.phone || ''}<br>
-      ${order.shippingAddress?.address || ''}<br>
-      ${order.shippingAddress?.city || ''}, ${order.shippingAddress?.state || ''} - ${order.shippingAddress?.zip || ''}
-    </div>
-  </div>
-  
-  <div class="section" style="border:none;">
-    <table>
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th class="text-right">Qty</th>
-          <th class="text-right">Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${order.items.map(item => `
-        <tr>
-          <td>${item.name}<br><span style="font-size:10px;color:#555;">[${item.color}]</span></td>
-          <td class="text-right">${item.quantity}</td>
-          <td class="text-right">Rs. ${(item.price * item.quantity).toLocaleString()}</td>
-        </tr>
-        `).join('')}
-      </tbody>
-    </table>
-    
-    <div class="totals">
-      <div class="row-flex"><span>Subtotal:</span><span>Rs. ${order.totalAmount.toLocaleString()}</span></div>
-      <div class="row-flex"><span>Shipping:</span><span>${order.shippingAddress?.method || 'Free'}</span></div>
-      <div class="row-flex grand-total"><span>Total:</span><span>Rs. ${order.totalAmount.toLocaleString()}</span></div>
-    </div>
-  </div>
-  
-  <div class="footer">
-    Thank you for choosing Fitzone!<br>www.fitzone.in
-  </div>
-</body>
-</html>
-    `.trim();
-  };
+  // ── Load logo as base64 for jsPDF ──────────────────────────────────────────
+  const loadLogoBase64 = (src) =>
+    new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        c.width = img.width;
+        c.height = img.height;
+        c.getContext('2d').drawImage(img, 0, 0);
+        resolve(c.toDataURL('image/png'));
+      };
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
 
-  const renderToCanvas = async (html) => {
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'absolute';
-    iframe.style.top = '-9999px';
-    iframe.style.width = '420px';
-    iframe.style.height = '800px';
-    document.body.appendChild(iframe);
-    
-    iframe.contentDocument.open();
-    iframe.contentDocument.write(html);
-    iframe.contentDocument.close();
-    
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const canvas = await html2canvas(iframe.contentDocument.body, { scale: 1, useCORS: true });
-    document.body.removeChild(iframe);
-    return canvas;
+  const drawShippingLabel = (doc, order, logoBase64, isFirstPage) => {
+    if (!isFirstPage) doc.addPage();
+
+    // Set standard font - The entire label uses bold text
+    doc.setFont('Helvetica', 'bold');
+
+    // --- TOP LEFT ---
+    doc.setFontSize(11);
+    doc.text('BOOKED UNDER BNPL ADVANCE FACILITY', 10, 15);
+    let textWidth = doc.getTextWidth('BOOKED UNDER BNPL ADVANCE FACILITY');
+    doc.setLineWidth(0.5);
+    doc.line(10, 16, 10 + textWidth, 16);
+
+    doc.text('TTN-628001/BNPL-ADV/TTN/TTN0050', 10, 21);
+    textWidth = doc.getTextWidth('TTN-628001/BNPL-ADV/TTN/TTN0050');
+    doc.line(10, 22, 10 + textWidth, 22);
+
+    // --- MIDDLE LEFT ---
+    doc.setFontSize(12);
+    doc.text('BILLER ID: 1988872960', 11, 40);
+
+    // --- BOTTOM LEFT ---
+    doc.setFontSize(12);
+    doc.text('FROM:', 10, 80);
+    doc.text('Fitz1 Tuticorin', 23, 86);
+    doc.text('Tamilnadu-628002,', 23, 92);
+    doc.text('Mob : 8072210156', 23, 98);
+
+    // --- RIGHT SIDE ---
+    doc.setFontSize(12);
+    doc.text('BUSINESS PARCEL', 100, 35);
+
+    // TO Section
+    doc.text('TO:', 80, 47);
+
+    // Customer Info Block
+    let currentY = 47;
+    const rightX = 88;
+    doc.setFontSize(12);
+
+    const customerName = `${order.customerInfo?.firstName || ''} ${order.customerInfo?.lastName || ''}`.trim();
+    doc.text(customerName, rightX, currentY);
+    currentY += 5;
+
+    const addr = order.shippingAddress?.address || '';
+    if (addr) {
+      const addrLines = doc.splitTextToSize(`Door no - ${addr}`, 55);
+      doc.text(addrLines, rightX, currentY);
+      currentY += addrLines.length * 5;
+    }
+
+    const city = order.shippingAddress?.city || '';
+    const zip = order.shippingAddress?.zip || '';
+    if (city || zip) {
+      doc.text(`${city} - ${zip}`, rightX, currentY);
+      currentY += 5;
+    }
+
+    const phone = order.customerInfo?.phone || '';
+    if (phone) {
+      doc.text(`Ph number- ${phone}`, rightX, currentY);
+      currentY += 5;
+    }
+
+    // Items ordered
+    const orderStr = order.items.map(i => `${i.name} (${i.color || 'Standard'})`).join(', ');
+    const orderLines = doc.splitTextToSize(`Order - ${orderStr}`, 55);
+    doc.text(orderLines, rightX, currentY);
+
+    // --- BOTTOM RIGHT (LOGO) ---
+    if (logoBase64) {
+      try {
+        // Logo bottom right position, matches image proportions
+        doc.addImage(logoBase64, 'PNG', 115, 85, 20, 12);
+      } catch (e) {
+        console.error('Logo error', e);
+      }
+    }
   };
 
   const handleDownloadPDF = async (orderId) => {
@@ -358,21 +357,13 @@ const AdminDashboard = () => {
       toast.error('Order not found');
       return;
     }
-    
-    const html = generateInvoiceHTML(order);
+
     const toastId = toast.loading('Generating PDF...');
-    
     try {
-      const canvas = await renderToCanvas(html);
-      // Use JPEG for smaller MB size
-      const imgData = canvas.toDataURL('image/jpeg', 0.8);
-      // a6 format is small, like a thermal/shipping label
-      const pdf = new jsPDF('p', 'pt', 'a6');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Invoice_${order.orderId}.pdf`);
+      const logoBase64 = await loadLogoBase64(fitzLogo);
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a6' });
+      drawShippingLabel(doc, order, logoBase64, true);
+      doc.save(`Invoice_${order.orderId}.pdf`);
       toast.success(`Downloaded invoice for ${orderId}`, { id: toastId });
     } catch (error) {
       console.error(error);
@@ -381,7 +372,6 @@ const AdminDashboard = () => {
   };
 
   const handleBulkDownload = async () => {
-    // Determine which orders to download: selected or filtered
     let targetOrders = [];
     if (selectedOrders.length > 0) {
       targetOrders = orders.filter(o => selectedOrders.includes(o._id));
@@ -391,26 +381,15 @@ const AdminDashboard = () => {
       toast.error('No orders to download');
       return;
     }
-    
+
     const toastId = toast.loading(`Generating ${targetOrders.length} PDFs...`);
-    
     try {
-      const pdf = new jsPDF('p', 'pt', 'a6');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      
+      const logoBase64 = await loadLogoBase64(fitzLogo);
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a6' });
       for (let i = 0; i < targetOrders.length; i++) {
-        const order = targetOrders[i];
-        const html = generateInvoiceHTML(order);
-        const canvas = await renderToCanvas(html);
-        
-        const imgData = canvas.toDataURL('image/jpeg', 0.8);
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        drawShippingLabel(doc, targetOrders[i], logoBase64, i === 0);
       }
-      
-      pdf.save(`Bulk_Invoices_${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`Bulk_Invoices_${new Date().toISOString().split('T')[0]}.pdf`);
       toast.success(`Downloaded ${targetOrders.length} invoices`, { id: toastId });
     } catch (error) {
       console.error(error);
@@ -418,19 +397,21 @@ const AdminDashboard = () => {
     }
   };
 
+
+
   // Filter Logic
   const filteredOrders = orders.filter(o => {
     const orderItemsString = o.items.map(i => i.name).join(' ');
     const productMatch = filterProduct === 'All' || orderItemsString.includes(filterProduct);
-    
-    const orderDate = new Date(o.createdAt).setHours(0,0,0,0);
-    
+
+    const orderDate = new Date(o.createdAt).setHours(0, 0, 0, 0);
+
     if (exactDate) {
-      const exactD = new Date(exactDate).setHours(0,0,0,0);
+      const exactD = new Date(exactDate).setHours(0, 0, 0, 0);
       if (orderDate !== exactD) return false;
     } else {
-      const fromD = fromDate ? new Date(fromDate).setHours(0,0,0,0) : null;
-      const toD = toDate ? new Date(toDate).setHours(0,0,0,0) : null;
+      const fromD = fromDate ? new Date(fromDate).setHours(0, 0, 0, 0) : null;
+      const toD = toDate ? new Date(toDate).setHours(0, 0, 0, 0) : null;
       if (fromD && orderDate < fromD) return false;
       if (toD && orderDate > toD) return false;
     }
@@ -449,7 +430,7 @@ const AdminDashboard = () => {
   const totalRevenue = orders.reduce((acc, curr) => acc + curr.totalAmount, 0);
 
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'processing': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'packing': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'shipping': return 'bg-purple-100 text-purple-800 border-purple-200';
@@ -460,7 +441,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="bg-secondary-white min-h-screen flex flex-col lg:flex-row pt-20">
-      
+
       {/* MOBILE TAB BAR */}
       <div className="lg:hidden w-full bg-white border-b border-black/5 px-4 py-3 flex overflow-x-auto gap-2 sticky top-20 z-20 shadow-sm">
         {[
@@ -469,8 +450,8 @@ const AdminDashboard = () => {
           { name: 'Products', icon: Package, tab: 'products' },
           { name: 'Settings', icon: Settings, tab: 'settings' },
         ].map((item, i) => (
-          <button 
-            key={i} 
+          <button
+            key={i}
             onClick={() => setActiveTab(item.tab)}
             className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-colors rounded
               ${activeTab === item.tab ? 'bg-primary-text text-white' : 'bg-secondary-white text-secondary-text hover:bg-black/5 hover:text-primary-text'}`}
@@ -478,14 +459,14 @@ const AdminDashboard = () => {
             <item.icon size={16} /> {item.name}
           </button>
         ))}
-        <button 
+        <button
           onClick={handleLogout}
           className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-widest whitespace-nowrap bg-red-50 text-red-600 rounded hover:bg-red-500 hover:text-white transition-colors ml-auto"
         >
           <LogOut size={16} /> Logout
         </button>
       </div>
-      
+
       {/* SIDEBAR */}
       <aside className="w-64 bg-white border-r border-black/5 fixed h-[calc(100vh-80px)] hidden lg:flex flex-col z-10">
         <div className="p-8">
@@ -497,8 +478,8 @@ const AdminDashboard = () => {
               { name: 'Products', icon: Package, tab: 'products' },
               { name: 'Settings', icon: Settings, tab: 'settings' },
             ].map((item, i) => (
-              <button 
-                key={i} 
+              <button
+                key={i}
                 onClick={() => setActiveTab(item.tab)}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-colors rounded-sm
                   ${activeTab === item.tab ? 'bg-primary-text text-white' : 'text-secondary-text hover:bg-black/5 hover:text-primary-text'}`}
@@ -517,7 +498,7 @@ const AdminDashboard = () => {
 
       {/* MAIN CONTENT */}
       <main className="flex-grow lg:ml-64 p-8 overflow-y-auto">
-        
+
         {activeTab === 'dashboard' && (
           <>
             <header className="mb-10">
@@ -617,8 +598,8 @@ const AdminDashboard = () => {
                 <button onClick={handleDownloadExcel} className="flex items-center gap-2 bg-white border border-black/10 px-4 py-2 text-xs font-bold uppercase tracking-widest hover:border-luxury-gold hover:text-luxury-gold transition-colors shadow-sm">
                   <FileSpreadsheet size={16} /> Export Excel
                 </button>
-                <button 
-                  onClick={handleBulkDownload} 
+                <button
+                  onClick={handleBulkDownload}
                   disabled={filteredOrders.length === 0}
                   className="flex items-center gap-2 bg-white border border-black/10 px-4 py-2 text-xs font-bold uppercase tracking-widest hover:border-luxury-gold hover:text-luxury-gold transition-colors shadow-sm disabled:opacity-50"
                 >
@@ -652,16 +633,16 @@ const AdminDashboard = () => {
                 <div className="flex flex-wrap items-end gap-4">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">From Date</label>
-                    <input type="date" value={fromDate} onChange={(e) => {setFromDate(e.target.value); setExactDate('');}} className="border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
+                    <input type="date" value={fromDate} onChange={(e) => { setFromDate(e.target.value); setExactDate(''); }} className="border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">To Date</label>
-                    <input type="date" value={toDate} onChange={(e) => {setToDate(e.target.value); setExactDate('');}} className="border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
+                    <input type="date" value={toDate} onChange={(e) => { setToDate(e.target.value); setExactDate(''); }} className="border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                   </div>
                   <div className="mx-2 flex items-center h-10 text-xs font-bold text-secondary-text uppercase">OR</div>
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Specific Date</label>
-                    <input type="date" value={exactDate} onChange={(e) => {setExactDate(e.target.value); setFromDate(''); setToDate('');}} className="border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
+                    <input type="date" value={exactDate} onChange={(e) => { setExactDate(e.target.value); setFromDate(''); setToDate(''); }} className="border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Product Filter</label>
@@ -703,9 +684,9 @@ const AdminDashboard = () => {
                   <thead>
                     <tr className="bg-secondary-white/50 text-xs font-bold uppercase tracking-widest text-secondary-text border-b border-black/5">
                       <th className="p-4 pl-6 w-10">
-                        <input type="checkbox" className="accent-luxury-gold w-4 h-4 cursor-pointer" 
-                          checked={selectedOrders.length === filteredOrders.length && filteredOrders.length > 0} 
-                          onChange={selectAllFiltered} 
+                        <input type="checkbox" className="accent-luxury-gold w-4 h-4 cursor-pointer"
+                          checked={selectedOrders.length === filteredOrders.length && filteredOrders.length > 0}
+                          onChange={selectAllFiltered}
                         />
                       </th>
                       <th className="p-4">Order ID</th>
@@ -713,6 +694,7 @@ const AdminDashboard = () => {
                       <th className="p-4">Customer</th>
                       <th className="p-4">Items</th>
                       <th className="p-4">Total</th>
+                      <th className="p-4">Payment</th>
                       <th className="p-4">Status</th>
                       <th className="p-4 pr-6 text-right">Actions</th>
                     </tr>
@@ -723,9 +705,9 @@ const AdminDashboard = () => {
                     ) : filteredOrders.length > 0 ? filteredOrders.map((order) => (
                       <tr key={order._id} className={`border-b border-black/5 hover:bg-secondary-white/20 transition-colors text-sm ${selectedOrders.includes(order._id) ? 'bg-luxury-gold/5' : ''}`}>
                         <td className="p-4 pl-6">
-                          <input type="checkbox" className="accent-luxury-gold w-4 h-4 cursor-pointer" 
-                            checked={selectedOrders.includes(order._id)} 
-                            onChange={() => toggleSelectOrder(order._id)} 
+                          <input type="checkbox" className="accent-luxury-gold w-4 h-4 cursor-pointer"
+                            checked={selectedOrders.includes(order._id)}
+                            onChange={() => toggleSelectOrder(order._id)}
                           />
                         </td>
                         <td className="p-4 font-mono font-bold text-xs">{order.orderId}</td>
@@ -737,7 +719,12 @@ const AdminDashboard = () => {
                         <td className="p-4 text-xs text-secondary-text">
                           {order.items.map(i => <div key={i._id}>{i.quantity}x {i.name} ({i.color})</div>)}
                         </td>
-                        <td className="p-4 font-bold">${order.totalAmount.toFixed(2)}</td>
+                        <td className="p-4 font-bold">₹{order.totalAmount.toFixed(2)}</td>
+                        <td className="p-4">
+                          <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest border rounded-full ${order.paymentStatus === 'completed' || order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'}`}>
+                            {order.paymentStatus || 'unpaid'}
+                          </span>
+                        </td>
                         <td className="p-4">
                           <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest border rounded-full ${getStatusColor(order.status)}`}>
                             {order.status}
@@ -745,7 +732,7 @@ const AdminDashboard = () => {
                         </td>
                         <td className="p-4 pr-6">
                           <div className="flex justify-end items-center gap-2">
-                            <select 
+                            <select
                               className="bg-transparent border border-black/10 text-[10px] font-bold uppercase tracking-widest px-2 py-1 outline-none cursor-pointer"
                               value={order.status}
                               onChange={(e) => updateOrderStatus(order._id, e.target.value)}
@@ -900,48 +887,48 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Name</label>
-                    <input type="text" value={productForm.name} onChange={(e) => setProductForm({...productForm, name: e.target.value})} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
+                    <input type="text" value={productForm.name} onChange={(e) => setProductForm({ ...productForm, name: e.target.value })} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Price</label>
-                    <input type="number" value={productForm.price} onChange={(e) => setProductForm({...productForm, price: e.target.value})} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
+                    <input type="number" value={productForm.price} onChange={(e) => setProductForm({ ...productForm, price: e.target.value })} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Description</label>
-                  <textarea value={productForm.description} onChange={(e) => setProductForm({...productForm, description: e.target.value})} rows={3} className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
+                  <textarea value={productForm.description} onChange={(e) => setProductForm({ ...productForm, description: e.target.value })} rows={3} className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Material</label>
-                    <input type="text" value={productForm.material} onChange={(e) => setProductForm({...productForm, material: e.target.value})} className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
+                    <input type="text" value={productForm.material} onChange={(e) => setProductForm({ ...productForm, material: e.target.value })} className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Stock</label>
-                    <input type="number" value={productForm.stock} onChange={(e) => setProductForm({...productForm, stock: e.target.value})} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
+                    <input type="number" value={productForm.stock} onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Size Type</label>
-                    <select value={productForm.size} onChange={(e) => setProductForm({...productForm, size: e.target.value})} className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none cursor-pointer bg-white">
+                    <select value={productForm.size} onChange={(e) => setProductForm({ ...productForm, size: e.target.value })} className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none cursor-pointer bg-white">
                       <option value="regular">Regular</option>
                       <option value="mini">Mini</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Badge</label>
-                    <input type="text" value={productForm.badge} onChange={(e) => setProductForm({...productForm, badge: e.target.value})} placeholder="e.g., Signature Series" className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
+                    <input type="text" value={productForm.badge} onChange={(e) => setProductForm({ ...productForm, badge: e.target.value })} placeholder="e.g., Signature Series" className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Image URL / Path</label>
-                    <input type="text" value={productForm.image} onChange={(e) => setProductForm({...productForm, image: e.target.value})} className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
+                    <input type="text" value={productForm.image} onChange={(e) => setProductForm({ ...productForm, image: e.target.value })} className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Hover Image URL / Path</label>
-                    <input type="text" value={productForm.hoverImage} onChange={(e) => setProductForm({...productForm, hoverImage: e.target.value})} className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
+                    <input type="text" value={productForm.hoverImage} onChange={(e) => setProductForm({ ...productForm, hoverImage: e.target.value })} className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                   </div>
                 </div>
                 <div className="flex justify-end gap-3 pt-4 border-t border-black/10">

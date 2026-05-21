@@ -2,6 +2,7 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const Order = require('../models/Order');
 const { sendEmail } = require('../utils/emailService');
+const { generateInvoicePdf } = require('../utils/pdfGenerator');
 
 // Initialize Razorpay with credentials from environment
 const razorpay = new Razorpay({
@@ -15,118 +16,196 @@ const razorpay = new Razorpay({
  * @param {boolean} isAdmin - Whether the recipient is the administrator
  * @returns {string} - Rich HTML content
  */
+/**
+ * Converts a number to Indian Rupees in words
+ */
+const numberToWords = (num) => {
+  const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+    'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+  const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+  
+  if (num === 0) return 'Zero';
+  
+  const convert = (n) => {
+    if (n < 20) return ones[n];
+    if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
+    if (n < 1000) return ones[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' and ' + convert(n % 100) : '');
+    if (n < 100000) return convert(Math.floor(n / 1000)) + ' Thousand' + (n % 1000 ? ' ' + convert(n % 1000) : '');
+    if (n < 10000000) return convert(Math.floor(n / 100000)) + ' Lakh' + (n % 100000 ? ' ' + convert(n % 100000) : '');
+    return convert(Math.floor(n / 10000000)) + ' Crore' + (n % 10000000 ? ' ' + convert(n % 10000000) : '');
+  };
+  
+  return convert(Math.floor(num)) + ' Rupees only';
+};
+
 const generateOrderEmailHtml = (order, isAdmin = false) => {
-  const itemsHtml = order.items.map(item => `
+  const invoiceDate = new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  const itemsHtml = order.items.map((item, index) => `
     <tr>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; text-align: left;">
-        <span style="font-weight: bold; color: #111;">${item.name}</span>
+      <td style="padding: 10px 12px; border: 1px solid #ddd; font-size: 13px; color: #333; text-align: center;">${index + 1}</td>
+      <td style="padding: 10px 12px; border: 1px solid #ddd; font-size: 13px; color: #333; text-align: left;">
+        ${item.name}<br>
+        <span style="font-size: 12px; color: #777;">${item.color || 'Standard'} Finish</span>
       </td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; color: #555; text-align: left;">
-        ${item.color || 'Standard'}
-      </td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; color: #111; text-align: center;">
-        ${item.quantity}
-      </td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; color: #111; text-align: right;">
-        Rs. ${item.price.toLocaleString()}
-      </td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; font-weight: bold; color: #111; text-align: right;">
-        Rs. ${(item.price * item.quantity).toLocaleString()}
-      </td>
+      <td style="padding: 10px 12px; border: 1px solid #ddd; font-size: 13px; color: #333; text-align: center;">${item.quantity}</td>
+      <td style="padding: 10px 12px; border: 1px solid #ddd; font-size: 13px; color: #333; text-align: right;">₹ ${item.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+      <td style="padding: 10px 12px; border: 1px solid #ddd; font-size: 13px; color: #333; text-align: right; font-weight: bold;">₹ ${(item.price * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
     </tr>
   `).join('');
 
+  const amountInWords = numberToWords(order.totalAmount);
+
+  // For admin notification, wrap the invoice with a short admin note at the top
+  const adminNoteHtml = isAdmin ? `
+    <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 14px 18px; margin-bottom: 20px; font-family: Arial, sans-serif;">
+      <p style="margin: 0; font-size: 14px; color: #856404; font-weight: bold;">🔔 New Order Received!</p>
+      <p style="margin: 6px 0 0 0; font-size: 13px; color: #856404;">A verified payment has been received. The Tax Invoice is attached below.</p>
+    </div>
+  ` : `
+    <div style="background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 14px 18px; margin-bottom: 20px; font-family: Arial, sans-serif;">
+      <p style="margin: 0; font-size: 14px; color: #166534; font-weight: bold;">✨ Order Confirmed & Paid!</p>
+      <p style="margin: 6px 0 0 0; font-size: 13px; color: #166534;">Hi ${order.customerInfo.firstName}, thank you for shopping at Fitz1. Your order is confirmed and is being prepared. Your Tax Invoice is below.</p>
+    </div>
+  `;
+
   return `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 0; background-color: #fafaf9; color: #1c1c1c; border: 1px solid #e5e5e0;">
-      <!-- Brand Header -->
-      <div style="background-color: #1a1a1a; padding: 30px; text-align: center; border-bottom: 3px solid #c9a84c;">
-        <h1 style="color: #fafaf9; font-size: 28px; font-weight: 800; letter-spacing: 2px; margin: 0; text-transform: uppercase; font-family: Arial, sans-serif;">FITZONE</h1>
-        <p style="color: #c9a84c; font-size: 11px; font-weight: bold; letter-spacing: 3px; margin: 5px 0 0 0; text-transform: uppercase;">Premium Training Equipment</p>
-      </div>
+    <div style="font-family: Arial, Helvetica, sans-serif; max-width: 620px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+      
+      ${adminNoteHtml}
 
-      <!-- Main Body -->
-      <div style="padding: 40px 30px;">
-        <h2 style="font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #111; margin-top: 0; border-bottom: 1px solid #e5e5e0; padding-bottom: 15px;">
-          ${isAdmin ? '🔔 New Order Received!' : '✨ Order Confirmed'}
-        </h2>
-        
-        <p style="font-size: 15px; line-height: 1.6; color: #444;">
-          ${isAdmin 
-            ? `An order has been successfully placed and verified. Here are the full transaction details:` 
-            : `Hi ${order.customerInfo.firstName},<br><br>Thank you for shopping at FITZONE. Your order has been confirmed, paid for, and is now being prepared by our craftsmen.`}
-        </p>
+      <!-- Tax Invoice Container -->
+      <div style="background-color: #ffffff; border: 1px solid #ddd; padding: 0;">
 
-        <!-- Order Information Metadata -->
-        <div style="background-color: #f3f3f0; border-left: 4px solid #c9a84c; padding: 15px; margin: 25px 0; border-radius: 4px;">
+        <!-- Company Header -->
+        <div style="padding: 25px 30px 20px 30px; border-bottom: 2px solid #333;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td style="font-size: 13px; color: #666; padding: 4px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Order Number:</td>
-              <td style="font-size: 14px; color: #c9a84c; padding: 4px 0; font-weight: bold; font-family: monospace; text-align: left;">${order.orderId}</td>
+              <td style="vertical-align: top; text-align: left; width: 65%;">
+                <h1 style="margin: 0 0 8px 0; font-size: 26px; font-weight: 900; color: #1a1a1a; letter-spacing: 1px;">Fitz1</h1>
+                <p style="margin: 0; font-size: 12px; line-height: 1.6; color: #555;">
+                  5/1293 THAI NAGAR Thoothukudi<br>
+                  Phone no.: 8072210156<br>
+                  Email: fitz1business@gmail.com<br>
+                  GSTIN: 33AAKFF3665N1Z0<br>
+                  State: 33-Tamil Nadu
+                </p>
+              </td>
+              <td style="vertical-align: top; text-align: right; width: 35%;">
+                <img src="cid:fitz1logo" alt="Fitz1 Logo" style="max-width: 100px; height: auto;" />
+              </td>
             </tr>
+          </table>
+        </div>
+
+        <!-- Tax Invoice Title -->
+        <div style="text-align: center; padding: 14px 0; border-bottom: 1px solid #eee;">
+          <h2 style="margin: 0; font-size: 18px; font-weight: bold; color: #aaaaaa; letter-spacing: 1px;">Tax Invoice</h2>
+        </div>
+
+        <!-- Bill To & Invoice Details -->
+        <div style="padding: 20px 30px;">
+          <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td style="font-size: 13px; color: #666; padding: 4px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Date:</td>
-              <td style="font-size: 14px; color: #111; padding: 4px 0; text-align: left;">${new Date(order.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</td>
-            </tr>
-            <tr>
-              <td style="font-size: 13px; color: #666; padding: 4px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Payment Status:</td>
-              <td style="font-size: 13px; color: #2e7d32; padding: 4px 0; font-weight: bold; text-transform: uppercase; text-align: left;">PAID (Razorpay)</td>
+              <td style="vertical-align: top; text-align: left; width: 55%;">
+                <p style="margin: 0 0 4px 0; font-size: 13px; font-weight: bold; color: #333; text-transform: uppercase;">Bill To</p>
+                <p style="margin: 0; font-size: 14px; font-weight: bold; color: #111;">${order.customerInfo.firstName} ${order.customerInfo.lastName}</p>
+                <p style="margin: 4px 0 0 0; font-size: 12px; color: #555; line-height: 1.5;">
+                  Contact No.: ${order.customerInfo.phone}<br>
+                  ${order.shippingAddress.address}<br>
+                  ${order.shippingAddress.city}, ${order.shippingAddress.state} - ${order.shippingAddress.zip}
+                </p>
+              </td>
+              <td style="vertical-align: top; text-align: right; width: 45%;">
+                <p style="margin: 0 0 4px 0; font-size: 13px; font-weight: bold; color: #333; text-transform: uppercase;">Invoice Details</p>
+                <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.8;">
+                  Invoice No.: <strong style="color: #111;">${order.orderId}</strong><br>
+                  Date: <strong style="color: #111;">${invoiceDate}</strong>
+                </p>
+              </td>
             </tr>
           </table>
         </div>
 
         <!-- Items Table -->
-        <h3 style="font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #111; margin: 30px 0 10px 0; text-align: left;">Ordered Items</h3>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
-          <thead>
-            <tr style="background-color: #1a1a1a;">
-              <th style="padding: 10px 12px; color: #fafaf9; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: left; letter-spacing: 1px;">Item</th>
-              <th style="padding: 10px 12px; color: #fafaf9; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: left; letter-spacing: 1px;">Finish</th>
-              <th style="padding: 10px 12px; color: #fafaf9; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: center; letter-spacing: 1px;">Qty</th>
-              <th style="padding: 10px 12px; color: #fafaf9; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: right; letter-spacing: 1px;">Price</th>
-              <th style="padding: 10px 12px; color: #fafaf9; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: right; letter-spacing: 1px;">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsHtml}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="3" style="padding: 15px 12px 5px 12px; text-align: right; font-size: 13px; color: #666; font-weight: bold; text-transform: uppercase;">Grand Total:</td>
-              <td colspan="2" style="padding: 15px 12px 5px 12px; text-align: right; font-size: 18px; font-weight: 800; color: #c9a84c;">Rs. ${order.totalAmount.toLocaleString()}</td>
-            </tr>
-          </tfoot>
-        </table>
+        <div style="padding: 0 30px 20px 30px;">
+          <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+            <thead>
+              <tr style="background-color: #f8f8f8;">
+                <th style="padding: 10px 12px; border: 1px solid #ddd; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: center; color: #333; width: 8%;">#</th>
+                <th style="padding: 10px 12px; border: 1px solid #ddd; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: left; color: #333;">Description</th>
+                <th style="padding: 10px 12px; border: 1px solid #ddd; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: center; color: #333; width: 10%;">Qty</th>
+                <th style="padding: 10px 12px; border: 1px solid #ddd; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: right; color: #333; width: 18%;">Rate</th>
+                <th style="padding: 10px 12px; border: 1px solid #ddd; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: right; color: #333; width: 18%;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+        </div>
 
-        <!-- Shipping & Customer details -->
-        <div style="border-top: 1px solid #e5e5e0; padding-top: 25px; margin-top: 25px;">
+        <!-- Totals Section -->
+        <div style="padding: 0 30px 20px 30px;">
           <table style="width: 100%; border-collapse: collapse;">
-            <tr style="vertical-align: top;">
-              <td style="width: 50%; padding-right: 15px; text-align: left;">
-                <h4 style="font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 10px 0;">Shipping Address</h4>
-                <p style="font-size: 14px; line-height: 1.5; color: #333; margin: 0;">
-                  <strong style="color: #111;">${order.customerInfo.firstName} ${order.customerInfo.lastName}</strong><br>
-                  ${order.shippingAddress.address}<br>
-                  ${order.shippingAddress.city}, ${order.shippingAddress.state} - ${order.shippingAddress.zip}<br>
-                  <span style="font-size: 13px; color: #666;">Method: ${order.shippingAddress.method || 'Standard Shipping'}</span>
-                </p>
+            <tr>
+              <td style="width: 55%; vertical-align: top;">
+                <p style="font-size: 12px; font-weight: bold; color: #333; margin: 0 0 4px 0; text-transform: uppercase;">Invoice Amount In Words</p>
+                <p style="font-size: 13px; color: #555; margin: 0; font-style: italic;">${amountInWords}</p>
               </td>
-              <td style="width: 50%; padding-left: 15px; border-left: 1px solid #e5e5e0; text-align: left;">
-                <h4 style="font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 10px 0;">Customer Contact</h4>
-                <p style="font-size: 14px; line-height: 1.5; color: #333; margin: 0;">
-                  Email: <a href="mailto:${order.customerInfo.email}" style="color: #c9a84c; text-decoration: none;">${order.customerInfo.email}</a><br>
-                  Phone: ${order.customerInfo.phone}
-                </p>
+              <td style="width: 45%; vertical-align: top;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 6px 0; font-size: 13px; font-weight: bold; color: #333; border-bottom: 1px solid #eee;">Total</td>
+                    <td style="padding: 6px 0; font-size: 14px; font-weight: 900; color: #2563eb; text-align: right; border-bottom: 1px solid #eee;">₹ ${order.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; font-size: 13px; color: #555;">Received</td>
+                    <td style="padding: 6px 0; font-size: 13px; color: #333; text-align: right;">₹ ${order.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; font-size: 13px; color: #555; border-top: 1px solid #eee;">Balance</td>
+                    <td style="padding: 6px 0; font-size: 13px; font-weight: bold; color: #16a34a; text-align: right; border-top: 1px solid #eee;">₹ 0.00</td>
+                  </tr>
+                </table>
               </td>
             </tr>
           </table>
         </div>
+
+        <!-- Shipping Info -->
+        <div style="padding: 0 30px 20px 30px; border-top: 1px solid #eee; margin-top: 5px; padding-top: 15px;">
+          <p style="font-size: 12px; font-weight: bold; color: #333; margin: 0 0 4px 0; text-transform: uppercase;">Shipping Details</p>
+          <p style="font-size: 12px; color: #555; margin: 0; line-height: 1.5;">
+            ${order.shippingAddress.address}, ${order.shippingAddress.city}, ${order.shippingAddress.state} - ${order.shippingAddress.zip}<br>
+            Method: ${order.shippingAddress.method || 'Standard Shipping'} &nbsp;|&nbsp; Payment: Razorpay (Online) &nbsp;|&nbsp; Status: <strong style="color: #16a34a;">PAID</strong>
+          </p>
+        </div>
+
+        <!-- Authorized Signatory -->
+        <div style="padding: 20px 30px 30px 30px; border-top: 1px solid #eee;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="text-align: left; vertical-align: bottom;">
+                <p style="font-size: 11px; color: #999; margin: 0;">This is a computer-generated invoice and does not require a physical signature.</p>
+              </td>
+              <td style="text-align: right; vertical-align: top;">
+                <p style="font-size: 13px; color: #555; margin: 0 0 6px 0;">For: <strong style="color: #111;">Fitz1</strong></p>
+                <img src="cid:fitz1sign" alt="Signature" style="width: 90px; height: auto; display: block; margin-left: auto;" />
+                <p style="font-size: 12px; font-weight: bold; color: #333; margin: 4px 0 0 0; border-top: 1px solid #ccc; padding-top: 6px;">Authorized Signatory</p>
+              </td>
+            </tr>
+          </table>
+        </div>
+
       </div>
 
-      <!-- Email Footer -->
-      <div style="background-color: #1a1a1a; padding: 25px; text-align: center; border-top: 1px solid #c9a84c;">
-        <p style="color: #fafaf9; font-size: 12px; margin: 0 0 8px 0; font-weight: bold; letter-spacing: 1px;">Thank you for choosing FITZONE.</p>
-        <p style="color: #888; font-size: 11px; margin: 0;">This is an automated confirmation email. For support, reply directly to this mail or write to us at <a href="mailto:kavinath50@gmail.com" style="color: #c9a84c; text-decoration: none;">kavinath50@gmail.com</a>.</p>
+      <!-- Footer -->
+      <div style="text-align: center; padding: 15px 0 5px 0;">
+        <p style="font-size: 11px; color: #999; margin: 0;">For support, contact us at <a href="mailto:fitz1business@gmail.com" style="color: #2563eb; text-decoration: none;">fitz1business@gmail.com</a> or call 8072210156</p>
+        <p style="font-size: 11px; color: #bbb; margin: 5px 0 0 0;">www.fitz1.in</p>
       </div>
+
     </div>
   `;
 };
@@ -241,15 +320,27 @@ const verifyPayment = async (req, res) => {
                 const customerEmailContent = generateOrderEmailHtml(updatedOrder, false);
                 const adminEmailAddress = process.env.ADMIN_EMAIL || 'kavinath50@gmail.com';
                 
+                let attachments = [];
+                try {
+                  const pdfBuffer = generateInvoicePdf(updatedOrder);
+                  attachments.push({
+                    filename: `Invoice-${updatedOrder.orderId}.pdf`,
+                    content: pdfBuffer,
+                    contentType: 'application/pdf'
+                  });
+                } catch (pdfErr) {
+                  console.error('❌ Failed to generate invoice PDF:', pdfErr.message);
+                }
+
                 // Asynchronously send Admin notification
-                sendEmail('New Order Confirmed - Fitzone', adminEmailContent, adminEmailAddress, 'Fitzone Admin', 'ADMIN_NOTIFICATION')
+                sendEmail('New Order Confirmed - Fitzone', adminEmailContent, adminEmailAddress, 'Fitzone Admin', 'ADMIN_NOTIFICATION', attachments)
                   .then(adminSent => {
                     if (adminSent) console.log('✅ Background: Admin order email sent successfully.');
                   })
                   .catch(err => console.error('❌ Background: Failed to send admin email:', err.message));
 
                 // Asynchronously send Customer confirmation
-                sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, updatedOrder.customerInfo.email, `${updatedOrder.customerInfo.firstName} ${updatedOrder.customerInfo.lastName}`, 'CUSTOMER_CONFIRMATION')
+                sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, updatedOrder.customerInfo.email, `${updatedOrder.customerInfo.firstName} ${updatedOrder.customerInfo.lastName}`, 'CUSTOMER_CONFIRMATION', attachments)
                   .then(customerSent => {
                     if (customerSent) console.log('✅ Background: Customer order confirmation email sent successfully.');
                   })
@@ -326,13 +417,25 @@ const razorpayWebhook = async (req, res) => {
               const customerEmailContent = generateOrderEmailHtml(updatedOrder, false);
               const adminEmailAddress = process.env.ADMIN_EMAIL || 'kavinath50@gmail.com';
               
-              sendEmail('New Order Confirmed - Fitzone', adminEmailContent, adminEmailAddress, 'Fitzone Admin', 'WEBHOOK_ADMIN')
+              let attachments = [];
+              try {
+                const pdfBuffer = generateInvoicePdf(updatedOrder);
+                attachments.push({
+                  filename: `Invoice-${updatedOrder.orderId}.pdf`,
+                  content: pdfBuffer,
+                  contentType: 'application/pdf'
+                });
+              } catch (pdfErr) {
+                console.error('❌ Failed to generate invoice PDF:', pdfErr.message);
+              }
+
+              sendEmail('New Order Confirmed - Fitzone', adminEmailContent, adminEmailAddress, 'Fitzone Admin', 'WEBHOOK_ADMIN', attachments)
                 .then(adminSent => {
                   if (adminSent) console.log('✅ Webhook Background: Admin order email sent.');
                 })
                 .catch(err => console.error('❌ Webhook Background: Admin email failed:', err.message));
 
-              sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, updatedOrder.customerInfo.email, `${updatedOrder.customerInfo.firstName} ${updatedOrder.customerInfo.lastName}`, 'WEBHOOK_CUSTOMER')
+              sendEmail('Your Order has been Confirmed! - Fitzone', customerEmailContent, updatedOrder.customerInfo.email, `${updatedOrder.customerInfo.firstName} ${updatedOrder.customerInfo.lastName}`, 'WEBHOOK_CUSTOMER', attachments)
                 .then(customerSent => {
                   if (customerSent) console.log('✅ Webhook Background: Customer order email sent.');
                 })
