@@ -45,41 +45,7 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ MongoDB Connected Successfully'))
   .catch((err) => console.error('❌ MongoDB Connection Error:', err));
 
-// Verify SMTP connection on startup so misconfigurations are caught immediately in logs
-const nodemailer = require('nodemailer');
-const verifySMTP = async () => {
-  const smtpHost = process.env.SMTP_HOST;
-  const smtpPort = parseInt(process.env.SMTP_PORT || '587');
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
-
-  if (!smtpUser || !smtpPass) {
-    console.warn('⚠️ [SMTP] No credentials found — emails will be skipped.');
-    return;
-  }
-
-  const transporter = nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure: smtpPort === 465,
-    auth: { user: smtpUser, pass: smtpPass },
-    tls: { rejectUnauthorized: false },
-    family: 4, // Force IPv4 to avoid ENETUNREACH IPv6 errors
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-  });
-
-  try {
-    await transporter.verify();
-    console.log(`✅ [SMTP] Connection verified: ${smtpHost}:${smtpPort} as ${smtpUser}`);
-  } catch (err) {
-    console.error(`❌ [SMTP] Connection FAILED: ${smtpHost}:${smtpPort}`);
-    console.error(`   Code: ${err.code} | ResponseCode: ${err.responseCode || 'N/A'}`);
-    console.error(`   Message: ${err.message}`);
-    console.error('   → Emails will fail until SMTP is fixed.');
-  }
-};
-verifySMTP();
+// SMTP Verification removed since we migrated to the highly reliable HTTP API
 
 // Seed default products
 const seedProducts = async () => {

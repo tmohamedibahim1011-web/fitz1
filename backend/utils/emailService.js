@@ -1,51 +1,15 @@
-const nodemailer = require('nodemailer');
 const path = require('path');
 const fs = require('fs');
 
 /**
- * Singleton transporter — created once and reused across all email sends.
- * Avoids the overhead of creating a new SMTP connection on every call (critical in production).
- */
-let _transporter = null;
-
-const getTransporter = () => {
-  if (_transporter) return _transporter;
-
-  const smtpHost = process.env.SMTP_HOST || 'smtp-relay.brevo.com';
-  const smtpPort = parseInt(process.env.SMTP_PORT || '587');
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
-
-  _transporter = nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure: smtpPort === 465, // true for port 465 (SSL), false for 587 (STARTTLS)
-    auth: {
-      user: smtpUser,
-      pass: smtpPass
-    },
-    tls: {
-      rejectUnauthorized: false // Required for many cloud hosts (Render, Railway, etc.)
-    },
-    family: 4, // Force IPv4 to avoid ENETUNREACH IPv6 errors
-    connectionTimeout: 15000,  // 15s to establish TCP connection
-    greetingTimeout: 15000,    // 15s for SMTP greeting
-    socketTimeout: 45000,      // 45s for idle socket (large for PDF attachments)
-  });
-
-  console.log(`📧 [EMAIL] Transporter initialized: ${smtpHost}:${smtpPort}`);
-  return _transporter;
-};
-
-/**
- * Sends an email using Nodemailer with a persistent SMTP connection.
+ * Sends an email using Brevo's HTTP API (bypasses all SMTP ESOCKET/ETIMEDOUT issues).
  *
  * @param {string} subject - Email subject line
  * @param {string} htmlContent - Rich HTML body content
  * @param {string} toEmail - Recipient email address
  * @param {string} toName - Recipient name
  * @param {string} logPrefix - Log prefix for debugging
- * @param {Array} attachments - Optional mail attachments array
+ * @param {Array} attachments - Optional mail attachments array (Nodemailer style)
  * @returns {Promise<boolean>} - Whether email sent successfully
  */
 const sendEmail = async (
@@ -56,70 +20,87 @@ const sendEmail = async (
   logPrefix = 'EMAIL',
   attachments = []
 ) => {
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
+  const apiKey = process.env.BREVO_API_KEY;
 
-  if (!smtpUser || !smtpPass) {
-    console.warn(`⚠️ [${logPrefix}] SMTP credentials not found in environment. Skipping email.`);
+  if (!apiKey) {
+    console.warn(`⚠️ [${logPrefix}] BREVO_API_KEY not found in environment. Skipping email.`);
     return false;
   }
 
   try {
-    const transporter = getTransporter();
+    // Build final attachments array for Brevo API
+    const brevoAttachments = [];
 
-    // Build final attachments array — add logo/signature if they exist on disk
-    const finalAttachments = [...attachments];
+    // 1. Process dynamic attachments (like Invoice PDF buffer)
+    for (const att of attachments) {
+      if (att.content && Buffer.isBuffer(att.content)) {
+        brevoAttachments.push({
+          name: att.filename,
+          content: att.content.toString('base64')
+        });
+      }
+    }
 
+    // 2. Add static logo (if it exists)
     const logoPath = path.join(__dirname, '../assets/fitz1.png');
-    if (fs.existsSync(logoPath) && !finalAttachments.some(a => a.cid === 'fitz1logo')) {
-      finalAttachments.push({
-        filename: 'fitz1.png',
-        path: logoPath,
-        cid: 'fitz1logo'
+    if (fs.existsSync(logoPath)) {
+      brevoAttachments.push({
+        name: 'fitz1.png',
+        content: fs.readFileSync(logoPath).toString('base64')
       });
+      // Replace CID in HTML with Brevo attachment reference (or fallback to base64 if needed)
+      // Actually, for Brevo API, standard attachment works for cid if name matches, or we just embed it
+      htmlContent = htmlContent.replace('cid:fitz1logo', `data:image/png;base64,${fs.readFileSync(logoPath).toString('base64')}`);
     }
 
+    // 3. Add static signature (if it exists)
     const signPath = path.join(__dirname, '../assets/sign.png');
-    if (fs.existsSync(signPath) && !finalAttachments.some(a => a.cid === 'fitz1sign')) {
-      finalAttachments.push({
-        filename: 'sign.png',
-        path: signPath,
-        cid: 'fitz1sign'
+    if (fs.existsSync(signPath)) {
+      brevoAttachments.push({
+        name: 'sign.png',
+        content: fs.readFileSync(signPath).toString('base64')
       });
+      htmlContent = htmlContent.replace('cid:fitz1sign', `data:image/png;base64,${fs.readFileSync(signPath).toString('base64')}`);
     }
 
-    const mailOptions = {
-      from: `"Fitz1" <${smtpUser}>`,
-      replyTo: `"Fitz1" <fitz1business@gmail.com>`,
-      to: `"${toName}" <${toEmail}>`,
+    const payload = {
+      sender: { name: 'Fitz1', email: 'fitz1business@gmail.com' },
+      to: [{ email: toEmail, name: toName }],
+      replyTo: { email: 'fitz1business@gmail.com', name: 'Fitz1 Support' },
       subject: subject,
-      html: htmlContent,
-      attachments: finalAttachments
+      htmlContent: htmlContent
     };
 
-    console.log(`🔄 [${logPrefix}] Sending email to ${toEmail} via ${process.env.SMTP_HOST || 'smtp-relay.brevo.com'}...`);
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`✅ [${logPrefix}] Email delivered! MessageId: ${info.messageId} | Response: ${info.response}`);
-    return true;
-  } catch (error) {
-    // Log the FULL error — not just .message — so we can see SMTP error codes in production
-    console.error(`❌ [${logPrefix}] SMTP Error sending to ${toEmail}:`);
-    console.error(`   Code: ${error.code || 'N/A'} | ResponseCode: ${error.responseCode || 'N/A'}`);
-    console.error(`   Message: ${error.message}`);
-    console.error(`   Command: ${error.command || 'N/A'}`);
-
-    // Reset the singleton transporter on auth/connection errors so it re-initializes next time
-    if (
-      error.code === 'ECONNECTION' ||
-      error.code === 'ECONNREFUSED' ||
-      error.code === 'ETIMEDOUT' ||
-      error.responseCode === 535 || // Auth failed
-      error.responseCode === 421    // Service unavailable
-    ) {
-      console.warn(`⚠️ [${logPrefix}] Resetting SMTP transporter due to connection/auth error.`);
-      _transporter = null;
+    if (brevoAttachments.length > 0) {
+      // Only include actual file attachments (like PDFs) in the attachment array
+      // Since we embedded the logo/sign as base64 in HTML, we only need the PDF here.
+      payload.attachment = brevoAttachments.filter(a => a.name.endsWith('.pdf'));
     }
 
+    console.log(`🔄 [${logPrefix}] Sending email to ${toEmail} via Brevo HTTP API...`);
+    
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': apiKey,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorData}`);
+    }
+
+    const data = await response.json();
+    console.log(`✅ [${logPrefix}] Email delivered! MessageId: ${data.messageId}`);
+    return true;
+
+  } catch (error) {
+    console.error(`❌ [${logPrefix}] HTTP API Error sending to ${toEmail}:`);
+    console.error(`   Message: ${error.message}`);
     return false;
   }
 };
