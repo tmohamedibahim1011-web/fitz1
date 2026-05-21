@@ -64,7 +64,7 @@ const sendEmail = async (
     }
 
     const payload = {
-      sender: { name: 'Fitz1', email: 'fitz1business@gmail.com' },
+      sender: { name: 'Fitz1', email: process.env.SMTP_USER || 'kavinath50@gmail.com' },
       to: [{ email: toEmail, name: toName }],
       replyTo: { email: 'fitz1business@gmail.com', name: 'Fitz1 Support' },
       subject: subject,
