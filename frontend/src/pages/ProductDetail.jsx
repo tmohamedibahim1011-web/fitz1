@@ -100,13 +100,25 @@ const ProductDetail = () => {
   const currentPrice = (product.basePrice || 0) + (selectedColor?.priceOffset || 0);
   const isNatural = selectedColor?.id === 'natural';
   const isBlack = selectedColor?.id === 'black';
+  const isMini = product.size === 'mini';
+
   const objectPosition = isDimensionImgActive 
     ? 'center' 
-    : isNatural 
+    : (isMini && isBlack) 
       ? 'center 45%' 
-      : isBlack 
-        ? 'center 55%' 
-        : 'center';
+      : 'center 48%';
+
+  const initialScale = isDimensionImgActive 
+    ? 1.0 
+    : (isMini && isBlack) 
+      ? 1.6 
+      : 1.15;
+
+  const animateScale = isDimensionImgActive 
+    ? 1.0 
+    : (isMini && isBlack) 
+      ? 1.55 
+      : 1.1;
 
   return (
     <div className="bg-primary-white min-h-screen pt-24 pb-32">
@@ -138,8 +150,8 @@ const ProductDetail = () => {
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={activeImage}
-                    initial={{ opacity: 0, scale: 1.15 }}
-                    animate={{ opacity: 1, scale: 1.1 }}
+                    initial={{ opacity: 0, scale: initialScale }}
+                    animate={{ opacity: 1, scale: animateScale }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.5 }}
                     style={{ objectPosition }}

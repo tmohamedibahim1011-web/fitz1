@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import fitzLogo from '../../assets/fitz1.png';
+import fitzLogo from '../../assets/fitz1.webp';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();

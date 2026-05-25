@@ -5,67 +5,61 @@ import { ArrowRight, Play, Star, Users, Check, Maximize2, Loader2, ArrowLeft, X 
 import axios from 'axios';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import vary from "../assets/photoshoot/vary-product.jpeg"
-import product3d from "../assets/3dproduct.png";
+import vary from "../assets/photoshoot/vary-product.webp"
+import product3d from "../assets/3dproduct.webp";
 import ProductCard from '../components/ProductCard';
-import natural from "../assets/products/regularnatural.jpeg"
-import black from "../assets/products/regularblack.jpeg"
-import mininatural from "../assets/products/mininatural.jpeg"
-import miniblack from "../assets/products/miniblack.PNG"
+import natural from "../assets/products/regularnatural.webp"
+import black from "../assets/products/regularblack.webp"
+import mininatural from "../assets/products/mininatural.webp"
+import miniblack from "../assets/products/miniblack.webp"
 
 // Assets
-import bannerImg from '../assets/banner.png';
+import bannerImg from '../assets/banner.webp';
 import processVideo from '../assets/how-its-made.mp4';
 
-// Video Reviews
-import video1 from '../assets/reviews/video-1.mp4';
-import video2 from '../assets/reviews/video-2.mp4';
-import video3 from '../assets/reviews/video-3.mp4';
-import video4 from '../assets/reviews/video-4.mp4';
-import video5 from '../assets/reviews/video-5.mp4';
-import video6 from '../assets/reviews/video-6.mp4';
+// Video Reviews — Cloudinary CDN (no local MP4 bandwidth)
 
 // Photoshoot Images
-import photo1 from '../assets/photoshoot/165547.jpg';
-import photo2 from '../assets/photoshoot/165549.jpg';
-import photo3 from '../assets/photoshoot/165554.jpg';
-import photo4 from '../assets/photoshoot/165557.jpg';
-import photo5 from '../assets/photoshoot/165560.jpg';
-import photo6 from '../assets/photoshoot/165564.jpg';
-import photo7 from '../assets/photoshoot/165566.jpg';
-import photo8 from '../assets/photoshoot/165568.jpg';
+import photo1 from '../assets/photoshoot/165547.webp';
+import photo2 from '../assets/photoshoot/165549.webp';
+import photo3 from '../assets/photoshoot/165554.webp';
+import photo4 from '../assets/photoshoot/165557.webp';
+import photo5 from '../assets/photoshoot/165560.webp';
+import photo6 from '../assets/photoshoot/165564.webp';
+import photo7 from '../assets/photoshoot/165566.webp';
+import photo8 from '../assets/photoshoot/165568.webp';
 
 // Review Images
-import rev1 from '../assets/reviews/165581.jpg';
-import rev2 from '../assets/reviews/165585.jpg';
-import rev3 from '../assets/reviews/165587.jpg';
-import rev4 from '../assets/reviews/165588.jpg';
-import rev5 from '../assets/reviews/165591.jpg';
-import rev6 from '../assets/reviews/165600.jpg';
-import rev7 from '../assets/reviews/165601.jpg';
-import rev8 from '../assets/reviews/165602.jpg';
-import rev9 from '../assets/reviews/165606.jpg';
-import rev10 from '../assets/reviews/165607.jpg';
-import rev11 from '../assets/reviews/165611.jpg';
-import rev12 from '../assets/reviews/165612.jpg';
-import rev13 from '../assets/reviews/165614.jpg';
-import rev14 from '../assets/reviews/165616.jpg';
-import rev15 from '../assets/reviews/165617.jpg';
-import rev16 from '../assets/reviews/165618.jpg';
-import rev17 from '../assets/reviews/165619.jpg';
-import rev18 from '../assets/reviews/165620.jpg';
-import rev19 from '../assets/reviews/165621.jpg';
-import rev20 from '../assets/reviews/165622.jpg';
-import rev21 from '../assets/reviews/165623.jpg';
-import rev22 from '../assets/reviews/165625.jpg';
+import rev1 from '../assets/reviews/165581.webp';
+import rev2 from '../assets/reviews/165585.webp';
+import rev3 from '../assets/reviews/165587.webp';
+import rev4 from '../assets/reviews/165588.webp';
+import rev5 from '../assets/reviews/165591.webp';
+import rev6 from '../assets/reviews/165600.webp';
+import rev7 from '../assets/reviews/165601.webp';
+import rev8 from '../assets/reviews/165602.webp';
+import rev9 from '../assets/reviews/165606.webp';
+import rev10 from '../assets/reviews/165607.webp';
+import rev11 from '../assets/reviews/165611.webp';
+import rev12 from '../assets/reviews/165612.webp';
+import rev13 from '../assets/reviews/165614.webp';
+import rev14 from '../assets/reviews/165616.webp';
+import rev15 from '../assets/reviews/165617.webp';
+import rev16 from '../assets/reviews/165618.webp';
+import rev17 from '../assets/reviews/165619.webp';
+import rev18 from '../assets/reviews/165620.webp';
+import rev19 from '../assets/reviews/165621.webp';
+import rev20 from '../assets/reviews/165622.webp';
+import rev21 from '../assets/reviews/165623.webp';
+import rev22 from '../assets/reviews/165625.webp';
 
 const VIDEO_REVIEWS = [
-  { src: video1, username: '@fitness_pro', text: "Best parallettes I've ever used!" },
-  { src: video2, username: '@calisthenics_king', text: "Game changer for my training" },
-  { src: video3, username: '@gymnast_life', text: "The grip is unbelievable" },
-  { src: video4, username: '@athlete_mike', text: "Worth every penny" },
-  { src: video5, username: '@coach_jones', text: "Highly recommended" },
-  { src: video6, username: '@workout_junkie', text: "Premium quality" },
+  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716333/video-1_qwydqo.mp4', username: '@fitness_pro', text: "Best parallettes I've ever used!" },
+  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716343/video-2_gd3at4.mp4', username: '@calisthenics_king', text: "Game changer for my training" },
+  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716340/video-3_fccfny.mp4', username: '@gymnast_life', text: "The grip is unbelievable" },
+  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716338/video-4_fboorm.mp4', username: '@athlete_mike', text: "Worth every penny" },
+  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716337/video-5_tzwvdr.mp4', username: '@coach_jones', text: "Highly recommended" },
+  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716340/video-6_utoffd.mp4', username: '@workout_junkie', text: "Premium quality" },
 ];
 
 const IMAGE_REVIEWS = [
@@ -98,7 +92,7 @@ const PHOTOSHOOT_GALLERY = [
   { src: photo5, title: "Rock-Solid Base Joint", desc: "CNC-milled interlocking joints for zero wobble under load." },
   { src: photo6, title: "Portable Elite Training", desc: "Take your gymnastics and calisthenics training anywhere." },
   { src: photo7, title: "Mahogany Finish Aesthetics", desc: "Premium Mahogany wood grain finish that elevates any room's decor." },
-  { src: photo8, title: "Zero Slip Grip", desc: "Industrial rubber padding for ultimate surface traction." },
+  { src: vary, title: "Zero Slip Grip", desc: "Industrial rubber padding for ultimate surface traction." },
   { src: photo4, title: "Sustainable Mahogany", desc: "Carefully sourced Mahogany body wood crafted to last a lifetime." }
 ];
 
@@ -111,7 +105,7 @@ const MASTERY_FEATURES = [
     subtitle: "Premium Ergonomic Feel",
     desc: "Tactile hand-sanded wooden handles absorb sweat and reduce joint pressure (45mm thickness for Regular parallettes; 45mm thickness for Mini parallettes) for absolute planches and static holds control.",
     label: "Grip Diameter",
-    
+
   },
   {
     id: 1,
@@ -150,10 +144,34 @@ const Home = () => {
   const [activeFeature, setActiveFeature] = useState(0);
 
   const finishes = [
-    { id: 1, name: "Regular Natural", image: natural },
-    { id: 2, name: "Regular Black", image: black },
-    { id: 3, name: "Mini Natural", image: mininatural },
-    { id: 4, name: "Mini Black", image: miniblack }
+    {
+      id: "natural",
+      name: "Natural Regular",
+      image: natural,
+      scale: 1.1,
+      objectPosition: 'center 48%'
+    },
+    {
+      id: "black",
+      name: "Shadow Black Regular",
+      image: black,
+      scale: 1.1,
+      objectPosition: 'center 48%'
+    },
+    {
+      id: "mini-natural",
+      name: "Mini Natural Regular",
+      image: mininatural,
+      scale: 1.1,
+      objectPosition: 'center 48%'
+    },
+    {
+      id: "mini-black",
+      name: "Mini Shadow Black Regular",
+      image: miniblack,
+      scale: 1.1,
+      objectPosition: 'center 48%'
+    }
   ];
 
   const [isLoading, setIsLoading] = useState(true);
@@ -333,12 +351,12 @@ const Home = () => {
         </div>
       </section>
 
-      {/* COLOR VARIATIONS SECTION - HIGH FASHION EDITORIAL LAYOUT */}
+      {/* COLOR VARIATIONS SECTION - HIGH FASHION EDITORIAL LAYOUT (Simple & Perfect 2-Column Grid) */}
       <section className="py-32 bg-[#FAFAF8] relative overflow-hidden border-b border-black/5">
         {/* Subtle background glow */}
         <div className="absolute top-1/2 left-1/2 w-[600px] h-[600px] bg-luxury-gold/5 blur-[140px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
 
-        <div className="container mx-auto px-6 max-w-6xl relative z-10">
+        <div className="container mx-auto px-6 max-w-5xl relative z-10">
           <motion.div
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
             className="text-center mb-20"
@@ -354,43 +372,55 @@ const Home = () => {
             <div className="w-12 h-[2px] bg-luxury-gold mx-auto mt-6"></div>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {finishes.map((finish, index) => (
-              <motion.div
-                key={finish.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.15 }}
-                viewport={{ once: true }}
-                className="group bg-white rounded-[32px] border border-black/5 overflow-hidden shadow-sm hover:shadow-2xl hover:border-luxury-gold/30 transition-all duration-500 cursor-pointer flex flex-col h-full"
-              >
-                {/* Large visual wrapper */}
-                <div className="w-full aspect-[4/5] overflow-hidden bg-secondary-white relative">
-                  <img
-                    src={finish.image}
-                    alt={finish.name}
-                    className="w-full h-full object-cover transform scale-110 group-hover:scale-115 transition-transform duration-700 ease-out"
-                    loading="lazy"
-                  />
-                  {/* Floating index badge */}
-                  <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white border border-white/10 text-[9px] uppercase font-mono py-1 px-3 rounded-full">
-                    0{index + 1}
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            {finishes.map((finish, index) => {
+              const isMini = finish.id.includes('mini');
+              return (
+                <motion.div
+                  key={finish.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="group flex flex-col h-full cursor-pointer"
+                >
+                  {/* Large visual wrapper */}
+                  <div className="w-full aspect-[4/5] overflow-hidden rounded-[28px] bg-secondary-white relative border border-black/5 group-hover:border-luxury-gold/30 group-hover:shadow-2xl transition-all duration-500">
+                    <motion.img
+                      src={finish.image}
+                      alt={finish.name}
+                      style={{ objectPosition: finish.objectPosition }}
+                      initial={{ scale: finish.scale }}
+                      whileHover={{ scale: finish.scale + 0.05 }}
+                      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                      className="w-full h-full object-cover origin-center"
+                      loading="lazy"
+                    />
 
-                {/* Text / Header Padding */}
-                <div className="p-6 flex flex-col items-center justify-center border-t border-black/5 bg-white flex-grow">
-                  <p
-                    className="text-outfit font-bold uppercase text-[11px] sm:text-xs tracking-tight text-primary-text text-center group-hover:text-luxury-gold transition-colors duration-300"
-                  >
-                    {finish.name}
-                  </p>
-                  <span className="block text-[8px] uppercase font-mono tracking-widest text-luxury-gold mt-2 font-bold">
-                    FITZ1 Handcrafted
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+                    {/* Floating Series Badge */}
+                    <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md text-primary-text border border-black/5 text-[8px] sm:text-[9px] uppercase font-bold tracking-widest py-1.5 px-3 rounded-full shadow-sm flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${isMini ? 'bg-orange-500 animate-pulse' : 'bg-luxury-gold animate-pulse'}`}></span>
+                      <span>{isMini ? 'Mini Series' : 'Pro Series'}</span>
+                    </div>
+
+                    {/* Floating index badge */}
+                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white border border-white/10 text-[9px] uppercase font-mono py-1 px-3 rounded-full">
+                      0{index + 1}
+                    </div>
+                  </div>
+
+                  {/* Clean Minimalist Text underneath card */}
+                  <div className="pt-6 pb-2 text-center flex flex-col items-center flex-grow">
+                    <h3 className="text-outfit font-black uppercase text-base sm:text-lg tracking-tight text-primary-text group-hover:text-luxury-gold transition-colors duration-300">
+                      {finish.name}
+                    </h3>
+                    {/* <p className="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-luxury-gold mt-1.5 font-bold">
+                      {isMini ? '250mm Travel Size • 40mm Grip' : '450mm Regular Size • 40mm Grip'}
+                    </p> */}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -426,7 +456,6 @@ const Home = () => {
             <div className="relative flex justify-center order-2 lg:order-1">
               <div className="absolute inset-0 bg-luxury-gold/10 blur-[120px] rounded-full text-center"></div>
 
-              {/* Responsive Hotspot Visualizer Wrapper */}
               <div className="relative w-full max-w-[580px] aspect-square flex items-center justify-center">
                 <motion.img
                   initial={{ opacity: 0, y: 40 }}
@@ -438,36 +467,15 @@ const Home = () => {
                   className="relative z-10 w-full h-full object-cover rounded-3xl drop-shadow-[0_45px_90px_rgba(0,0,0,0.8)]"
                 />
 
-                {/* Hotspot buttons (visible on tablet/desktop for elite UX) */}
-                {/* {MASTERY_FEATURES.map((feature) => (
-                  <button
-                    key={feature.id}
-                    onClick={() => setActiveFeature(feature.id)}
-                    style={feature.style}
-                    className="absolute z-30 w-8 h-8 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center group/hotspot cursor-pointer"
-                  >
-                    {/* Outer pulse */}
-                    {/* <span className={`absolute inline-flex h-full w-full rounded-full bg-luxury-gold/40 opacity-75 ${activeFeature === feature.id ? 'animate-ping' : 'group-hover/hotspot:animate-ping'}`}></span> */}
-                    {/* Inner core */}
-                    {/* <span className={`relative inline-flex rounded-full h-4 w-4 border border-white transition-colors duration-300 ${activeFeature === feature.id ? 'bg-luxury-gold' : 'bg-white group-hover/hotspot:bg-luxury-gold'}`}></span> */}
-
-                    {/* Spec Tooltip label */}
-                    {/* <span className={`absolute bottom-10 bg-black/95 text-white text-[10px] font-mono uppercase tracking-widest py-1.5 px-3 rounded-lg border border-white/10 shadow-2xl transition-all duration-300 whitespace-nowrap opacity-0 group-hover/hotspot:opacity-100 ${activeFeature === feature.id ? 'opacity-100 scale-100' : 'scale-95'}`}>
-                      {feature.label}
-                    </span>
-                  </button> */}
-                {/* ))} */}
-
-                {/* Left/Right Mobile Specs Floating Badges (Visible on mobile only for simple, responsive UX) */}
-                <div className="absolute bottom-4 left-4 bg-white/5 border border-white/10 backdrop-blur-md py-2.5 px-4 rounded-xl block sm:hidden z-25 text-center">
-                  <span className="block text-lg font-bold text-luxury-gold font-serif">350 KG</span>
-                  <span className="block text-[8px] uppercase text-white/50 font-mono tracking-widest">Capacity</span>
-                </div>
-
-                <div className="absolute top-4 right-4 bg-white/5 border border-white/10 backdrop-blur-md py-2.5 px-4 rounded-xl block sm:hidden z-25 text-center">
-                  <span className="block text-lg font-bold text-luxury-gold font-serif">40 MM</span>
-                  <span className="block text-[8px] uppercase text-white/50 font-mono tracking-widest">Grip</span>
-                </div>
+                {/* 350 KG Capacity Badge */}
+                <motion.div
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute bottom-6 left-6 sm:bottom-10 sm:left-10 bg-black/75 border border-white/15 backdrop-blur-md py-3 px-5 rounded-2xl z-25 text-center shadow-2xl"
+                >
+                  <span className="block text-base sm:text-2xl font-black text-luxury-gold tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>350 KG</span>
+                  <span className="block text-[8px] sm:text-[10px] uppercase text-white/60 font-mono tracking-widest mt-0.5">Capacity</span>
+                </motion.div>
               </div>
             </div>
 
@@ -595,10 +603,10 @@ const Home = () => {
               className="relative aspect-square overflow-hidden rounded-3xl shadow-xl border border-black/5 bg-secondary-white"
             >
               <img
-                src={vary}
+                src={photo8}
                 alt="FITZ1 premium wooden parallettes"
                 loading="lazy"
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                className="w-full h-full object-cover hover:scale-110 transition-transform duration-700"
               />
             </motion.div>
           </div>
@@ -625,6 +633,7 @@ const Home = () => {
               muted
               loop
               playsInline
+              preload="none"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
 
@@ -829,6 +838,7 @@ const VideoReviewCard = ({ video }) => {
           playsInline
           loop
           muted={!isPlaying}
+          preload="none"
         />
         {!isPlaying && (
           <>

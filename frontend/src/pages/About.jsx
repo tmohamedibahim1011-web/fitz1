@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Check, Home as HomeIcon, Shield, Sparkles, Heart } from 'lucide-react';
-import aboutPhoto from '../assets/about_photo.PNG';
+import aboutPhoto from '../assets/about_photo.webp';
 
 const About = () => {
   return (
