@@ -315,7 +315,7 @@ const ProductDetail = () => {
                       </div>
                     )
                   },
-                  { title: 'Wood Care', content: 'Wipe with a slightly damp cloth after use. Store in a dry place. We recommend oiling every 6 months to maintain the premium finish.' }
+                  { title: 'Wood Care', content: 'Wipe with a slightly damp cloth after use. Store in a dry place away from direct sunlight and rain to prevent cracks. We recommend lightly oiling with natural mineral oil every 6 months to keep the wood supple and prevent drying. The Regular parallettes have a 45mm grip thickness; the Mini parallettes also have a 45mm grip thickness.' }
                 ].map((item, idx) => (
                   <div key={idx} className="border-b border-black/10 overflow-hidden">
                     <button 

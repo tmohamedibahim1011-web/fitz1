@@ -89,20 +89,6 @@ const seedProducts = async () => {
       ],
       rating: 5,
       reviewCount: 89
-    },
-    {
-      name: 'Live Test Product',
-      description: 'Use this product to test a real Rs. 1 live transaction on Razorpay. It validates the full cart, checkout, payment gateway, and email workflows.',
-      basePrice: 1,
-      size: 'regular',
-      material: 'Test Material',
-      badge: 'Test Mode',
-      stock: 999,
-      colors: [
-        { id: 'natural', name: 'Standard', hex: '#E0E0E0', priceOffset: 0, image: '/products/regularnatural.jpeg', hoverImage: '/products/regularnatural.jpeg' }
-      ],
-      rating: 5,
-      reviewCount: 1
     }
   ];
   
@@ -140,6 +126,21 @@ app.post('/api/debug/test-email', async (req, res) => {
     'SMTP_TEST'
   );
   res.json({ success: sent, to, smtpHost: process.env.SMTP_HOST, smtpPort: process.env.SMTP_PORT });
+});
+
+// Admin Route to wipe all test orders before production launch
+app.delete('/api/admin/wipe-orders-danger', async (req, res) => {
+  const secret = req.headers['x-admin-secret'];
+  if (secret !== process.env.JWT_SECRET) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+  try {
+    const Order = require('./models/Order');
+    await Order.deleteMany({});
+    res.json({ success: true, message: 'All test orders have been wiped successfully.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Error Handling Middleware

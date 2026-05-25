@@ -9,7 +9,7 @@ const FAQS = [
   },
   {
     question: "What type of wood do you use?",
-    answer: "We strictly use premium hardwoods (Mahogany, Maple) known for their density, durability, and moisture resistance. We do not use softwoods or plywood."
+    answer: "We strictly use premium hardwoods Mahogany known for their density, durability, and moisture resistance. We do not use softwoods or plywood."
   },
   {
     question: "Do you ship internationally?",
@@ -21,7 +21,7 @@ const FAQS = [
   },
   {
     question: "How do I maintain the wood finish?",
-    answer: "Wipe down with a slightly damp cloth after sweaty sessions. We recommend lightly rubbing them with natural mineral oil every 6 months to keep the wood supple and prevent drying.Avoid over exposure to sunlight and rain"
+    answer: "Wipe down with a slightly damp cloth after sweaty sessions. Avoid keeping the parallettes in direct sunlight and rain to prevent cracks. We recommend lightly rubbing them with natural mineral oil every 6 months to keep the wood supple and prevent drying."
   },
   {
     question: "What is the weight limit?",

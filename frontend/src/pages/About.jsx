@@ -31,28 +31,28 @@ const About = () => {
       <section className="bg-black text-white py-24 mb-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-luxury-gold/5 blur-3xl pointer-events-none"></div>
         <div className="container mx-auto px-6 relative z-10 max-w-5xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <div>
               <span className="text-luxury-gold text-xs font-bold uppercase tracking-[0.3em] mb-4 block font-mono">// Our Niche</span>
-              <h2 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter leading-none mb-6" style={{ fontFamily: "'Outfit', sans-serif" }}>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold uppercase tracking-tighter leading-none mb-6" style={{ fontFamily: "'Outfit', sans-serif" }}>
                 HOME WORKOUT EQUIPMENT.<br />NOT GYM CLUTTER.
               </h2>
-              <p className="text-white/80 leading-relaxed font-light mb-6 text-base md:text-lg">
+              <p className="text-white/80 leading-relaxed font-light mb-6 text-sm md:text-base">
                 With simple workouts and the right basic equipment, anyone can begin their fitness journey from the comfort of home. Our brand focuses on providing quality home workout equipment designed for everyday fitness needs.
               </p>
-              <p className="text-white/80 leading-relaxed font-light text-base md:text-lg">
+              <p className="text-white/80 leading-relaxed font-light text-sm md:text-base">
                 Whether you are a beginner or someone looking to maintain an active lifestyle, FITZ1 helps you stay consistent with simple and effective workouts.
               </p>
             </div>
-            <div className="bg-white/5 border border-white/10 p-10 rounded-3xl backdrop-blur-xl relative">
-              <div className="absolute -top-6 -right-6 w-16 h-16 bg-luxury-gold/20 rounded-full flex items-center justify-center text-luxury-gold border border-luxury-gold/40">
-                <HomeIcon size={28} />
+            <div className="bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-xl relative mt-4 lg:mt-0">
+              <div className="absolute -top-5 -right-5 w-12 h-12 bg-luxury-gold/20 rounded-full flex items-center justify-center text-luxury-gold border border-luxury-gold/40">
+                <HomeIcon size={22} />
               </div>
-              <h3 className="text-2xl font-bold uppercase tracking-widest text-luxury-gold mb-4">Our Mission</h3>
+              <h3 className="text-xl font-bold uppercase tracking-widest text-luxury-gold mb-4">Our Mission</h3>
               <p className="text-white/90 leading-relaxed text-sm md:text-base italic mb-6">
                 "The FITZ1 page was created to inspire people to make fitness a part of daily life in an easy and practical way. Start small, stay active, and build a healthier lifestyle with FITZ1 — because fitness begins at home."
               </p>
-              <div className="border-t border-white/10 pt-6 flex items-center justify-between text-xs font-mono text-white/60 uppercase tracking-widest">
+              <div className="border-t border-white/10 pt-6 flex flex-wrap items-center gap-2 text-xs font-mono text-white/60 uppercase tracking-widest">
                 <span>Accessibility</span>
                 <span>•</span>
                 <span>Affordability</span>

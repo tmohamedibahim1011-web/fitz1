@@ -54,12 +54,12 @@ import rev21 from '../assets/reviews/165623.webp';
 import rev22 from '../assets/reviews/165625.webp';
 
 const VIDEO_REVIEWS = [
-  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716333/video-1_qwydqo.mp4', username: '@fitness_pro', text: "Best parallettes I've ever used!" },
-  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716343/video-2_gd3at4.mp4', username: '@calisthenics_king', text: "Game changer for my training" },
-  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716340/video-3_fccfny.mp4', username: '@gymnast_life', text: "The grip is unbelievable" },
-  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716338/video-4_fboorm.mp4', username: '@athlete_mike', text: "Worth every penny" },
-  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716337/video-5_tzwvdr.mp4', username: '@coach_jones', text: "Highly recommended" },
-  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716340/video-6_utoffd.mp4', username: '@workout_junkie', text: "Premium quality" },
+  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716333/video-1_qwydqo.mp4', poster: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/so_0/v1779716333/video-1_qwydqo.jpg', username: '@fitness_pro', text: "Best parallettes I've ever used!" },
+  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716343/video-2_gd3at4.mp4', poster: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/so_0/v1779716343/video-2_gd3at4.jpg', username: '@calisthenics_king', text: "Game changer for my training" },
+  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716340/video-3_fccfny.mp4', poster: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/so_0/v1779716340/video-3_fccfny.jpg', username: '@gymnast_life', text: "The grip is unbelievable" },
+  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716338/video-4_fboorm.mp4', poster: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/so_0/v1779716338/video-4_fboorm.jpg', username: '@athlete_mike', text: "Worth every penny" },
+  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716337/video-5_tzwvdr.mp4', poster: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/so_0/v1779716337/video-5_tzwvdr.jpg', username: '@coach_jones', text: "Highly recommended" },
+  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716340/video-6_utoffd.mp4', poster: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/so_0/v1779716340/video-6_utoffd.jpg', username: '@workout_junkie', text: "Premium quality" },
 ];
 
 const IMAGE_REVIEWS = [
@@ -93,7 +93,7 @@ const PHOTOSHOOT_GALLERY = [
   { src: photo6, title: "Portable Elite Training", desc: "Take your gymnastics and calisthenics training anywhere." },
   { src: photo7, title: "Mahogany Finish Aesthetics", desc: "Premium Mahogany wood grain finish that elevates any room's decor." },
   { src: vary, title: "Zero Slip Grip", desc: "Industrial rubber padding for ultimate surface traction." },
-  { src: photo4, title: "Sustainable Mahogany", desc: "Carefully sourced Mahogany body wood crafted to last a lifetime." }
+  // { src: photo4, title: "Sustainable Mahogany", desc: "Carefully sourced Mahogany body wood crafted to last a lifetime." }
 ];
 
 const HERO_IMAGES = [photo1, photo3, photo2];
@@ -142,32 +142,45 @@ const Home = () => {
   const [heroIndex, setHeroIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const [activeFeature, setActiveFeature] = useState(0);
+  const [isProcessVideoFading, setIsProcessVideoFading] = useState(false);
+
+  const handleProcessVideoTimeUpdate = () => {
+    if (videoRef.current) {
+      const { currentTime, duration } = videoRef.current;
+      // Fade out to black in the last 1.2 seconds of the video
+      if (duration - currentTime < 1.2) {
+        setIsProcessVideoFading(true);
+      } else {
+        setIsProcessVideoFading(false);
+      }
+    }
+  };
 
   const finishes = [
     {
       id: "natural",
-      name: "Natural Regular",
+      name: "Regular Natural",
       image: natural,
       scale: 1.1,
       objectPosition: 'center 48%'
     },
     {
       id: "black",
-      name: "Shadow Black Regular",
+      name: "Regular Shadow Black",
       image: black,
       scale: 1.1,
       objectPosition: 'center 48%'
     },
     {
       id: "mini-natural",
-      name: "Mini Natural Regular",
+      name: "Mini Natural",
       image: mininatural,
       scale: 1.1,
       objectPosition: 'center 48%'
     },
     {
       id: "mini-black",
-      name: "Mini Shadow Black Regular",
+      name: "Mini Shadow Black",
       image: miniblack,
       scale: 1.1,
       objectPosition: 'center 48%'
@@ -180,7 +193,7 @@ const Home = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setHeroIndex((prev) => (prev + 1) % HERO_IMAGES.length);
-    }, 3500);
+    },4500);
     return () => clearInterval(timer);
   }, []);
 
@@ -422,6 +435,9 @@ const Home = () => {
               );
             })}
           </div>
+
+          {/* 350 KG Capacity Animated Weight Icon — Below Finishes */}
+         
         </div>
       </section>
 
@@ -467,14 +483,65 @@ const Home = () => {
                   className="relative z-10 w-full h-full object-cover rounded-3xl drop-shadow-[0_45px_90px_rgba(0,0,0,0.8)]"
                 />
 
-                {/* 350 KG Capacity Badge */}
+                {/* 350 KG Capacity — SVG Weight Icon */}
                 <motion.div
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute bottom-6 left-6 sm:bottom-10 sm:left-10 bg-black/75 border border-white/15 backdrop-blur-md py-3 px-5 rounded-2xl z-25 text-center shadow-2xl"
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute bottom-6 left-6 sm:bottom-10 sm:left-10 z-25 flex flex-col items-center drop-shadow-2xl"
                 >
-                  <span className="block text-base sm:text-2xl font-black text-luxury-gold tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>350 KG</span>
-                  <span className="block text-[8px] sm:text-[10px] uppercase text-white/60 font-mono tracking-widest mt-0.5">Capacity</span>
+                  {/* Animated glow ring */}
+                  <motion.div
+                    animate={{ scale: [1, 1.12, 1], opacity: [0.3, 0.7, 0.3] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute inset-0 rounded-full bg-luxury-gold/20 blur-xl pointer-events-none"
+                  />
+
+                  {/* SVG Weight Icon with text inside */}
+                  <svg
+                    viewBox="0 0 120 130"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-24 h-28 sm:w-32 sm:h-36 drop-shadow-[0_8px_24px_rgba(212,175,55,0.4)]"
+                  >
+                    {/* Ring handle */}
+                    <circle cx="60" cy="18" r="13" fill="none" stroke="#ffff" strokeWidth="6" />
+
+                    {/* Weight body — trapezoid shape */}
+                    <path
+                      d="M22 36 L98 36 L110 118 Q110 124 104 124 L16 124 Q10 124 10 118 Z"
+                      fill="#000000"
+                      stroke="#ffff"
+                      strokeWidth="3"
+                      strokeLinejoin="round"
+                    />
+
+                    {/* 350 KG text inside body */}
+                    <text
+                      x="60"
+                      y="85"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#D4AF37"
+                      fontSize="22"
+                      fontWeight="900"
+                      fontFamily="Outfit, sans-serif"
+                      letterSpacing="-0.5"
+                    >
+                      350
+                    </text>
+                    <text
+                      x="60"
+                      y="108"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="rgba(255,255,255,0.55)"
+                      fontSize="9"
+                      fontWeight="600"
+                      fontFamily="monospace"
+                      letterSpacing="2"
+                    >
+                      KG CAPACITY
+                    </text>
+                  </svg>
                 </motion.div>
               </div>
             </div>
@@ -624,7 +691,7 @@ const Home = () => {
             <p className="text-white/60 mt-4 max-w-xl mx-auto font-light text-sm">Every pair is a labor of love. Experience the journey from raw timber to professional equipment.</p>
           </div>
 
-          <div className="relative aspect-video max-w-5xl mx-auto border border-white/10 group bg-black shadow-2xl">
+          <div className="relative aspect-video max-w-5xl mx-auto border border-white/10 group bg-black shadow-2xl overflow-hidden">
             <video
               ref={videoRef}
               src={processVideo}
@@ -634,10 +701,19 @@ const Home = () => {
               loop
               playsInline
               preload="none"
+              onTimeUpdate={handleProcessVideoTimeUpdate}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
 
-            <div className="absolute bottom-8 left-8 right-8 flex justify-between items-end">
+            {/* Fade-out overlay at the end of the video loop */}
+            <div 
+              className={`absolute inset-0 bg-black pointer-events-none transition-opacity duration-1000 ease-in-out ${isProcessVideoFading ? 'opacity-100' : 'opacity-0'}`} 
+            />
+
+            {/* Dark gradient for bottom text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+
+            {/* Bottom text overlay */}
+            <div className="absolute bottom-8 left-8 right-8 flex justify-between items-end pointer-events-none">
               <div className="max-w-md">
                 <h4 className="text-xl font-bold mb-2 flex items-center gap-2">
                   <span className="w-8 h-[1px] bg-luxury-gold"></span>
@@ -649,7 +725,7 @@ const Home = () => {
               </div>
               <button
                 onClick={() => videoRef.current?.requestFullscreen()}
-                className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-luxury-gold hover:border-luxury-gold transition-all duration-300"
+                className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-luxury-gold hover:border-luxury-gold transition-all duration-300 pointer-events-auto"
               >
                 <Maximize2 size={20} />
               </button>
@@ -733,13 +809,18 @@ const Home = () => {
                 key={review.id}
                 whileHover={{ y: -8 }}
                 onClick={() => openLightbox(idx)}
-                className="flex-none w-[220px] md:w-[280px] aspect-[9/16] bg-secondary-white border border-black/5 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:border-luxury-gold/30 transition-all duration-300 cursor-zoom-in snap-center"
+                className="relative flex-none w-[220px] md:w-[280px] aspect-[9/16] bg-secondary-white border border-black/5 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:border-luxury-gold/30 transition-all duration-300 cursor-zoom-in snap-center"
               >
                 <img
                   src={review.src}
                   alt={review.name}
                   className="w-full h-full object-cover"
                   loading="lazy"
+                />
+                {/* Privacy overlay — blurs phone numbers in top portion of WhatsApp screenshots */}
+                <div
+                  className="absolute top-0 left-0 right-0 h-[18%] backdrop-blur-md bg-black/20"
+                  style={{ backdropFilter: 'blur(12px)' }}
                 />
               </motion.div>
             ))}
@@ -834,6 +915,7 @@ const VideoReviewCard = ({ video }) => {
         <video
           ref={videoRef}
           src={video.src}
+          poster={video.poster}
           className="w-full h-full object-cover"
           playsInline
           loop
