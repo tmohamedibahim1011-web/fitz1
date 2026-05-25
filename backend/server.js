@@ -62,7 +62,7 @@ const seedProducts = async () => {
   const defaultProducts = [
     {
       name: 'Pro Series Regular Parallettes',
-      description: 'Premium Mahogany Wood parallettes for professional training. 40mm ergonomic grip, 450mm length, 140mm base width, 130mm height. 350kg weight capacity.',
+      description: 'Premium Mahogany Wood parallettes for professional training. 45mm ergonomic grip, 450mm length, 140mm base width, 130mm height. 350kg weight capacity.',
       basePrice: 1599,
       size: 'regular',
       material: 'Premium Mahogany Wood',
