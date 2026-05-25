@@ -94,9 +94,8 @@ const ProductDetail = () => {
   }
 
   const currentImage = selectedColor?.image || product.colors?.[0]?.image || product.image || '';
-  const currentHoverImage = selectedColor?.hoverImage || product.colors?.[0]?.hoverImage || product.hoverImage || '';
   const dimensionImg = product.size === 'mini' ? miniDim : regularDim;
-  const images = [currentImage, currentHoverImage, dimensionImg].filter(Boolean);
+  const images = [currentImage, dimensionImg].filter(Boolean);
   const isDimensionImgActive = images[activeImage] === dimensionImg;
   const currentPrice = (product.basePrice || 0) + (selectedColor?.priceOffset || 0);
   const isNatural = selectedColor?.id === 'natural';
