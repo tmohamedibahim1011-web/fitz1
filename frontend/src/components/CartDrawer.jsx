@@ -36,7 +36,7 @@ const CartDrawer = () => {
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-black/10">
-              <h2 className="text-xl font-bold uppercase tracking-widest text-primary-text flex items-center gap-2" style={{ fontFamily: 'var(--font-bebas)' }}>
+              <h2 className="text-xl font-bold uppercase tracking-widest text-primary-text flex items-center gap-2" style={{ fontFamily: "'Unbounded', sans-serif" }}>
                 <ShoppingBag size={20} /> Your Cart
               </h2>
               <button 

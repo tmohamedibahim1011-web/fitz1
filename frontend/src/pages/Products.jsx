@@ -33,7 +33,7 @@ const Products = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <h1 className="text-5xl md:text-7xl font-bold text-primary-text uppercase tracking-tighter mb-6" style={{ fontFamily: 'var(--font-bebas)' }}>
+          <h1 className="text-5xl md:text-7xl font-bold text-primary-text uppercase tracking-tighter mb-6" style={{ fontFamily: "'Unbounded', sans-serif" }}>
             THE PRO COLLECTION
           </h1>
           <p className="text-secondary-text max-w-xl mx-auto text-sm md:text-base leading-relaxed">

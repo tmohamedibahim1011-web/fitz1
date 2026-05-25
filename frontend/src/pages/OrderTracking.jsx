@@ -57,7 +57,7 @@ const OrderTracking = () => {
     <div className="bg-primary-white min-h-screen pt-32 pb-32">
       <div className="container mx-auto px-6 max-w-4xl">
         <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-7xl font-bold uppercase tracking-tighter text-primary-text mb-4" style={{ fontFamily: 'var(--font-bebas)' }}>
+          <h1 className="text-5xl md:text-7xl font-bold uppercase tracking-tighter text-primary-text mb-4" style={{ fontFamily: "'Unbounded', sans-serif" }}>
             Track Your Order
           </h1>
           <p className="text-secondary-text text-sm md:text-base">

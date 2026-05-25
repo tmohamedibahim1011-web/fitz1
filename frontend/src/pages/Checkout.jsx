@@ -226,7 +226,7 @@ const Checkout = () => {
       <div className="container mx-auto px-6 max-w-4xl">
         
         <header className="mb-10 text-center">
-          <h1 className="text-4xl font-bold uppercase tracking-widest text-primary-text mb-2" style={{ fontFamily: 'var(--font-bebas)' }}>
+          <h1 className="text-4xl font-bold uppercase tracking-widest text-primary-text mb-2" style={{ fontFamily: "'Unbounded', sans-serif" }}>
             Checkout
           </h1>
           <p className="text-secondary-text text-sm">Complete your order</p>

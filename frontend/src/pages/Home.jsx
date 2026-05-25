@@ -5,6 +5,7 @@ import { ArrowRight, Play, Star, Users, Check, Maximize2, Loader2, ArrowLeft, X 
 import axios from 'axios';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import vary from "../assets/photoshoot/vary-product.jpeg"
 import product3d from "../assets/3dproduct.png";
 import ProductCard from '../components/ProductCard';
 import natural from "../assets/products/regularnatural.jpeg"
@@ -93,12 +94,12 @@ const IMAGE_REVIEWS = [
 ];
 
 const PHOTOSHOOT_GALLERY = [
-  { src: photo2, title: "Premium Walnut Grip", desc: "40mm hand-sanded ergonomic handles for absolute control." },
+  { src: photo3, title: "Premium Mahogany Body", desc: "40mm hand-sanded ergonomic handles with custom Mahogany body for absolute control." },
   { src: photo5, title: "Rock-Solid Base Joint", desc: "CNC-milled interlocking joints for zero wobble under load." },
   { src: photo6, title: "Portable Elite Training", desc: "Take your gymnastics and calisthenics training anywhere." },
-  { src: photo7, title: "Oak Finish Aesthetics", desc: "Natural grain finish that elevates any room's decor." },
+  { src: photo7, title: "Mahogany Finish Aesthetics", desc: "Premium Mahogany wood grain finish that elevates any room's decor." },
   { src: photo8, title: "Zero Slip Grip", desc: "Industrial rubber padding for ultimate surface traction." },
-  { src: photo4, title: "Sustainable Timber", desc: "Carefully sourced hardwoods crafted to last a lifetime." }
+  { src: photo4, title: "Sustainable Mahogany", desc: "Carefully sourced Mahogany body wood crafted to last a lifetime." }
 ];
 
 const HERO_IMAGES = [photo1, photo3, photo2];
@@ -107,18 +108,18 @@ const MASTERY_FEATURES = [
   {
     id: 0,
     title: "Wrist-Friendly Grip",
-    subtitle: "40mm Ergonomic Thickness",
-    desc: "Metal or plastic bars strain your hands and joints. FITZ1's hand-sanded hardwood handles absorb sweat and reduce pressure—making planches, pushups, or static holds extremely comfortable.",
-    label: "40mm Grip",
-    style: { top: "32%", left: "55%" }
+    subtitle: "Premium Ergonomic Feel",
+    desc: "Tactile hand-sanded wooden handles absorb sweat and reduce joint pressure (45mm thickness for Regular parallettes; 45mm thickness for Mini parallettes) for absolute planches and static holds control.",
+    label: "Grip Diameter",
+    
   },
   {
     id: 1,
     title: "Living Room Friendly",
     subtitle: "Pure Organic Style",
-    desc: "Bulky gym equipment ruins home styling. FITZ1 parallettes feature premium oak and walnut grains that look like luxury room decor. Tuck them under the sofa or display them proudly on shelves.",
-    label: "Walnut Body",
-    style: { top: "52%", left: "32%" }
+    desc: "FITZ1 parallettes feature premium Mahogany wood body grains (Regular: 450mm L x 140mm W x 130mm H; Mini: 250mm L x 120mm W x 100mm H) styled to complement your home interior decor perfectly.",
+    label: "Mahogany Body",
+
   },
   {
     id: 2,
@@ -126,15 +127,15 @@ const MASTERY_FEATURES = [
     subtitle: "Floor Safe Traction",
     desc: "Outfitted with heavy-duty rubber grip pads. Enjoy absolute stability during explosive movements, L-sits, or basic fitness routines with zero sliding and zero floor scratches.",
     label: "Rubber Footing",
-    style: { top: "78%", left: "44%" }
+
   },
   {
     id: 3,
     title: "CNC-Precision Solid",
     subtitle: "Wobble-Free Connection",
-    desc: "Hand-finished solid wood blocks fitted together with interlocking joints machined to 0.1mm accuracy. Supports up to 350kg with zero creaks, zero flex, and absolute safety for a lifetime.",
+    desc: "Hand-finished solid Mahogany wood blocks fitted together with interlocking joints machined to 0.1mm accuracy. Supports up to 350kg with zero creaks, zero flex, and absolute safety for a lifetime.",
     label: "Interlocking Joint",
-    style: { top: "58%", left: "65%" }
+
   }
 ];
 
@@ -228,7 +229,7 @@ const Home = () => {
     <div className="bg-primary-white overflow-hidden">
       {/* REDESIGNED ASYMMETRIC & IMMERSIVE HERO SECTION */}
       <section className="relative min-h-[100svh] flex flex-col lg:flex-row overflow-hidden bg-primary-white">
-        
+
         {/* Background Slideshow (Fills full screen on mobile, right side on desktop) */}
         <div className="absolute inset-0 lg:left-1/2 lg:w-1/2 h-full z-0 bg-black">
           <div className="absolute inset-0 overflow-hidden">
@@ -244,10 +245,10 @@ const Home = () => {
                 transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
               />
             </AnimatePresence>
-            
+
             {/* Mobile dark gradient overlay mask for high legibility */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/50 to-black/95 pointer-events-none block lg:hidden z-10"></div>
-            
+
             {/* Desktop split white/transparent gradient mask */}
             <div className="absolute inset-0 bg-gradient-to-l from-transparent to-primary-white pointer-events-none hidden lg:block z-10"></div>
 
@@ -283,7 +284,7 @@ const Home = () => {
               DEFY<br />
               GRAVITY.
               {/* Decorative accent */}
-              <span className="absolute -bottom-5 left-0 text-luxury-gold text-6xl md:text-8xl opacity-35 font-serif pointer-events-none">*</span>
+
             </h1>
 
             <p className="text-white/70 lg:text-secondary-text max-w-md text-xs sm:text-sm md:text-base leading-relaxed mb-12 font-light">
@@ -345,7 +346,7 @@ const Home = () => {
             <span className="uppercase tracking-[0.35em] text-luxury-gold text-xs font-semibold block mb-4">
               Premium Selections
             </span>
-            <h2 
+            <h2
               className="text-unbounded font-extrabold text-3xl md:text-5xl uppercase tracking-tighter text-primary-text leading-tight"
             >
               Available Finishes
@@ -368,7 +369,7 @@ const Home = () => {
                   <img
                     src={finish.image}
                     alt={finish.name}
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
+                    className="w-full h-full object-cover transform scale-110 group-hover:scale-115 transition-transform duration-700 ease-out"
                     loading="lazy"
                   />
                   {/* Floating index badge */}
@@ -379,7 +380,7 @@ const Home = () => {
 
                 {/* Text / Header Padding */}
                 <div className="p-6 flex flex-col items-center justify-center border-t border-black/5 bg-white flex-grow">
-                  <p 
+                  <p
                     className="text-unbounded font-bold uppercase text-[11px] sm:text-xs tracking-tight text-primary-text text-center group-hover:text-luxury-gold transition-colors duration-300"
                   >
                     {finish.name}
@@ -404,7 +405,7 @@ const Home = () => {
         <div className="container mx-auto px-6 relative z-10">
           {/* Heading */}
           <div className="max-w-3xl mx-auto text-center mb-24">
-            <span className="uppercase tracking-[0.35em] text-luxury-gold text-xs font-semibold bg-white/5 py-2 px-4 rounded-full border border-white/10 text-unbounded">
+            <span className="inline-block uppercase tracking-[0.12em] sm:tracking-[0.35em] text-luxury-gold text-[8px] xs:text-[10px] sm:text-xs font-semibold bg-white/5 py-2 px-4 rounded-full border border-white/10 text-unbounded max-w-full text-center">
               Calisthenics • Home Workouts • Everyday Strength
             </span>
 
@@ -432,13 +433,13 @@ const Home = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                   viewport={{ once: true }}
-                  src={product3d}
+                  src={natural}
                   alt="FITZ1 Parallettes Interactive Features"
-                  className="relative z-10 w-full h-full object-contain drop-shadow-[0_45px_90px_rgba(0,0,0,0.8)]"
+                  className="relative z-10 w-full h-full object-cover rounded-3xl drop-shadow-[0_45px_90px_rgba(0,0,0,0.8)]"
                 />
 
                 {/* Hotspot buttons (visible on tablet/desktop for elite UX) */}
-                {MASTERY_FEATURES.map((feature) => (
+                {/* {MASTERY_FEATURES.map((feature) => (
                   <button
                     key={feature.id}
                     onClick={() => setActiveFeature(feature.id)}
@@ -446,23 +447,23 @@ const Home = () => {
                     className="absolute z-30 w-8 h-8 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center group/hotspot cursor-pointer"
                   >
                     {/* Outer pulse */}
-                    <span className={`absolute inline-flex h-full w-full rounded-full bg-luxury-gold/40 opacity-75 ${activeFeature === feature.id ? 'animate-ping' : 'group-hover/hotspot:animate-ping'}`}></span>
+                    {/* <span className={`absolute inline-flex h-full w-full rounded-full bg-luxury-gold/40 opacity-75 ${activeFeature === feature.id ? 'animate-ping' : 'group-hover/hotspot:animate-ping'}`}></span> */}
                     {/* Inner core */}
-                    <span className={`relative inline-flex rounded-full h-4 w-4 border border-white transition-colors duration-300 ${activeFeature === feature.id ? 'bg-luxury-gold' : 'bg-white group-hover/hotspot:bg-luxury-gold'}`}></span>
-                    
+                    {/* <span className={`relative inline-flex rounded-full h-4 w-4 border border-white transition-colors duration-300 ${activeFeature === feature.id ? 'bg-luxury-gold' : 'bg-white group-hover/hotspot:bg-luxury-gold'}`}></span> */}
+
                     {/* Spec Tooltip label */}
-                    <span className={`absolute bottom-10 bg-black/95 text-white text-[10px] font-mono uppercase tracking-widest py-1.5 px-3 rounded-lg border border-white/10 shadow-2xl transition-all duration-300 whitespace-nowrap opacity-0 group-hover/hotspot:opacity-100 ${activeFeature === feature.id ? 'opacity-100 scale-100' : 'scale-95'}`}>
+                    {/* <span className={`absolute bottom-10 bg-black/95 text-white text-[10px] font-mono uppercase tracking-widest py-1.5 px-3 rounded-lg border border-white/10 shadow-2xl transition-all duration-300 whitespace-nowrap opacity-0 group-hover/hotspot:opacity-100 ${activeFeature === feature.id ? 'opacity-100 scale-100' : 'scale-95'}`}>
                       {feature.label}
                     </span>
-                  </button>
-                ))}
+                  </button> */}
+                {/* ))} */}
 
                 {/* Left/Right Mobile Specs Floating Badges (Visible on mobile only for simple, responsive UX) */}
                 <div className="absolute bottom-4 left-4 bg-white/5 border border-white/10 backdrop-blur-md py-2.5 px-4 rounded-xl block sm:hidden z-25 text-center">
                   <span className="block text-lg font-bold text-luxury-gold font-serif">350 KG</span>
                   <span className="block text-[8px] uppercase text-white/50 font-mono tracking-widest">Capacity</span>
                 </div>
-                
+
                 <div className="absolute top-4 right-4 bg-white/5 border border-white/10 backdrop-blur-md py-2.5 px-4 rounded-xl block sm:hidden z-25 text-center">
                   <span className="block text-lg font-bold text-luxury-gold font-serif">40 MM</span>
                   <span className="block text-[8px] uppercase text-white/50 font-mono tracking-widest">Grip</span>
@@ -476,19 +477,17 @@ const Home = () => {
                 <button
                   key={feature.id}
                   onClick={() => setActiveFeature(feature.id)}
-                  className={`w-full text-left rounded-3xl p-6 border transition-all duration-500 cursor-pointer relative group ${
-                    activeFeature === feature.id
-                      ? 'bg-white/[0.06] border-luxury-gold/50 shadow-xl shadow-luxury-gold/5'
-                      : 'bg-white/[0.01] border-white/[0.05] opacity-50 hover:opacity-80 hover:bg-white/[0.03]'
-                  }`}
+                  className={`w-full text-left rounded-3xl p-6 border transition-all duration-500 cursor-pointer relative group ${activeFeature === feature.id
+                    ? 'bg-white/[0.06] border-luxury-gold/50 shadow-xl shadow-luxury-gold/5'
+                    : 'bg-white/[0.01] border-white/[0.05] opacity-50 hover:opacity-80 hover:bg-white/[0.03]'
+                    }`}
                 >
                   <div className="flex gap-5 items-start">
                     {/* Index / Selector circle */}
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border font-bold text-sm transition-all duration-300 flex-shrink-0 ${
-                      activeFeature === feature.id
-                        ? 'bg-luxury-gold border-luxury-gold text-black'
-                        : 'bg-white/5 border-white/10 text-white/70 group-hover:text-white'
-                    }`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border font-bold text-sm transition-all duration-300 flex-shrink-0 ${activeFeature === feature.id
+                      ? 'bg-luxury-gold border-luxury-gold text-black'
+                      : 'bg-white/5 border-white/10 text-white/70 group-hover:text-white'
+                      }`}>
                       {feature.id + 1}
                     </div>
 
@@ -497,11 +496,10 @@ const Home = () => {
                       <span className="block text-[9px] uppercase tracking-widest text-luxury-gold font-mono mt-0.5 mb-3">
                         {feature.subtitle}
                       </span>
-                      
+
                       {/* Smooth description expand */}
-                      <div className={`transition-all duration-500 overflow-hidden ${
-                        activeFeature === feature.id ? 'max-h-[160px] opacity-100 mt-2' : 'max-h-0 opacity-0'
-                      }`}>
+                      <div className={`transition-all duration-500 overflow-hidden ${activeFeature === feature.id ? 'max-h-[160px] opacity-100 mt-2' : 'max-h-0 opacity-0'
+                        }`}>
                         <p className="text-white/60 leading-relaxed text-xs sm:text-sm font-light">
                           {feature.desc}
                         </p>
@@ -570,7 +568,7 @@ const Home = () => {
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeInUp}>
               <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-luxury-gold mb-6 flex items-center gap-2 text-unbounded"><Users size={16} /> Who It's For</h2>
               <h3 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter mb-8 text-unbounded text-primary-text" style={{ lineHeight: "1.1" }}>
-                Built for athletes who refuse to compromise.
+                Built for those who refuse to compromise.
               </h3>
 
               <ul className="space-y-6">
@@ -597,7 +595,7 @@ const Home = () => {
               className="relative aspect-square overflow-hidden rounded-3xl shadow-xl border border-black/5 bg-secondary-white"
             >
               <img
-                src={photo2}
+                src={vary}
                 alt="FITZ1 premium wooden parallettes"
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
               />
@@ -671,7 +669,7 @@ const Home = () => {
       {/* HORIZONTAL VIDEO REVIEWS */}
       <section className="py-32 bg-secondary-white relative overflow-hidden border-b border-black/5">
         <div className="container mx-auto px-6 mb-12">
-          <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-luxury-gold mb-4 text-unbounded">Real Athletes</h2>
+          <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-luxury-gold mb-4 text-unbounded">Customer Reviews</h2>
           <h3 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-unbounded text-primary-text">
             Video Reviews
           </h3>
@@ -700,10 +698,10 @@ const Home = () => {
               <h2
                 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-unbounded text-primary-text"
               >
-                Athletes Feedback
+                Customer Feedback
               </h2>
               <p className="text-secondary-text mt-4 max-w-2xl font-light text-sm md:text-base">
-                Real customer feedback screenshots from athletes using FITZ1 parallettes. Click any screenshot to open in full size.
+                Real customer feedback screenshots from users using FITZ1 parallettes. Click any screenshot to open in full size.
               </p>
             </div>
 

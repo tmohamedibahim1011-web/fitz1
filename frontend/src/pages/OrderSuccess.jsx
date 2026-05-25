@@ -82,7 +82,7 @@ const OrderSuccess = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <h1 className="text-5xl md:text-6xl font-bold uppercase tracking-tighter text-primary-text mb-4" style={{ fontFamily: 'var(--font-bebas)' }}>
+          <h1 className="text-5xl md:text-6xl font-bold uppercase tracking-tighter text-primary-text mb-4" style={{ fontFamily: "'Unbounded', sans-serif" }}>
             Order Confirmed
           </h1>
           <p className="text-secondary-text text-lg max-w-md mx-auto mb-12">

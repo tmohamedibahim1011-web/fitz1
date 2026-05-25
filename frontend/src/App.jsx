@@ -20,7 +20,6 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
 import About from './pages/About';
-import Contact from './pages/Contact';
 import OrderTracking from './pages/OrderTracking';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -47,7 +46,6 @@ function App() {
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/success" element={<OrderSuccess />} />
               <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
               <Route path="/track" element={<OrderTracking />} />
               <Route path="/admin" element={<AdminLogin />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />

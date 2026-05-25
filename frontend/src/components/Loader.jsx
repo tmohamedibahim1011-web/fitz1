@@ -20,7 +20,7 @@ const Loader = () => {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, y: '-100%' }}
           transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
-          className="fixed inset-0 z-[100] bg-primary-text flex items-center justify-center overflow-hidden"
+          className="fixed inset-0 z-[100] bg-primary-white flex items-center justify-center overflow-hidden"
         >
           <div className="relative flex flex-col items-center">
             {/* Dim ghost logo (background layer) */}
@@ -29,8 +29,7 @@ const Loader = () => {
                 src={logo}
                 alt=""
                 aria-hidden="true"
-                className="h-16 md:h-24 w-auto opacity-[0.12]"
-                style={{ filter: 'brightness(0) invert(1)' }}
+                className="h-16 md:h-24 w-auto opacity-[0.15]"
               />
 
               {/* Animated fill logo (clip-path reveal from bottom) */}
@@ -44,7 +43,6 @@ const Loader = () => {
                   src={logo}
                   alt="FITZ1"
                   className="h-16 md:h-24 w-auto"
-                  style={{ filter: 'brightness(0) invert(1)' }}
                 />
               </motion.div>
 

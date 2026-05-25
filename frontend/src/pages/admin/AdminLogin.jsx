@@ -43,7 +43,7 @@ const AdminLogin = () => {
         className="w-full max-w-md bg-white p-12 shadow-2xl relative z-10"
       >
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold uppercase tracking-widest text-primary-text mb-2" style={{ fontFamily: 'var(--font-bebas)' }}>
+          <h1 className="text-3xl font-bold uppercase tracking-widest text-primary-text mb-2" style={{ fontFamily: "'Unbounded', sans-serif" }}>
             FITZONE<span className="text-luxury-gold">.</span>
           </h1>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-secondary-text">Admin Portal</p>

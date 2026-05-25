@@ -12,7 +12,7 @@ const FloatingUI = () => {
       const totalScroll = document.documentElement.scrollTop;
       const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
       const scroll = `${totalScroll / windowHeight}`;
-      
+
       setScrollProgress(Number(scroll) * 100);
       setIsVisible(totalScroll > 300);
     };
@@ -29,7 +29,7 @@ const FloatingUI = () => {
     <>
       {/* Scroll Progress Bar */}
       <div className="fixed top-0 left-0 w-full h-[2px] bg-transparent z-[100] pointer-events-none">
-        <div 
+        <div
           className="h-full bg-luxury-gold transition-all duration-150"
           style={{ width: `${scrollProgress}%` }}
         />
@@ -37,16 +37,16 @@ const FloatingUI = () => {
 
       <AnimatePresence>
         {isVisible && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             className="fixed bottom-6 right-6 z-50 flex flex-col gap-3"
           >
             {/* WhatsApp Button */}
-            <a 
-              href="https://wa.me/916374270471" 
-              target="_blank" 
+            <a
+              href="https://wa.me/918072210156"
+              target="_blank"
               rel="noreferrer"
               className="w-12 h-12 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform relative group"
             >
@@ -59,7 +59,7 @@ const FloatingUI = () => {
             </a>
 
             {/* Back to Top */}
-            <button 
+            <button
               onClick={scrollToTop}
               className="w-12 h-12 bg-white border border-black/10 text-primary-text rounded-full flex items-center justify-center shadow-lg hover:border-luxury-gold hover:text-luxury-gold transition-colors relative group"
             >

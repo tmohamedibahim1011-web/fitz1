@@ -5,6 +5,8 @@ import { Minus, Plus, ChevronDown, Check, Shield, Truck, RotateCcw, Loader2, Ale
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import regularDim from '../assets/dimension/regualr.jpeg';
+import miniDim from '../assets/dimension/min.jpeg';
 
 const DEFAULT_COLORS = [
   { id: 'natural', name: 'Natural Finish', hex: '#D7CCC8', priceOffset: 0 },
@@ -93,7 +95,8 @@ const ProductDetail = () => {
 
   const currentImage = selectedColor?.image || product.colors?.[0]?.image || product.image || '';
   const currentHoverImage = selectedColor?.hoverImage || product.colors?.[0]?.hoverImage || product.hoverImage || '';
-  const images = [currentImage, currentHoverImage].filter(Boolean);
+  const dimensionImg = product.size === 'mini' ? miniDim : regularDim;
+  const images = [currentImage, currentHoverImage, dimensionImg].filter(Boolean);
   const currentPrice = (product.basePrice || 0) + (selectedColor?.priceOffset || 0);
 
   return (
@@ -126,13 +129,13 @@ const ProductDetail = () => {
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={activeImage}
-                    initial={{ opacity: 0, scale: 1.05 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, scale: 1.15 }}
+                    animate={{ opacity: 1, scale: 1.1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.5 }}
                     src={images[activeImage] || currentImage}
                     alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out origin-center"
+                    className="w-full h-full object-cover group-hover:scale-115 transition-transform duration-700 ease-out origin-center"
                   />
                 </AnimatePresence>
               </div>
@@ -162,9 +165,9 @@ const ProductDetail = () => {
                   </div>
                 )}
                 <div className="mb-8 border-b border-black/10 pb-8">
-                <h1 className="text-3xl md:text-5xl font-bold text-primary-text uppercase tracking-tighter mb-4" style={{ fontFamily: 'var(--font-bebas)' }}>
-                  {product.name}
-                </h1>
+                 <h1 className="text-3xl md:text-5xl font-bold text-primary-text uppercase tracking-tighter mb-4" style={{ fontFamily: "'Unbounded', sans-serif" }}>
+                   {product.name}
+                 </h1>
                 <div className="text-2xl font-medium text-primary-text flex items-center gap-4">
                   <span>Rs. {currentPrice.toLocaleString()}</span>
                 </div>
@@ -255,7 +258,31 @@ const ProductDetail = () => {
               {/* ACCORDION */}
               <div className="space-y-1">
                 {[
-                  { title: 'Dimensions & Specs', content: product.features && product.features.length > 0 ? <ul className="list-disc pl-5 space-y-2">{product.features.map((f, i) => <li key={i}>{f}</li>)}</ul> : <p>Standard specifications apply. Please contact support for precise dimensions.</p> },
+                  { 
+                    title: 'Dimensions & Specs', 
+                    content: (
+                      <div className="space-y-4">
+                        {product.features && product.features.length > 0 ? (
+                          <ul className="list-disc pl-5 space-y-2 mb-4">
+                            {product.features.map((f, i) => <li key={i}>{f}</li>)}
+                          </ul>
+                        ) : (
+                          <p className="mb-4 text-xs font-light text-secondary-text">Standard specifications apply. Precise blueprint dimensions shown below:</p>
+                        )}
+                        <div className="mt-4 border border-black/5 rounded-2xl overflow-hidden bg-secondary-white max-w-sm mx-auto shadow-sm">
+                          <div className="bg-white px-4 py-2 border-b border-black/5 flex justify-between items-center">
+                            <span className="text-[9px] uppercase tracking-widest text-secondary-text font-bold">Dimension Guide</span>
+                            <span className="text-[9px] uppercase tracking-widest text-luxury-gold font-bold">{product.size === 'mini' ? 'Mini Series' : 'Pro Series'}</span>
+                          </div>
+                          <img 
+                            src={product.size === 'mini' ? miniDim : regularDim} 
+                            alt={`${product.name} Dimensions`} 
+                            className="w-full h-auto object-contain bg-white hover:scale-105 transition-transform duration-500"
+                          />
+                        </div>
+                      </div>
+                    )
+                  },
                   { 
                     title: 'Shipping Policy', 
                     content: (
