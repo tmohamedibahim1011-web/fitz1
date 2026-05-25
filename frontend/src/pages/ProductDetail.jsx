@@ -101,13 +101,13 @@ const ProductDetail = () => {
   const currentPrice = (product.basePrice || 0) + (selectedColor?.priceOffset || 0);
   const isNatural = selectedColor?.id === 'natural';
   const isBlack = selectedColor?.id === 'black';
-  const yOffset = isDimensionImgActive 
-    ? 0 
+  const objectPosition = isDimensionImgActive 
+    ? 'center' 
     : isNatural 
-      ? '4.5%' 
+      ? 'center 45%' 
       : isBlack 
-        ? '-4.5%' 
-        : 0;
+        ? 'center 55%' 
+        : 'center';
 
   return (
     <div className="bg-primary-white min-h-screen pt-24 pb-32">
@@ -139,10 +139,11 @@ const ProductDetail = () => {
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={activeImage}
-                    initial={{ opacity: 0, scale: 1.15, y: yOffset }}
-                    animate={{ opacity: 1, scale: 1.1, y: yOffset }}
+                    initial={{ opacity: 0, scale: 1.15 }}
+                    animate={{ opacity: 1, scale: 1.1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.5 }}
+                    style={{ objectPosition }}
                     src={images[activeImage] || currentImage}
                     alt={product.name}
                     className={`w-full h-full group-hover:scale-115 transition-transform duration-700 ease-out origin-center ${isDimensionImgActive ? 'object-contain bg-white p-6 md:p-8' : 'object-cover'}`}
