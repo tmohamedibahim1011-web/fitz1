@@ -99,6 +99,15 @@ const ProductDetail = () => {
   const images = [currentImage, currentHoverImage, dimensionImg].filter(Boolean);
   const isDimensionImgActive = images[activeImage] === dimensionImg;
   const currentPrice = (product.basePrice || 0) + (selectedColor?.priceOffset || 0);
+  const isNatural = selectedColor?.id === 'natural';
+  const isBlack = selectedColor?.id === 'black';
+  const yOffset = isDimensionImgActive 
+    ? 0 
+    : isNatural 
+      ? '4.5%' 
+      : isBlack 
+        ? '-4.5%' 
+        : 0;
 
   return (
     <div className="bg-primary-white min-h-screen pt-24 pb-32">
@@ -130,8 +139,8 @@ const ProductDetail = () => {
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={activeImage}
-                    initial={{ opacity: 0, scale: 1.15 }}
-                    animate={{ opacity: 1, scale: 1.1 }}
+                    initial={{ opacity: 0, scale: 1.15, y: yOffset }}
+                    animate={{ opacity: 1, scale: 1.1, y: yOffset }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.5 }}
                     src={images[activeImage] || currentImage}
@@ -241,18 +250,14 @@ const ProductDetail = () => {
               </div>
 
               {/* FEATURES ICONS */}
-              <div className="grid grid-cols-3 gap-4 mb-12 py-6 border-y border-black/10">
-                <div className="flex flex-col items-center text-center gap-2">
-                  <Shield size={24} className="text-luxury-gold" strokeWidth={1.5} />
-                  <span className="text-[10px] uppercase tracking-widest text-secondary-text font-bold">Lifetime<br/>Warranty</span>
-                </div>
+              <div className="grid grid-cols-2 gap-4 mb-12 py-6 border-y border-black/10">
                 <div className="flex flex-col items-center text-center gap-2">
                   <Truck size={24} className="text-luxury-gold" strokeWidth={1.5} />
                   <span className="text-[10px] uppercase tracking-widest text-secondary-text font-bold">Tamil Nadu<br/>Free Shipping</span>
                 </div>
                 <div className="flex flex-col items-center text-center gap-2">
-                  <RotateCcw size={24} className="text-luxury-gold" strokeWidth={1.5} />
-                  <span className="text-[10px] uppercase tracking-widest text-secondary-text font-bold">30-Day<br/>Returns</span>
+                  <Shield size={24} className="text-luxury-gold" strokeWidth={1.5} />
+                  <span className="text-[10px] uppercase tracking-widest text-secondary-text font-bold">Damaged Parcel<br/>Full Replacement</span>
                 </div>
               </div>
 

@@ -26,8 +26,8 @@ const Terms = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold uppercase tracking-widest text-primary-text mb-4">4. Shipping & Returns</h2>
-              <p>We offer a 30-day return policy for unused items in their original packaging. Return shipping costs are the responsibility of the customer unless the product arrived defective.</p>
+              <h2 className="text-xl font-bold uppercase tracking-widest text-primary-text mb-4">4. Shipping & Replacement Policy</h2>
+              <p>We do not offer standard returns or refunds. However, if your parcel arrives damaged during transit, we provide a full replacement. Please inspect your parcel upon delivery and notify us immediately with proof of damage (unboxing video or photos) within 24 hours of receipt.</p>
             </section>
           </div>
         </motion.div>
