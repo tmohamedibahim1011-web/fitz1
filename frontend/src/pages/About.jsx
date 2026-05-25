@@ -95,6 +95,7 @@ const About = () => {
               <img 
                 src={aboutPhoto} 
                 alt="Kavinath - Founder of FITZ1" 
+                loading="lazy"
                 className="w-full h-full object-cover rounded-2xl shadow-inner object-top"
               />
             </div>

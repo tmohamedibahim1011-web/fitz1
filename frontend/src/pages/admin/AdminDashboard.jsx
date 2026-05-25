@@ -650,8 +650,8 @@ const AdminDashboard = () => {
                       <Filter size={16} className="text-secondary-text" />
                       <select value={filterProduct} onChange={(e) => setFilterProduct(e.target.value)} className="bg-transparent text-xs font-bold uppercase tracking-widest text-primary-text outline-none cursor-pointer">
                         <option value="All">All Products</option>
-                        <option value="Regular">Regular Series</option>
-                        <option value="Mini">Mini Series</option>
+                        <option value="Regular">Pro Series Regular</option>
+                        <option value="Mini">Mini Parallettes</option>
                       </select>
                     </div>
                   </div>

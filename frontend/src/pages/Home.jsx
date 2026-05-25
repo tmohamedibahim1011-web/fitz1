@@ -597,6 +597,7 @@ const Home = () => {
               <img
                 src={vary}
                 alt="FITZ1 premium wooden parallettes"
+                loading="lazy"
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
               />
             </motion.div>

@@ -131,6 +131,7 @@ const ProductCard = ({ product, index }) => {
           <img
             src={currentImage}
             alt={product.name}
+            loading="lazy"
             className="absolute inset-0 w-full h-full object-cover object-center transform scale-110 group-hover:scale-115 transition-transform duration-700 ease-out"
           />
           
@@ -138,6 +139,7 @@ const ProductCard = ({ product, index }) => {
             <img
               src={hoverImage}
               alt={`${product.name} alternate`}
+              loading="lazy"
               className="absolute inset-0 w-full h-full object-cover object-center opacity-0 group-hover:opacity-100 transform scale-110 group-hover:scale-115 transition-all duration-700 ease-out"
             />
           )}
@@ -166,6 +168,7 @@ const ProductCard = ({ product, index }) => {
                 <img
                   src={currentImage}
                   alt={product.name}
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
                 {selectedColor && (

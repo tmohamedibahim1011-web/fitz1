@@ -76,7 +76,7 @@ const seedProducts = async () => {
       reviewCount: 124
     },
     {
-      name: 'Series Mini Parallettes',
+      name: 'Mini Parallettes',
       description: 'Travel-friendly mini parallettes for training anywhere. Compact 30mm grip, 250mm length, 120mm base width, 100mm height. Perfect for on-the-go.',
       basePrice: 999,
       size: 'mini',

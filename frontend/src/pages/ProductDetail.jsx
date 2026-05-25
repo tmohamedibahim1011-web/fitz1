@@ -97,6 +97,7 @@ const ProductDetail = () => {
   const currentHoverImage = selectedColor?.hoverImage || product.colors?.[0]?.hoverImage || product.hoverImage || '';
   const dimensionImg = product.size === 'mini' ? miniDim : regularDim;
   const images = [currentImage, currentHoverImage, dimensionImg].filter(Boolean);
+  const isDimensionImgActive = images[activeImage] === dimensionImg;
   const currentPrice = (product.basePrice || 0) + (selectedColor?.priceOffset || 0);
 
   return (
@@ -135,7 +136,7 @@ const ProductDetail = () => {
                     transition={{ duration: 0.5 }}
                     src={images[activeImage] || currentImage}
                     alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-115 transition-transform duration-700 ease-out origin-center"
+                    className={`w-full h-full group-hover:scale-115 transition-transform duration-700 ease-out origin-center ${isDimensionImgActive ? 'object-contain bg-white p-6 md:p-8' : 'object-cover'}`}
                   />
                 </AnimatePresence>
               </div>
@@ -272,7 +273,7 @@ const ProductDetail = () => {
                         <div className="mt-4 border border-black/5 rounded-2xl overflow-hidden bg-secondary-white max-w-sm mx-auto shadow-sm">
                           <div className="bg-white px-4 py-2 border-b border-black/5 flex justify-between items-center">
                             <span className="text-[9px] uppercase tracking-widest text-secondary-text font-bold">Dimension Guide</span>
-                            <span className="text-[9px] uppercase tracking-widest text-luxury-gold font-bold">{product.size === 'mini' ? 'Mini Series' : 'Pro Series'}</span>
+                            <span className="text-[9px] uppercase tracking-widest text-luxury-gold font-bold">{product.size === 'mini' ? 'Mini Parallettes' : 'Pro Series'}</span>
                           </div>
                           <img 
                             src={product.size === 'mini' ? miniDim : regularDim} 
