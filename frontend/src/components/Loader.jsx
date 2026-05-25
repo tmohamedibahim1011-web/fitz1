@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import logo from '../assets/fitz1.png';
 
 const Loader = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate initial loading sequence
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 2000);
@@ -22,35 +22,40 @@ const Loader = () => {
           transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
           className="fixed inset-0 z-[100] bg-primary-text flex items-center justify-center overflow-hidden"
         >
-          <div className="relative">
-            {/* Outline Text */}
-            <h1 
-              className="text-7xl md:text-9xl font-bold uppercase tracking-tighter text-transparent" 
-              style={{ 
-                fontFamily: 'var(--font-bebas)',
-                WebkitTextStroke: '1px rgba(255,255,255,0.2)'
-              }}
-            >
-              FITZONE
-            </h1>
-            
-            {/* Fill Text Animation */}
-            <motion.h1
-              initial={{ clipPath: 'inset(100% 0 0 0)' }}
-              animate={{ clipPath: 'inset(0% 0 0 0)' }}
-              transition={{ duration: 1.5, ease: 'easeInOut' }}
-              className="text-7xl md:text-9xl font-bold uppercase tracking-tighter text-white absolute top-0 left-0"
-              style={{ fontFamily: 'var(--font-bebas)' }}
-            >
-              FITZONE
-            </motion.h1>
+          <div className="relative flex flex-col items-center">
+            {/* Dim ghost logo (background layer) */}
+            <div className="relative">
+              <img
+                src={logo}
+                alt=""
+                aria-hidden="true"
+                className="h-16 md:h-24 w-auto opacity-[0.12]"
+                style={{ filter: 'brightness(0) invert(1)' }}
+              />
 
-            <motion.div 
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: 1.5, ease: 'easeInOut' }}
-              className="absolute -bottom-4 left-0 w-full h-[2px] bg-luxury-gold origin-left"
-            />
+              {/* Animated fill logo (clip-path reveal from bottom) */}
+              <motion.div
+                initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                animate={{ clipPath: 'inset(0% 0 0 0)' }}
+                transition={{ duration: 1.5, ease: 'easeInOut' }}
+                className="absolute inset-0"
+              >
+                <img
+                  src={logo}
+                  alt="FITZ1"
+                  className="h-16 md:h-24 w-auto"
+                  style={{ filter: 'brightness(0) invert(1)' }}
+                />
+              </motion.div>
+
+              {/* Gold underline */}
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 1.5, ease: 'easeInOut' }}
+                className="absolute -bottom-4 left-0 w-full h-[2px] bg-luxury-gold origin-left"
+              />
+            </div>
           </div>
         </motion.div>
       )}

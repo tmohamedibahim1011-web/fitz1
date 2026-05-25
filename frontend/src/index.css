@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap');
-
 @theme {
   --color-primary-white: #FAFAF8;
   --color-secondary-white: #F4F4F2;
@@ -17,6 +15,7 @@
   --font-barlow: 'Barlow Condensed', sans-serif;
   --font-inter: 'Inter', sans-serif;
   --font-dmsans: 'DM Sans', sans-serif;
+  --font-unbounded: 'Unbounded', sans-serif;
 }
 
 @layer base {
@@ -48,6 +47,10 @@
 
   .text-barlow {
     font-family: 'Barlow Condensed', sans-serif;
+  }
+
+  .text-unbounded {
+    font-family: 'Unbounded', sans-serif;
   }
 }
 
