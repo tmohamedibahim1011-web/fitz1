@@ -5,7 +5,7 @@ const Privacy = () => {
     <div className="bg-primary-white min-h-screen pt-32 pb-32">
       <div className="container mx-auto px-6 max-w-4xl">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <h1 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter text-primary-text mb-12" style={{ fontFamily: "'Unbounded', sans-serif" }}>
+          <h1 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter text-primary-text mb-12" style={{ fontFamily: "'Outfit', sans-serif" }}>
             Privacy Policy
           </h1>
           

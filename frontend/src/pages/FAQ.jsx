@@ -36,7 +36,7 @@ const FAQ = () => {
     <div className="bg-primary-white min-h-screen pt-32 pb-32">
       <div className="container mx-auto px-6 max-w-4xl">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter text-primary-text mb-4" style={{ fontFamily: "'Unbounded', sans-serif" }}>
+          <h1 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter text-primary-text mb-4" style={{ fontFamily: "'Outfit', sans-serif" }}>
             Frequently Asked Questions
           </h1>
           <p className="text-secondary-text">Everything you need to know about our products and services.</p>

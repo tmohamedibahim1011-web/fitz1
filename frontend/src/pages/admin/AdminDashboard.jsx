@@ -502,7 +502,7 @@ const AdminDashboard = () => {
         {activeTab === 'dashboard' && (
           <>
             <header className="mb-10">
-              <h1 className="text-3xl font-bold uppercase tracking-widest text-primary-text mb-1" style={{ fontFamily: "'Unbounded', sans-serif" }}>Dashboard</h1>
+              <h1 className="text-3xl font-bold uppercase tracking-widest text-primary-text mb-1" style={{ fontFamily: "'Outfit', sans-serif" }}>Dashboard</h1>
               <p className="text-secondary-text text-sm">Overview of your store performance.</p>
             </header>
 
@@ -591,7 +591,7 @@ const AdminDashboard = () => {
           <>
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
               <div>
-                <h1 className="text-3xl font-bold uppercase tracking-widest text-primary-text mb-1" style={{ fontFamily: "'Unbounded', sans-serif" }}>Orders</h1>
+                <h1 className="text-3xl font-bold uppercase tracking-widest text-primary-text mb-1" style={{ fontFamily: "'Outfit', sans-serif" }}>Orders</h1>
                 <p className="text-secondary-text text-sm">Manage and track customer orders.</p>
               </div>
               <div className="flex gap-3">
@@ -764,7 +764,7 @@ const AdminDashboard = () => {
           <>
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
               <div>
-                <h1 className="text-3xl font-bold uppercase tracking-widest text-primary-text mb-1" style={{ fontFamily: "'Unbounded', sans-serif" }}>Products</h1>
+                <h1 className="text-3xl font-bold uppercase tracking-widest text-primary-text mb-1" style={{ fontFamily: "'Outfit', sans-serif" }}>Products</h1>
                 <p className="text-secondary-text text-sm">Manage your product inventory.</p>
               </div>
               <button onClick={() => openProductModal()} className="flex items-center gap-2 bg-primary-text text-white px-4 py-2 text-xs font-bold uppercase tracking-widest hover:bg-luxury-gold transition-colors shadow-sm">
@@ -838,7 +838,7 @@ const AdminDashboard = () => {
         {activeTab === 'settings' && (
           <div className="max-w-4xl">
             <header className="mb-10">
-              <h1 className="text-3xl font-bold uppercase tracking-widest text-primary-text mb-1" style={{ fontFamily: "'Unbounded', sans-serif" }}>Settings</h1>
+              <h1 className="text-3xl font-bold uppercase tracking-widest text-primary-text mb-1" style={{ fontFamily: "'Outfit', sans-serif" }}>Settings</h1>
               <p className="text-secondary-text text-sm">Configure admin account and notification preferences.</p>
             </header>
 

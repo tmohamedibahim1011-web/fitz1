@@ -175,7 +175,7 @@ const ProductDetail = () => {
                   </div>
                 )}
                 <div className="mb-8 border-b border-black/10 pb-8">
-                 <h1 className="text-3xl md:text-5xl font-bold text-primary-text uppercase tracking-tighter mb-4" style={{ fontFamily: "'Unbounded', sans-serif" }}>
+                 <h1 className="text-3xl md:text-5xl font-bold text-primary-text uppercase tracking-tighter mb-4" style={{ fontFamily: "'Outfit', sans-serif" }}>
                    {product.name}
                  </h1>
                 <div className="text-2xl font-medium text-primary-text flex items-center gap-4">

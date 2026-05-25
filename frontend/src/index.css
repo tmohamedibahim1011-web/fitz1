@@ -15,7 +15,8 @@
   --font-barlow: 'Barlow Condensed', sans-serif;
   --font-inter: 'Inter', sans-serif;
   --font-dmsans: 'DM Sans', sans-serif;
-  --font-unbounded: 'Unbounded', sans-serif;
+  --font-outfit: 'Outfit', sans-serif;
+  --font-jakarta: 'Plus Jakarta Sans', sans-serif;
 }
 
 @layer base {
@@ -30,20 +31,21 @@
     --accent-black: #1A1A1A;
     --border-light: rgba(0, 0, 0, 0.08);
     --font-bebas: 'Bebas Neue', sans-serif;
-    --font-unbounded: 'Unbounded', sans-serif;
+    --font-outfit: 'Outfit', sans-serif;
+    --font-jakarta: 'Plus Jakarta Sans', sans-serif;
   }
 
   body {
     background-color: var(--primary-white);
     color: var(--primary-text);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Unbounded', sans-serif;
+    font-family: 'Outfit', sans-serif;
     letter-spacing: -0.02em;
   }
 
@@ -51,8 +53,12 @@
     font-family: 'Barlow Condensed', sans-serif;
   }
 
-  .text-unbounded {
-    font-family: 'Unbounded', sans-serif;
+  .text-outfit {
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .text-jakarta {
+    font-family: 'Plus Jakarta Sans', sans-serif;
   }
 }
 

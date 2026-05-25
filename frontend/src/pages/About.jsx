@@ -18,7 +18,7 @@ const About = () => {
             <span className="text-xs font-bold uppercase tracking-[0.3em] text-secondary-text">The FITZ1 Philosophy</span>
             <span className="w-12 h-[2px] bg-luxury-gold"></span>
           </div>
-          <h1 className="text-6xl md:text-8xl font-bold uppercase tracking-tighter text-primary-text mb-8" style={{ fontFamily: "'Unbounded', sans-serif" }}>
+          <h1 className="text-6xl md:text-8xl font-bold uppercase tracking-tighter text-primary-text mb-8" style={{ fontFamily: "'Outfit', sans-serif" }}>
             FITNESS BEGINS AT HOME.
           </h1>
           <p className="text-xl md:text-2xl font-serif text-primary-text max-w-3xl mx-auto leading-relaxed mb-6 font-medium">
@@ -34,7 +34,7 @@ const About = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <span className="text-luxury-gold text-xs font-bold uppercase tracking-[0.3em] mb-4 block font-mono">// Our Niche</span>
-              <h2 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter leading-none mb-6" style={{ fontFamily: "'Unbounded', sans-serif" }}>
+              <h2 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter leading-none mb-6" style={{ fontFamily: "'Outfit', sans-serif" }}>
                 HOME WORKOUT EQUIPMENT.<br />NOT GYM CLUTTER.
               </h2>
               <p className="text-white/80 leading-relaxed font-light mb-6 text-base md:text-lg">
@@ -72,7 +72,7 @@ const About = () => {
               <span className="w-8 h-[2px] bg-luxury-gold"></span>
               <h2 className="text-xs font-bold uppercase tracking-[0.3em] text-secondary-text">The Founder</h2>
             </div>
-            <h3 className="text-5xl md:text-7xl font-bold uppercase tracking-tighter text-primary-text mb-4" style={{ fontFamily: "'Unbounded', sans-serif" }}>
+            <h3 className="text-5xl md:text-7xl font-bold uppercase tracking-tighter text-primary-text mb-4" style={{ fontFamily: "'Outfit', sans-serif" }}>
               Meet Kavinath
             </h3>
             <p className="text-sm uppercase tracking-[0.2em] font-mono text-luxury-gold mb-8">Founder & Visionary behind FITZ1</p>
@@ -118,7 +118,7 @@ const About = () => {
         <div className="container mx-auto px-6 max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-xs font-bold uppercase tracking-[0.3em] text-luxury-gold mb-3">The FITZ1 Advantage</h2>
-            <h3 className="text-5xl md:text-7xl font-bold uppercase tracking-tighter text-primary-text" style={{ fontFamily: "'Unbounded', sans-serif" }}>
+            <h3 className="text-5xl md:text-7xl font-bold uppercase tracking-tighter text-primary-text" style={{ fontFamily: "'Outfit', sans-serif" }}>
               Why Home Equipment?
             </h3>
           </div>
@@ -146,7 +146,7 @@ const About = () => {
         <div className="bg-primary-text text-white p-16 rounded-3xl relative overflow-hidden border border-luxury-gold/30 shadow-2xl">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-luxury-gold/20 via-transparent to-transparent"></div>
           <div className="relative z-10">
-            <h2 className="text-5xl md:text-7xl font-bold uppercase tracking-tighter mb-6" style={{ fontFamily: "'Unbounded', sans-serif" }}>
+            <h2 className="text-5xl md:text-7xl font-bold uppercase tracking-tighter mb-6" style={{ fontFamily: "'Outfit', sans-serif" }}>
               Start Small. Stay Active.
             </h2>
             <p className="text-white/80 max-w-xl mx-auto mb-10 text-base md:text-lg font-light leading-relaxed">

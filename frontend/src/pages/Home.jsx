@@ -275,12 +275,12 @@ const Home = () => {
           >
             <div className="flex items-center gap-4 mb-6 sm:mb-8">
               <div className="w-12 h-[2px] bg-luxury-gold"></div>
-              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] text-white/70 lg:text-secondary-text text-unbounded">
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] text-white/70 lg:text-secondary-text text-outfit">
                 Engineered for the Elite
               </span>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl xl:text-7xl font-black text-white lg:text-primary-text leading-[0.9] tracking-tighter mb-8 relative text-unbounded uppercase">
+            <h1 className="text-4xl sm:text-6xl xl:text-7xl font-black text-white lg:text-primary-text leading-[0.9] tracking-tighter mb-8 relative text-outfit uppercase">
               DEFY<br />
               GRAVITY.
               {/* Decorative accent */}
@@ -294,7 +294,7 @@ const Home = () => {
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <Link
                 to="/products"
-                className="group relative px-8 py-4 sm:px-10 sm:py-5 bg-primary-text text-white text-xs font-bold uppercase tracking-[0.2em] overflow-hidden w-fit text-center border border-primary-text text-unbounded rounded-none"
+                className="group relative px-8 py-4 sm:px-10 sm:py-5 bg-primary-text text-white text-xs font-bold uppercase tracking-[0.2em] overflow-hidden w-fit text-center border border-primary-text text-outfit rounded-none"
               >
                 <span className="relative z-10 flex items-center justify-center gap-4">
                   Shop Collection <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform duration-300" />
@@ -313,7 +313,7 @@ const Home = () => {
             initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeInUp}
             className="text-center mb-16"
           >
-            <h2 className="text-unbounded font-extrabold text-3xl md:text-5xl uppercase tracking-tighter text-primary-text">The Pro Collection</h2>
+            <h2 className="text-outfit font-extrabold text-3xl md:text-5xl uppercase tracking-tighter text-primary-text">The Pro Collection</h2>
             <p className="text-secondary-text mt-4 text-sm md:text-base">We don't make a hundred mediocre products. We make two perfect ones.</p>
           </motion.div>
 
@@ -347,7 +347,7 @@ const Home = () => {
               Premium Selections
             </span>
             <h2
-              className="text-unbounded font-extrabold text-3xl md:text-5xl uppercase tracking-tighter text-primary-text leading-tight"
+              className="text-outfit font-extrabold text-3xl md:text-5xl uppercase tracking-tighter text-primary-text leading-tight"
             >
               Available Finishes
             </h2>
@@ -381,7 +381,7 @@ const Home = () => {
                 {/* Text / Header Padding */}
                 <div className="p-6 flex flex-col items-center justify-center border-t border-black/5 bg-white flex-grow">
                   <p
-                    className="text-unbounded font-bold uppercase text-[11px] sm:text-xs tracking-tight text-primary-text text-center group-hover:text-luxury-gold transition-colors duration-300"
+                    className="text-outfit font-bold uppercase text-[11px] sm:text-xs tracking-tight text-primary-text text-center group-hover:text-luxury-gold transition-colors duration-300"
                   >
                     {finish.name}
                   </p>
@@ -405,12 +405,12 @@ const Home = () => {
         <div className="container mx-auto px-6 relative z-10">
           {/* Heading */}
           <div className="max-w-3xl mx-auto text-center mb-24">
-            <span className="inline-block uppercase tracking-[0.12em] sm:tracking-[0.35em] text-luxury-gold text-[8px] xs:text-[10px] sm:text-xs font-semibold bg-white/5 py-2 px-4 rounded-full border border-white/10 text-unbounded max-w-full text-center">
+            <span className="inline-block uppercase tracking-[0.12em] sm:tracking-[0.35em] text-luxury-gold text-[8px] xs:text-[10px] sm:text-xs font-semibold bg-white/5 py-2 px-4 rounded-full border border-white/10 text-outfit max-w-full text-center">
               Calisthenics • Home Workouts • Everyday Strength
             </span>
 
             <h2
-              className="mt-6 text-3xl md:text-5xl lg:text-6xl font-extrabold uppercase leading-tight tracking-tighter text-unbounded"
+              className="mt-6 text-3xl md:text-5xl lg:text-6xl font-extrabold uppercase leading-tight tracking-tighter text-outfit"
             >
               Designed For Strength.<br />Crafted For The Home.
             </h2>
@@ -517,11 +517,11 @@ const Home = () => {
       <section className="py-32 bg-secondary-white relative border-b border-black/5">
         <div className="container mx-auto px-6 max-w-6xl">
           <div className="text-center mb-20">
-            <span className="uppercase tracking-[0.35em] text-luxury-gold text-xs font-semibold text-unbounded block mb-3">
+            <span className="uppercase tracking-[0.35em] text-luxury-gold text-xs font-semibold text-outfit block mb-3">
               FITZ1 Photoshoot
             </span>
             <h2
-              className="mt-4 text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-primary-text text-unbounded"
+              className="mt-4 text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-primary-text text-outfit"
             >
               Aesthetic In Action
             </h2>
@@ -566,8 +566,8 @@ const Home = () => {
         <div className="container mx-auto px-6 max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeInUp}>
-              <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-luxury-gold mb-6 flex items-center gap-2 text-unbounded"><Users size={16} /> Who It's For</h2>
-              <h3 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter mb-8 text-unbounded text-primary-text" style={{ lineHeight: "1.1" }}>
+              <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-luxury-gold mb-6 flex items-center gap-2 text-outfit"><Users size={16} /> Who It's For</h2>
+              <h3 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter mb-8 text-outfit text-primary-text" style={{ lineHeight: "1.1" }}>
                 Built for those who refuse to compromise.
               </h3>
 
@@ -609,8 +609,8 @@ const Home = () => {
       <section className="py-32 bg-primary-text text-white relative overflow-hidden">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-luxury-gold mb-4 text-unbounded">The Process</h2>
-            <h3 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-unbounded text-white">
+            <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-luxury-gold mb-4 text-outfit">The Process</h2>
+            <h3 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-outfit text-white">
               How It's Made
             </h3>
             <p className="text-white/60 mt-4 max-w-xl mx-auto font-light text-sm">Every pair is a labor of love. Experience the journey from raw timber to professional equipment.</p>
@@ -670,8 +670,8 @@ const Home = () => {
       {/* HORIZONTAL VIDEO REVIEWS */}
       <section className="py-32 bg-secondary-white relative overflow-hidden border-b border-black/5">
         <div className="container mx-auto px-6 mb-12">
-          <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-luxury-gold mb-4 text-unbounded">Customer Reviews</h2>
-          <h3 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-unbounded text-primary-text">
+          <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-luxury-gold mb-4 text-outfit">Customer Reviews</h2>
+          <h3 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-outfit text-primary-text">
             Video Reviews
           </h3>
         </div>
@@ -693,11 +693,11 @@ const Home = () => {
         <div className="container mx-auto px-6 mb-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <span className="uppercase tracking-[0.35em] text-luxury-gold text-xs font-semibold text-unbounded block mb-3">
+              <span className="uppercase tracking-[0.35em] text-luxury-gold text-xs font-semibold text-outfit block mb-3">
                 Customer Proof
               </span>
               <h2
-                className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-unbounded text-primary-text"
+                className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-outfit text-primary-text"
               >
                 Customer Feedback
               </h2>
