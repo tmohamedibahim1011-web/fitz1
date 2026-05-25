@@ -88,7 +88,7 @@ const IMAGE_REVIEWS = [
 ];
 
 const PHOTOSHOOT_GALLERY = [
-  { src: photo3, title: "Premium Mahogany Body", desc: "40mm hand-sanded ergonomic handles with custom Mahogany body for absolute control." },
+  { src: photo3, title: "Premium Mahogany Body", desc: "45mm hand-sanded ergonomic handles with custom Mahogany body for absolute control." },
   { src: photo5, title: "Rock-Solid Base Joint", desc: "CNC-milled interlocking joints for zero wobble under load." },
   { src: photo6, title: "Portable Elite Training", desc: "Take your gymnastics and calisthenics training anywhere." },
   { src: photo7, title: "Mahogany Finish Aesthetics", desc: "Premium Mahogany wood grain finish that elevates any room's decor." },
@@ -428,7 +428,7 @@ const Home = () => {
                       {finish.name}
                     </h3>
                     {/* <p className="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-luxury-gold mt-1.5 font-bold">
-                      {isMini ? '250mm Travel Size • 40mm Grip' : '450mm Regular Size • 40mm Grip'}
+                      {isMini ? '250mm Travel Size • 45mm Grip' : '450mm Regular Size • 45mm Grip'}
                     </p> */}
                   </div>
                 </motion.div>
@@ -867,16 +867,23 @@ const Home = () => {
               className="relative max-w-full max-h-[85vh] flex flex-col items-center justify-center p-2"
               onClick={(e) => e.stopPropagation()}
             >
-              <motion.img
-                key={lightboxIndex}
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                src={IMAGE_REVIEWS[lightboxIndex].src}
-                alt={`FITZ1 Customer Review ${lightboxIndex + 1}`}
-                className="max-w-[90vw] md:max-w-[600px] max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-white/10"
-              />
+              <div className="relative flex justify-center items-center">
+                <motion.img
+                  key={lightboxIndex}
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  src={IMAGE_REVIEWS[lightboxIndex].src}
+                  alt={`FITZ1 Customer Review ${lightboxIndex + 1}`}
+                  className="max-w-[90vw] md:max-w-[600px] max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-white/10"
+                />
+                {/* Privacy overlay — blurs phone numbers in top portion of WhatsApp screenshots in Lightbox */}
+                <div
+                  className="absolute top-0 left-0 right-0 h-[12%] rounded-t-2xl backdrop-blur-md bg-black/20"
+                  style={{ backdropFilter: 'blur(12px)' }}
+                />
+              </div>
 
               {/* Caption */}
               <div className="mt-6 flex items-center justify-between w-full max-w-[600px] px-2 text-white/60 text-xs font-mono uppercase tracking-widest">

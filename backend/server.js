@@ -77,7 +77,7 @@ const seedProducts = async () => {
     },
     {
       name: 'Mini Parallettes',
-      description: 'Travel-friendly mini parallettes for training anywhere. Compact 30mm grip, 250mm length, 120mm base width, 100mm height. Perfect for on-the-go.',
+      description: 'Travel-friendly mini parallettes for training anywhere. Compact 45mm grip, 250mm length, 120mm base width, 100mm height. Perfect for on-the-go.',
       basePrice: 999,
       size: 'mini',
       material: 'Premium Mahogany Wood',

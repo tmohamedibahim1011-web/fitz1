@@ -104,21 +104,15 @@ const ProductDetail = () => {
 
   const objectPosition = isDimensionImgActive 
     ? 'center' 
-    : (isMini && isBlack) 
-      ? 'center 45%' 
-      : 'center 48%';
+    : 'center 48%';
 
   const initialScale = isDimensionImgActive 
     ? 1.0 
-    : (isMini && isBlack) 
-      ? 1.6 
-      : 1.15;
+    : 1.05;
 
   const animateScale = isDimensionImgActive 
     ? 1.0 
-    : (isMini && isBlack) 
-      ? 1.55 
-      : 1.1;
+    : 1.0;
 
   return (
     <div className="bg-primary-white min-h-screen pt-24 pb-32">
