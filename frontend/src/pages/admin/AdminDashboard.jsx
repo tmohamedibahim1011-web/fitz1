@@ -27,6 +27,11 @@ const AdminDashboard = () => {
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [bulkStatus, setBulkStatus] = useState('');
 
+  // Tracking Modal State
+  const [showTrackingModal, setShowTrackingModal] = useState(false);
+  const [trackingOrder, setTrackingOrder] = useState(null);
+  const [trackingInputId, setTrackingInputId] = useState('');
+
   // Product Form State
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -731,29 +736,16 @@ const AdminDashboard = () => {
                             <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest border rounded-full w-fit ${getStatusColor(order.status)}`}>
                               {order.status}
                             </span>
-                            <div className="flex flex-col gap-1 mt-2">
-                              <input 
-                                type="text" 
-                                placeholder="Courier (e.g. India Post)" 
-                                defaultValue={order.courierName}
-                                onBlur={(e) => { if(e.target.value !== order.courierName) updateOrderDetails(order._id, { status: order.status, trackingId: order.trackingId, trackingLink: order.trackingLink, courierName: e.target.value }) }}
-                                className="border border-black/10 px-2 py-1 text-[10px] font-mono outline-none focus:border-luxury-gold min-w-[120px]"
-                              />
-                              <input 
-                                type="text" 
-                                placeholder="Tracking ID" 
-                                defaultValue={order.trackingId}
-                                onBlur={(e) => { if(e.target.value !== order.trackingId) updateOrderDetails(order._id, { status: order.status, courierName: order.courierName, trackingLink: order.trackingLink, trackingId: e.target.value }) }}
-                                className="border border-black/10 px-2 py-1 text-[10px] font-mono outline-none focus:border-luxury-gold min-w-[120px]"
-                              />
-                              <input 
-                                type="text" 
-                                placeholder="Tracking Link (URL)" 
-                                defaultValue={order.trackingLink}
-                                onBlur={(e) => { if(e.target.value !== order.trackingLink) updateOrderDetails(order._id, { status: order.status, trackingId: order.trackingId, courierName: order.courierName, trackingLink: e.target.value }) }}
-                                className="border border-black/10 px-2 py-1 text-[10px] font-mono outline-none focus:border-luxury-gold min-w-[120px]"
-                              />
-                            </div>
+                            <button 
+                              onClick={() => {
+                                setTrackingOrder(order);
+                                setTrackingInputId(order.trackingId || '');
+                                setShowTrackingModal(true);
+                              }}
+                              className="mt-2 text-[10px] font-bold uppercase tracking-widest border border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-white transition-colors px-3 py-1.5 w-fit flex items-center gap-1.5"
+                            >
+                              <Package size={12} /> {order.trackingId ? 'Edit Tracking' : 'Add Tracking'}
+                            </button>
                           </div>
                         </td>
                         <td className="p-4 pr-6">
@@ -969,6 +961,49 @@ const AdminDashboard = () => {
         )}
 
       </main>
+      {/* Tracking Modal */}
+      {showTrackingModal && trackingOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white max-w-md w-full p-8 relative">
+            <button onClick={() => setShowTrackingModal(false)} className="absolute top-4 right-4 text-secondary-text hover:text-primary-text">
+              <X size={20} />
+            </button>
+            <h2 className="text-xl font-bold uppercase tracking-tighter text-primary-text mb-6 border-b border-black/10 pb-4">
+              Add Tracking Details
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-secondary-text mb-2">Tracking ID</label>
+                <input 
+                  type="text" 
+                  value={trackingInputId} 
+                  onChange={(e) => setTrackingInputId(e.target.value)} 
+                  className="w-full border border-black/20 p-3 text-sm outline-none focus:border-luxury-gold font-mono"
+                  placeholder="Enter Tracking ID..."
+                />
+              </div>
+              <button 
+                onClick={() => {
+                  updateOrderDetails(trackingOrder._id, { 
+                    status: trackingOrder.status,
+                    trackingId: trackingInputId, 
+                    courierName: 'India Post', 
+                    trackingLink: 'https://www.indiapost.gov.in/_layouts/15/dop.portal.tracking/trackconsignment.aspx' 
+                  });
+                  setShowTrackingModal(false);
+                }}
+                className="w-full bg-primary-text text-white font-bold uppercase tracking-widest text-xs py-4 hover:bg-luxury-gold transition-colors"
+              >
+                Save Tracking Details
+              </button>
+              <p className="text-[10px] text-secondary-text text-center italic mt-2">
+                *Courier defaults to India Post automatically.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
