@@ -317,7 +317,7 @@ const AdminDashboard = () => {
 
     const addr = order.shippingAddress?.address || '';
     if (addr) {
-      const addrLines = doc.splitTextToSize(`Door no - ${addr}`, 40);
+      const addrLines = doc.splitTextToSize(`Door no - ${addr}`, 35);
       doc.text(addrLines, rightX, currentY);
       currentY += addrLines.length * 5;
     }
@@ -337,15 +337,15 @@ const AdminDashboard = () => {
 
     // Items ordered
     const orderStr = order.items.map(i => `${i.name} (${i.color || 'Standard'})`).join(', ');
-    const orderLines = doc.splitTextToSize(`Order - ${orderStr}`, 40);
+    const orderLines = doc.splitTextToSize(`Order - ${orderStr}`, 35);
     doc.text(orderLines, rightX, currentY);
     currentY += orderLines.length * 5;
 
     // --- BOTTOM RIGHT (LOGO) ---
     if (logoBase64) {
       try {
-        // Place logo at the bottom right, scaled down slightly to avoid text overlap
-        doc.addImage(logoBase64, 'PNG', 130, 85, 15, 9);
+        // Place logo at the bottom right, with even more padding from text
+        doc.addImage(logoBase64, 'PNG', 130, 88, 14, 8.5);
       } catch (e) {
         console.error('Logo error', e);
       }
