@@ -339,12 +339,14 @@ const AdminDashboard = () => {
     const orderStr = order.items.map(i => `${i.name} (${i.color || 'Standard'})`).join(', ');
     const orderLines = doc.splitTextToSize(`Order - ${orderStr}`, 55);
     doc.text(orderLines, rightX, currentY);
+    currentY += orderLines.length * 5;
 
     // --- BOTTOM RIGHT (LOGO) ---
     if (logoBase64) {
       try {
-        // Logo bottom right position, matches image proportions
-        doc.addImage(logoBase64, 'PNG', 115, 85, 20, 12);
+        // Place logo dynamically below the text to prevent overlap
+        const logoY = Math.min(currentY + 2, 92);
+        doc.addImage(logoBase64, 'PNG', 120, logoY, 20, 12);
       } catch (e) {
         console.error('Logo error', e);
       }
