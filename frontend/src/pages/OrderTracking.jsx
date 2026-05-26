@@ -65,7 +65,7 @@ const OrderTracking = () => {
           </p>
         </div>
 
-        <div className="bg-white border border-black/10 p-8 md:p-12 mb-12 shadow-sm">
+        <div className="bg-white border border-black/10 p-6 md:p-12 mb-12 shadow-sm">
           <form onSubmit={handleTrack} className="flex flex-col md:flex-row gap-4">
             <div className="flex-grow relative">
               <input 
@@ -96,7 +96,7 @@ const OrderTracking = () => {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}
-                  className="bg-white border border-black/10 p-8 shadow-sm"
+                  className="bg-white border border-black/10 p-6 sm:p-8 md:p-10 shadow-sm"
                 >
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 border-b border-black/10 pb-6 gap-4">
                     <div>
@@ -110,25 +110,27 @@ const OrderTracking = () => {
                   </div>
 
                   {/* Status Timeline */}
-                  <div className="mb-10 relative">
-                    <div className="absolute top-6 left-0 w-full h-[2px] bg-gray-200 z-0"></div>
-                    <div className="absolute top-6 left-0 h-[2px] bg-luxury-gold z-10 transition-all" 
-                         style={{ width: `${(getStepIndex(order.status) / (statusSteps.length - 1)) * 100}%` }}></div>
-                    <div className="flex justify-between relative z-20">
-                      {statusSteps.map((step, idx) => {
-                        const isActive = getStepIndex(order.status) >= idx;
-                        const Icon = step.icon;
-                        return (
-                          <div key={idx} className="flex flex-col items-center gap-2">
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${isActive ? getStatusColor(order.status) + ' text-white' : 'bg-gray-100 text-gray-400'}`}>
-                              <Icon size={20} />
+                  <div className="mb-10 relative overflow-x-auto pb-4 hide-scrollbar">
+                    <div className="min-w-[320px] sm:min-w-[400px] relative">
+                      <div className="absolute top-6 left-0 w-full h-[2px] bg-gray-200 z-0"></div>
+                      <div className="absolute top-6 left-0 h-[2px] bg-luxury-gold z-10 transition-all" 
+                           style={{ width: `${(getStepIndex(order.status) / (statusSteps.length - 1)) * 100}%` }}></div>
+                      <div className="flex justify-between relative z-20">
+                        {statusSteps.map((step, idx) => {
+                          const isActive = getStepIndex(order.status) >= idx;
+                          const Icon = step.icon;
+                          return (
+                            <div key={idx} className="flex flex-col items-center gap-2">
+                              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-sm ${isActive ? getStatusColor(order.status) + ' text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                <Icon size={18} className="sm:w-[20px] sm:h-[20px]" />
+                              </div>
+                              <span className={`text-[9px] sm:text-[10px] font-bold uppercase ${isActive ? 'text-primary-text' : 'text-gray-400'} text-center px-1`}>
+                                {step.label}
+                              </span>
                             </div>
-                            <span className={`text-[10px] font-bold uppercase ${isActive ? 'text-primary-text' : 'text-gray-400'}`}>
-                              {step.label}
-                            </span>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
 
@@ -168,7 +170,7 @@ const OrderTracking = () => {
                         <div className="mt-6 p-4 bg-luxury-gold/5 border border-luxury-gold/20">
                           <h4 className="text-xs font-bold uppercase tracking-widest text-luxury-gold mb-2">Tracking Information</h4>
                           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
+                            <div className="w-full">
                               <p className="text-sm font-mono text-primary-text mb-1">
                                 ID: <span className="font-bold">{order.trackingId}</span>
                               </p>
@@ -184,7 +186,7 @@ const OrderTracking = () => {
                                 href={order.trackingLink} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="bg-primary-text text-white px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-luxury-gold transition-colors text-center whitespace-nowrap"
+                                className="w-full sm:w-auto bg-primary-text text-white px-6 py-4 sm:py-3 text-xs font-bold uppercase tracking-widest hover:bg-luxury-gold transition-colors text-center whitespace-nowrap shadow-sm"
                               >
                                 Track Package
                               </a>

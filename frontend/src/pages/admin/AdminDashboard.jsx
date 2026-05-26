@@ -988,7 +988,7 @@ const AdminDashboard = () => {
                     status: trackingOrder.status,
                     trackingId: trackingInputId, 
                     courierName: 'India Post', 
-                    trackingLink: 'https://www.indiapost.gov.in/_layouts/15/dop.portal.tracking/trackconsignment.aspx' 
+                    trackingLink: `https://parcelsapp.com/en/tracking/${trackingInputId}` 
                   });
                   setShowTrackingModal(false);
                 }}
