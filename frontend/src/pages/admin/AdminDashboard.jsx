@@ -177,15 +177,15 @@ const AdminDashboard = () => {
     }
   };
 
-  const updateOrderStatus = async (id, newStatus) => {
+  const updateOrderDetails = async (id, details) => {
     try {
       const token = localStorage.getItem('adminToken');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      await axios.put(`${import.meta.env.VITE_API_URL}/admin/orders/${id}/status`, { status: newStatus }, { headers, withCredentials: true });
-      setOrders(orders.map(o => o._id === id ? { ...o, status: newStatus } : o));
-      toast.success(`Order status updated to ${newStatus}`);
+      const res = await axios.put(`${import.meta.env.VITE_API_URL}/admin/orders/${id}/status`, details, { headers, withCredentials: true });
+      setOrders(orders.map(o => o._id === id ? res.data.order : o));
+      toast.success(`Order updated successfully`);
     } catch (error) {
-      toast.error('Failed to update status');
+      toast.error('Failed to update order details');
     }
   };
 
@@ -304,11 +304,11 @@ const AdminDashboard = () => {
     doc.text('BUSINESS PARCEL', 100, 35);
 
     // TO Section
-    doc.text('TO:', 80, 47);
+    doc.text('TO:', 65, 47);
 
     // Customer Info Block
     let currentY = 47;
-    const rightX = 88;
+    const rightX = 73;
     doc.setFontSize(12);
 
     const customerName = `${order.customerInfo?.firstName || ''} ${order.customerInfo?.lastName || ''}`.trim();
@@ -317,7 +317,7 @@ const AdminDashboard = () => {
 
     const addr = order.shippingAddress?.address || '';
     if (addr) {
-      const addrLines = doc.splitTextToSize(`Door no - ${addr}`, 35);
+      const addrLines = doc.splitTextToSize(`Door no - ${addr}`, 50);
       doc.text(addrLines, rightX, currentY);
       currentY += addrLines.length * 5;
     }
@@ -337,7 +337,7 @@ const AdminDashboard = () => {
 
     // Items ordered
     const orderStr = order.items.map(i => `${i.name} (${i.color || 'Standard'})`).join(', ');
-    const orderLines = doc.splitTextToSize(`Order - ${orderStr}`, 35);
+    const orderLines = doc.splitTextToSize(`Order - ${orderStr}`, 50);
     doc.text(orderLines, rightX, currentY);
     currentY += orderLines.length * 5;
 
@@ -727,16 +727,41 @@ const AdminDashboard = () => {
                           </span>
                         </td>
                         <td className="p-4">
-                          <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest border rounded-full ${getStatusColor(order.status)}`}>
-                            {order.status}
-                          </span>
+                          <div className="flex flex-col gap-2">
+                            <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest border rounded-full w-fit ${getStatusColor(order.status)}`}>
+                              {order.status}
+                            </span>
+                            <div className="flex flex-col gap-1 mt-2">
+                              <input 
+                                type="text" 
+                                placeholder="Courier (e.g. India Post)" 
+                                defaultValue={order.courierName}
+                                onBlur={(e) => { if(e.target.value !== order.courierName) updateOrderDetails(order._id, { status: order.status, trackingId: order.trackingId, trackingLink: order.trackingLink, courierName: e.target.value }) }}
+                                className="border border-black/10 px-2 py-1 text-[10px] font-mono outline-none focus:border-luxury-gold min-w-[120px]"
+                              />
+                              <input 
+                                type="text" 
+                                placeholder="Tracking ID" 
+                                defaultValue={order.trackingId}
+                                onBlur={(e) => { if(e.target.value !== order.trackingId) updateOrderDetails(order._id, { status: order.status, courierName: order.courierName, trackingLink: order.trackingLink, trackingId: e.target.value }) }}
+                                className="border border-black/10 px-2 py-1 text-[10px] font-mono outline-none focus:border-luxury-gold min-w-[120px]"
+                              />
+                              <input 
+                                type="text" 
+                                placeholder="Tracking Link (URL)" 
+                                defaultValue={order.trackingLink}
+                                onBlur={(e) => { if(e.target.value !== order.trackingLink) updateOrderDetails(order._id, { status: order.status, trackingId: order.trackingId, courierName: order.courierName, trackingLink: e.target.value }) }}
+                                className="border border-black/10 px-2 py-1 text-[10px] font-mono outline-none focus:border-luxury-gold min-w-[120px]"
+                              />
+                            </div>
+                          </div>
                         </td>
                         <td className="p-4 pr-6">
                           <div className="flex justify-end items-center gap-2">
                             <select
                               className="bg-transparent border border-black/10 text-[10px] font-bold uppercase tracking-widest px-2 py-1 outline-none cursor-pointer"
                               value={order.status}
-                              onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                              onChange={(e) => updateOrderDetails(order._id, { status: e.target.value, trackingId: order.trackingId, courierName: order.courierName, trackingLink: order.trackingLink })}
                             >
                               <option value="processing">Processing</option>
                               <option value="packing">Packing</option>

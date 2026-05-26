@@ -162,6 +162,36 @@ const OrderTracking = () => {
                         </p>
                         <p className="text-xs text-gray-500 mt-2">{order.shippingAddress?.method}</p>
                       </div>
+
+                      {/* Tracking Information */}
+                      {order.trackingId && (
+                        <div className="mt-6 p-4 bg-luxury-gold/5 border border-luxury-gold/20">
+                          <h4 className="text-xs font-bold uppercase tracking-widest text-luxury-gold mb-2">Tracking Information</h4>
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                              <p className="text-sm font-mono text-primary-text mb-1">
+                                ID: <span className="font-bold">{order.trackingId}</span>
+                              </p>
+                              {order.courierName && (
+                                <p className="text-xs text-secondary-text uppercase tracking-widest font-bold">Courier: {order.courierName}</p>
+                              )}
+                              <p className="text-[10px] text-secondary-text mt-3 border-t border-luxury-gold/10 pt-2 font-medium">
+                                Use this tracking ID to track your order via {order.courierName || 'your respective courier'}.
+                              </p>
+                            </div>
+                            {order.trackingLink && (
+                              <a 
+                                href={order.trackingLink} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="bg-primary-text text-white px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-luxury-gold transition-colors text-center whitespace-nowrap"
+                              >
+                                Track Package
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </motion.div>

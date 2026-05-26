@@ -147,8 +147,13 @@ const getAllOrders = async (req, res) => {
 // Update order status (admin)
 const updateOrderStatus = async (req, res) => {
   try {
-    const { status } = req.body;
-    const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    const { status, trackingId, courierName, trackingLink } = req.body;
+    const updateData = { status };
+    if (trackingId !== undefined) updateData.trackingId = trackingId;
+    if (courierName !== undefined) updateData.courierName = courierName;
+    if (trackingLink !== undefined) updateData.trackingLink = trackingLink;
+    
+    const order = await Order.findByIdAndUpdate(req.params.id, updateData, { new: true });
     
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
     

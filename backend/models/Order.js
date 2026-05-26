@@ -28,6 +28,9 @@ const OrderSchema = new mongoose.Schema({
     enum: ['processing', 'packing', 'shipping', 'delivered'],
     default: 'processing'
   },
+  trackingId: { type: String, default: '' },
+  courierName: { type: String, default: '' },
+  trackingLink: { type: String, default: '' },
   paymentId: String,
   paymentStatus: { type: String, default: 'pending' },
   emailSent: { type: Boolean, default: false },
