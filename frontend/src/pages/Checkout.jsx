@@ -59,7 +59,7 @@ const Checkout = () => {
 
   const [formData, setFormData] = useState({
     email: '', phone: '', firstName: '', lastName: '',
-    address: '', city: '', state: '', zip: ''
+    doorNo: '', streetName: '', area: '', landmark: '', district: '', state: '', zip: ''
   });
 
   const isTamilNadu = formData.state.toLowerCase().trim() === 'tamil nadu' || formData.state.toLowerCase().trim() === 'tn';
@@ -103,8 +103,8 @@ const Checkout = () => {
           phone: formData.phone
         },
         shippingAddress: {
-          address: formData.address,
-          city: formData.city,
+          address: `${formData.doorNo}, ${formData.streetName}, ${formData.area}${formData.landmark ? `, ${formData.landmark}` : ''}`,
+          city: formData.district,
           state: formData.state,
           zip: formData.zip,
           method: shipping === 0 ? 'Free Shipping' : (shipping === 50 ? 'Mini Shipping (Rs.50)' : 'Standard Shipping (Rs.100)')
@@ -192,8 +192,8 @@ const Checkout = () => {
           phone: formData.phone
         },
         shippingAddress: {
-          address: formData.address,
-          city: formData.city,
+          address: `${formData.doorNo}, ${formData.streetName}, ${formData.area}${formData.landmark ? `, ${formData.landmark}` : ''}`,
+          city: formData.district,
           state: formData.state,
           zip: formData.zip,
           method: shipping === 0 ? 'Free Shipping' : (shipping === 50 ? 'Mini Shipping (Rs.50)' : 'Standard Shipping (Rs.100)')
@@ -308,14 +308,28 @@ const Checkout = () => {
               <Home size={20} className="text-luxury-gold" /> Shipping Address
             </h2>
             <div className="space-y-4">
-              <div>
-                <label className="block text-xs uppercase tracking-widest text-secondary-text mb-2 font-bold">Address *</label>
-                <input type="text" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} required className="w-full bg-secondary-white border border-black/10 p-3 focus:outline-none focus:border-luxury-gold transition-colors text-sm" placeholder="123 Street, Area" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-secondary-text mb-2 font-bold">Door No *</label>
+                  <input type="text" value={formData.doorNo} onChange={(e) => setFormData({...formData, doorNo: e.target.value})} required className="w-full bg-secondary-white border border-black/10 p-3 focus:outline-none focus:border-luxury-gold transition-colors text-sm" placeholder="12A" />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-secondary-text mb-2 font-bold">Street Name line 1 *</label>
+                  <input type="text" value={formData.streetName} onChange={(e) => setFormData({...formData, streetName: e.target.value})} required className="w-full bg-secondary-white border border-black/10 p-3 focus:outline-none focus:border-luxury-gold transition-colors text-sm" placeholder="Main Street" />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-secondary-text mb-2 font-bold">Area line 2 *</label>
+                  <input type="text" value={formData.area} onChange={(e) => setFormData({...formData, area: e.target.value})} required className="w-full bg-secondary-white border border-black/10 p-3 focus:outline-none focus:border-luxury-gold transition-colors text-sm" placeholder="Downtown" />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-secondary-text mb-2 font-bold">Land mark (optional)</label>
+                  <input type="text" value={formData.landmark} onChange={(e) => setFormData({...formData, landmark: e.target.value})} className="w-full bg-secondary-white border border-black/10 p-3 focus:outline-none focus:border-luxury-gold transition-colors text-sm" placeholder="Near Park" />
+                </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-xs uppercase tracking-widest text-secondary-text mb-2 font-bold">City *</label>
-                  <input type="text" value={formData.city} onChange={(e) => setFormData({...formData, city: e.target.value})} required className="w-full bg-secondary-white border border-black/10 p-3 focus:outline-none focus:border-luxury-gold transition-colors text-sm" placeholder="Chennai" />
+                  <label className="block text-xs uppercase tracking-widest text-secondary-text mb-2 font-bold">District *</label>
+                  <input type="text" value={formData.district} onChange={(e) => setFormData({...formData, district: e.target.value})} required className="w-full bg-secondary-white border border-black/10 p-3 focus:outline-none focus:border-luxury-gold transition-colors text-sm" placeholder="Chennai" />
                 </div>
                  <div>
                   <label className="block text-xs uppercase tracking-widest text-secondary-text mb-2 font-bold">State *</label>
@@ -390,8 +404,8 @@ const Checkout = () => {
                     <MapPin size={14} className="text-luxury-gold" />
                     <span className="text-xs font-bold uppercase tracking-widest text-secondary-text">Shipping To</span>
                   </div>
-                  <p className="text-primary-text">{formData.address}</p>
-                  <p className="text-sm text-secondary-text">{formData.city}, {formData.state} - {formData.zip}</p>
+                  <p className="text-primary-text">{formData.doorNo}, {formData.streetName}, {formData.area}{formData.landmark ? `, ${formData.landmark}` : ''}</p>
+                  <p className="text-sm text-secondary-text">{formData.district}, {formData.state} - {formData.zip}</p>
                 </div>
 
                 {/* Items */}

@@ -49,11 +49,18 @@ const generateInvoicePdf = (order) => {
 
   doc.setFont('Helvetica', 'normal');
   doc.setFontSize(9);
-  doc.text('5/1293 THAI NAGAR Thoothukudi', 15, 26);
-  doc.text('Phone no.: 8072210156', 15, 31);
-  doc.text('Email: fitz1business@gmail.com', 15, 36);
-  doc.text('GSTIN: 33AAKFF3665N1Z0', 15, 41);
-  doc.text('State: 33-Tamil Nadu', 15, 46);
+  
+  // Wrap company address in case it gets long, to avoid hitting logo at X=160
+  const companyAddress = '5/1293 THAI NAGAR Thoothukudi';
+  const splitCompanyAddr = doc.splitTextToSize(companyAddress, 130);
+  doc.text(splitCompanyAddr, 15, 26);
+  
+  let currentHeaderY = 26 + (splitCompanyAddr.length * 4) + 1;
+  
+  doc.text('Phone no.: 8072210156', 15, currentHeaderY);
+  doc.text('Email: fitz1business@gmail.com', 15, currentHeaderY + 5);
+  doc.text('GSTIN: 33AAKFF3665N1Z0', 15, currentHeaderY + 10);
+  doc.text('State: 33-Tamil Nadu', 15, currentHeaderY + 15);
 
   // 3. Logo (Right)
   const logoPath = path.join(__dirname, '../assets/fitz1.png');
@@ -75,7 +82,7 @@ const generateInvoicePdf = (order) => {
   doc.setFont('Helvetica', 'bold');
   doc.setFontSize(14);
   doc.setTextColor(160, 160, 160); // light grey
-  doc.text('Tax Invoice', 105, 57, { align: 'center' });
+  doc.text('Order Invoice', 105, 57, { align: 'center' });
 
   // 5. Bill To (Left) & Invoice Details (Right)
   doc.setTextColor(0, 0, 0);
@@ -95,8 +102,20 @@ const generateInvoicePdf = (order) => {
   const invoiceDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-') : '';
   doc.text(`Date: ${invoiceDate}`, 195, 82, { align: 'right' });
 
-  // 6. Table Headers & Items
   let currentY = 95;
+  
+  // Add customer address with wrapping so it doesn't overlap the right side
+  if (order.shippingAddress) {
+    const { address, city, state, zip } = order.shippingAddress;
+    const addrLine = `${address || ''}, ${city || ''}, ${state || ''} - ${zip || ''}`.replace(/^[\s,]+|[\s,]+$/g, '');
+    if (addrLine) {
+      const splitAddr = doc.splitTextToSize(addrLine, 85); // limit width to 85mm
+      doc.text(splitAddr, 15, 88);
+      currentY = Math.max(95, 88 + (splitAddr.length * 4) + 2);
+    }
+  }
+
+  // 6. Table Headers & Items
   
   // Grey Bar for Total (Right side)
   doc.setFillColor(169, 169, 169); // Dark grey
@@ -125,7 +144,9 @@ const generateInvoicePdf = (order) => {
   let itemsEndY = currentY;
   if (order.items && order.items.length > 0) {
     order.items.forEach((item) => {
-      const descText = `${item.name} ${item.color || 'Standard'} Finish`;
+      const color = item.color || 'Standard';
+      const suffix = color.toLowerCase().includes('finish') ? '' : ' Finish';
+      const descText = `${item.name} ${color}${suffix}`;
       doc.text(descText, 15, itemsEndY);
       itemsEndY += 6;
     });
