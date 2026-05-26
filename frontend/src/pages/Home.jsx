@@ -89,12 +89,12 @@ const IMAGE_REVIEWS = [
 
 const PHOTOSHOOT_GALLERY = [
   { src: photo3, title: "Premium Mahogany Body", desc: "45mm hand-sanded ergonomic handles with custom Mahogany body for absolute control." },
-  { src: photo5, title: "Rock-Solid Base Joint", desc: "CNC-milled interlocking joints for zero wobble under load." },
-  { src: photo6, title: "Portable Elite Training", desc: "Take your gymnastics and calisthenics training anywhere." },
-  { src: photo7, title: "Mahogany Finish Aesthetics", desc: "Premium Mahogany wood grain finish that elevates any room's decor." },
-  { src: vary, title: "Zero Slip Grip", desc: "Industrial rubber padding for ultimate surface traction." },
-  // { src: photo4, title: "Sustainable Mahogany", desc: "Carefully sourced Mahogany body wood crafted to last a lifetime." }
+    { src: photo7, title: "Mahogany Finish Aesthetics", desc: "Premium Mahogany wood grain finish that elevates any room's decor." },
+  { src: vary, title: "Portable Elite Training", desc: "Take your gymnastics and calisthenics training anywhere." },
+
+  { src: photo5, title: "Rock-Solid Base Joint", desc: "CNC-milled interlocking joints for zero wobble under load." }
 ];
+
 
 const HERO_IMAGES = [photo1, photo3, photo2];
 
@@ -605,7 +605,7 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {PHOTOSHOOT_GALLERY.map((photo, index) => (
               <motion.div
                 key={index}
@@ -939,13 +939,13 @@ const VideoReviewCard = ({ video }) => {
             </div>
           </>
         )}
-        <div className="absolute bottom-6 left-6 right-6">
+        {/* <div className="absolute bottom-6 left-6 right-6">
           <div className="flex text-luxury-gold mb-2">
             {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
           </div>
           <p className="text-white font-bold text-sm">"{video.text}"</p>
           <p className="text-white/70 text-xs mt-1">{video.username}</p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

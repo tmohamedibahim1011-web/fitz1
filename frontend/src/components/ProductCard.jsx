@@ -5,6 +5,11 @@ import { Star, ShoppingBag, X, Check, AlertTriangle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 
+import regularnatural from '../assets/products/regularnatural.webp';
+import regularblack from '../assets/products/regularblack.webp';
+import mininatural from '../assets/products/mininatural.webp';
+import miniblack from '../assets/products/miniblack.webp';
+
 const DEFAULT_COLORS = [
   { id: 'natural', name: 'Natural Finish', hex: '#D7CCC8', priceOffset: 0, image: '', hoverImage: '' },
   { id: 'black', name: 'Shadow Black', hex: '#1C1C1C', priceOffset: 100, image: '', hoverImage: '' },
@@ -23,6 +28,15 @@ const ProductCard = ({ product, index }) => {
 
   // Get image based on selected color
   const getProductImage = () => {
+    const isMini = product?.name?.toLowerCase().includes('mini');
+    const isBlack = (selectedColor && selectedColor.id === 'black') || 
+                    (!selectedColor && colors[0]?.id === 'black');
+    
+    if (isMini && isBlack) return miniblack;
+    if (isMini && !isBlack) return mininatural;
+    if (!isMini && isBlack) return regularblack;
+    if (!isMini && !isBlack) return regularnatural;
+
     if (selectedColor && selectedColor.image) {
       return selectedColor.image;
     }
@@ -55,7 +69,7 @@ const ProductCard = ({ product, index }) => {
     }
 
     const finalPrice = basePrice + (selectedColor.priceOffset || 0);
-    const imageToUse = selectedColor.image || product.image;
+    const imageToUse = getProductImage();
 
     addToCart(
       {
@@ -94,7 +108,8 @@ const ProductCard = ({ product, index }) => {
 
   const currentPrice = basePrice + (selectedColor?.priceOffset || 0);
   const currentImage = getProductImage();
-  const hoverImage = getHoverImage();
+  const hoverImage = getHoverImage(); // we can leave hoverImage as is, though the user might not even use it
+  const objectPos = product?.name?.toLowerCase().includes('mini') ? 'center' : 'center 48%';
 
   return (
     <motion.div
@@ -132,7 +147,8 @@ const ProductCard = ({ product, index }) => {
             src={currentImage}
             alt={product.name}
             loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover object-center transform scale-110 group-hover:scale-115 transition-transform duration-700 ease-out"
+            className="absolute inset-0 w-full h-full object-cover transform transition-transform duration-700 ease-out scale-110 group-hover:scale-115"
+            style={{ objectPosition: objectPos }}
           />
           
           {hoverImage && (
@@ -140,7 +156,8 @@ const ProductCard = ({ product, index }) => {
               src={hoverImage}
               alt={`${product.name} alternate`}
               loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover object-center opacity-0 group-hover:opacity-100 transform scale-110 group-hover:scale-115 transition-all duration-700 ease-out"
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transform transition-all duration-700 ease-out scale-110 group-hover:scale-115"
+              style={{ objectPosition: objectPos }}
             />
           )}
         </Link>
@@ -169,10 +186,11 @@ const ProductCard = ({ product, index }) => {
                   src={currentImage}
                   alt={product.name}
                   loading="lazy"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transform scale-110"
+                  style={{ objectPosition: objectPos }}
                 />
                 {selectedColor && (
-                  <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 text-xs font-bold">
+                  <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 text-xs font-bold z-10">
                     {selectedColor.name}
                   </div>
                 )}
@@ -237,13 +255,13 @@ const ProductCard = ({ product, index }) => {
       </div>
 
       <div className="p-4 flex flex-col flex-grow">
-        <div className="flex justify-between items-start mb-2">
-          <Link to={`/product/${productId}`} className="block">
-            <h3 className="font-bold text-lg text-primary-text group-hover:text-luxury-gold">
+        <div className="flex justify-between items-start mb-2 gap-4">
+          <Link to={`/product/${productId}`} className="block flex-grow">
+            <h3 className="font-bold text-lg text-primary-text group-hover:text-luxury-gold line-clamp-2">
               {product.name}
             </h3>
           </Link>
-          <span className="font-medium text-primary-text">Rs. {basePrice.toLocaleString()}</span>
+          <span className="font-medium text-primary-text flex-shrink-0 text-right">Rs. {basePrice.toLocaleString()}</span>
         </div>
         
         <p className="text-secondary-text text-sm mb-3">{product.material}</p>

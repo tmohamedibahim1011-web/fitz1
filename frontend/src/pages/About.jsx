@@ -100,7 +100,7 @@ const About = () => {
               />
             </div>
             {/* Decorative Badge */}
-            <div className="absolute -bottom-6 -left-6 bg-primary-text text-white p-6 rounded-2xl shadow-xl hidden sm:flex items-center gap-4 border border-luxury-gold/30">
+            {/* <div className="absolute -bottom-6 -left-6 bg-primary-text text-white p-6 rounded-2xl shadow-xl hidden sm:flex items-center gap-4 border border-luxury-gold/30">
               <div className="w-12 h-12 rounded-full bg-luxury-gold/20 flex items-center justify-center text-luxury-gold">
                 <Sparkles size={24} />
               </div>
@@ -108,7 +108,7 @@ const About = () => {
                 <p className="text-xs font-mono uppercase tracking-widest text-luxury-gold">Established</p>
                 <p className="text-lg font-bold uppercase tracking-wider font-serif">Premium Quality</p>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </section>

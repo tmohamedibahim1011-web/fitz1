@@ -8,6 +8,11 @@ import axios from 'axios';
 import regularDim from '../assets/dimension/regualr.jpeg';
 import miniDim from '../assets/dimension/min.jpeg';
 
+import regularnatural from '../assets/products/regularnatural.webp';
+import regularblack from '../assets/products/regularblack.webp';
+import mininatural from '../assets/products/mininatural.webp';
+import miniblack from '../assets/products/miniblack.webp';
+
 const DEFAULT_COLORS = [
   { id: 'natural', name: 'Natural Finish', hex: '#D7CCC8', priceOffset: 0 },
   { id: 'black', name: 'Shadow Black', hex: '#1C1C1C', priceOffset: 100 },
@@ -45,6 +50,16 @@ const ProductDetail = () => {
   const colors = product?.colors || DEFAULT_COLORS;
   const showLowStock = product?.stock !== undefined && product.stock > 0 && product.stock <= 10;
   const isOutOfStock = product?.stock !== undefined && product.stock < 1;
+  const isMini = product?.size === 'mini' || product?.name?.toLowerCase().includes('mini');
+  const isBlack = selectedColor?.id === 'black';
+
+  let localImage = '';
+  if (isMini && isBlack) localImage = miniblack;
+  if (isMini && !isBlack) localImage = mininatural;
+  if (!isMini && isBlack) localImage = regularblack;
+  if (!isMini && !isBlack) localImage = regularnatural;
+
+  const currentImage = localImage || selectedColor?.image || product?.colors?.[0]?.image || product?.image || '';
 
   const handleAddToCart = () => {
     if (!selectedColor) {
@@ -93,26 +108,24 @@ const ProductDetail = () => {
     );
   }
 
-  const currentImage = selectedColor?.image || product.colors?.[0]?.image || product.image || '';
-  const dimensionImg = product.size === 'mini' ? miniDim : regularDim;
+  const dimensionImg = isMini ? miniDim : regularDim;
   const images = [currentImage, dimensionImg].filter(Boolean);
   const isDimensionImgActive = images[activeImage] === dimensionImg;
   const currentPrice = (product.basePrice || 0) + (selectedColor?.priceOffset || 0);
-  const isNatural = selectedColor?.id === 'natural';
-  const isBlack = selectedColor?.id === 'black';
-  const isMini = product.size === 'mini';
 
   const objectPosition = isDimensionImgActive 
     ? 'center' 
-    : 'center 48%';
+    : (isMini ? 'center' : 'center 48%');
+
+  const baseScale = 1.10;
 
   const initialScale = isDimensionImgActive 
     ? 1.0 
-    : 1.05;
+    : baseScale + 0.05;
 
   const animateScale = isDimensionImgActive 
     ? 1.0 
-    : 1.0;
+    : baseScale;
 
   return (
     <div className="bg-primary-white min-h-screen pt-24 pb-32">
@@ -135,7 +148,12 @@ const ProductDetail = () => {
                     onClick={() => setActiveImage(idx)}
                     className={`relative aspect-square flex-shrink-0 w-20 md:w-full overflow-hidden transition-all duration-300 ${activeImage === idx ? 'ring-2 ring-luxury-gold ring-offset-2' : 'opacity-60 hover:opacity-100'}`}
                   >
-                    <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
+                    <img 
+                      src={img} 
+                      alt={`Thumbnail ${idx}`} 
+                      className={`w-full h-full object-cover ${idx === 0 ? 'scale-110' : ''}`}
+                      style={{ objectPosition: idx === 0 ? objectPosition : 'center' }}
+                    />
                   </button>
                 ))}
               </div>
@@ -151,7 +169,7 @@ const ProductDetail = () => {
                     style={{ objectPosition }}
                     src={images[activeImage] || currentImage}
                     alt={product.name}
-                    className={`w-full h-full group-hover:scale-115 transition-transform duration-700 ease-out origin-center ${isDimensionImgActive ? 'object-contain bg-white p-6 md:p-8' : 'object-cover'}`}
+                    className={`w-full h-full transition-transform duration-700 ease-out origin-center ${isDimensionImgActive ? 'object-contain bg-white p-6 md:p-8' : 'object-cover group-hover:scale-125'}`}
                   />
                 </AnimatePresence>
               </div>
