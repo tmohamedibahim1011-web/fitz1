@@ -89,14 +89,14 @@ const IMAGE_REVIEWS = [
 
 const PHOTOSHOOT_GALLERY = [
   { src: photo3, title: "Premium Mahogany Body", desc: "45mm hand-sanded ergonomic handles with custom Mahogany body for absolute control." },
-    { src: photo7, title: "Mahogany Finish Aesthetics", desc: "Premium Mahogany wood grain finish that elevates any room's decor." },
+  { src: photo7, title: "Mahogany Finish Aesthetics", desc: "Premium Mahogany wood grain finish that elevates any room's decor." },
   { src: vary, title: "Portable Elite Training", desc: "Take your gymnastics and calisthenics training anywhere." },
 
   { src: photo5, title: "Rock-Solid Base Joint", desc: "CNC-milled interlocking joints for zero wobble under load." }
 ];
 
 
-const HERO_IMAGES = [photo1, photo3, photo2];
+const HERO_IMAGES = [photo1, photo2, photo3];
 
 const MASTERY_FEATURES = [
   {
@@ -193,7 +193,7 @@ const Home = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setHeroIndex((prev) => (prev + 1) % HERO_IMAGES.length);
-    },4500);
+    }, 4500);
     return () => clearInterval(timer);
   }, []);
 
@@ -437,7 +437,7 @@ const Home = () => {
           </div>
 
           {/* 350 KG Capacity Animated Weight Icon — Below Finishes */}
-         
+
         </div>
       </section>
 
@@ -705,8 +705,8 @@ const Home = () => {
             />
 
             {/* Fade-out overlay at the end of the video loop */}
-            <div 
-              className={`absolute inset-0 bg-black pointer-events-none transition-opacity duration-1000 ease-in-out ${isProcessVideoFading ? 'opacity-100' : 'opacity-0'}`} 
+            <div
+              className={`absolute inset-0 bg-black pointer-events-none transition-opacity duration-1000 ease-in-out ${isProcessVideoFading ? 'opacity-100' : 'opacity-0'}`}
             />
 
             {/* Dark gradient for bottom text readability */}
