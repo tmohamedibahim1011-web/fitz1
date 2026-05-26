@@ -746,7 +746,7 @@ const Home = () => {
             <div className="bg-white/5 border border-white/10 p-8">
               <span className="text-luxury-gold font-mono text-xl mb-4 block">03</span>
               <h4 className="font-bold uppercase tracking-widest mb-4">The Final Finish</h4>
-              <p className="text-white/70 text-sm leading-relaxed font-light">Sanded by hand through five grits and sealed with natural mineral oil. The result is a grip that feels alive, not plastic.</p>
+              <p className="text-white/70 text-sm leading-relaxed font-light">Sanded by hand through five grits and sealed with natural mineral oil. The result is a grip that feels alive, <span className="text-luxury-gold font-semibold">not plastic</span>.</p>
             </div>
           </div>
         </div>

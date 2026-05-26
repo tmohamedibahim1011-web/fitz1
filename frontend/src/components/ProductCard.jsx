@@ -278,12 +278,6 @@ const ProductCard = ({ product, index }) => {
               />
             ))}
           </div>
-          <div className="flex items-center gap-1 text-luxury-gold">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} fill="currentColor" size={12} className={i >= (product.rating || 5) ? 'text-gray-300' : ''} />
-            ))}
-            <span className="text-secondary-text text-xs ml-1">({product.reviewCount || 0})</span>
-          </div>
         </div>
 
         <button 
