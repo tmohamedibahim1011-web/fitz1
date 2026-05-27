@@ -516,7 +516,7 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
               <div className="bg-white p-6 border border-black/5 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-2">Total Revenue</p>
-                <h3 className="text-3xl font-bold text-primary-text">Rs. {totalRevenue.toLocaleString()}</h3>
+                <h3 className="text-3xl font-bold text-primary-text">₹{totalRevenue.toLocaleString()}</h3>
               </div>
               <div className="bg-white p-6 border border-black/5 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-2">Total Orders</p>
@@ -553,7 +553,7 @@ const AdminDashboard = () => {
                       <tr key={order._id} className="border-b border-black/5 hover:bg-secondary-white/20 transition-colors text-sm">
                         <td className="p-4 font-mono font-bold text-xs">{order.orderId}</td>
                         <td className="p-4">{order.customerInfo?.firstName} {order.customerInfo?.lastName}</td>
-                        <td className="p-4 font-bold">Rs. {order.totalAmount.toLocaleString()}</td>
+                        <td className="p-4 font-bold">₹{order.totalAmount.toLocaleString()}</td>
                         <td className="p-4">
                           <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest border rounded-full ${getStatusColor(order.status)}`}>
                             {order.status}
@@ -619,7 +619,7 @@ const AdminDashboard = () => {
               <div className="bg-white p-6 border border-black/5 shadow-sm relative overflow-hidden group hover:border-luxury-gold/50 transition-colors">
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><ArrowUpRight size={48} /></div>
                 <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-2">Total Revenue</p>
-                <h3 className="text-3xl font-bold text-primary-text mb-1">${totalRevenue.toFixed(2)}</h3>
+                <h3 className="text-3xl font-bold text-primary-text mb-1">₹{totalRevenue.toFixed(2)}</h3>
               </div>
               <div className="bg-white p-6 border border-black/5 shadow-sm relative overflow-hidden group hover:border-luxury-gold/50 transition-colors">
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><ShoppingCart size={48} /></div>
@@ -815,7 +815,7 @@ const AdminDashboard = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="p-4 font-bold">Rs. {product.basePrice?.toLocaleString()}</td>
+                        <td className="p-4 font-bold">₹{product.basePrice?.toLocaleString()}</td>
                         <td className="p-4">
                           <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest border rounded-full 
                             ${product.stock < 10 ? 'bg-red-100 text-red-800 border-red-200' : 'bg-green-100 text-green-800 border-green-200'}`}>
