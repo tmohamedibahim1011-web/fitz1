@@ -194,6 +194,42 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteOrder = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this order? This action cannot be undone.')) return;
+    try {
+      const token = localStorage.getItem('adminToken');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      await axios.delete(`${import.meta.env.VITE_API_URL}/admin/orders/${id}`, { headers, withCredentials: true });
+      setOrders(orders.filter(o => o._id !== id));
+      setSelectedOrders(selectedOrders.filter(orderId => orderId !== id));
+      toast.success('Order deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete order');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const ordersToDelete = orders.filter(o => selectedOrders.includes(o._id) && filteredOrders.some(f => f._id === o._id));
+    if (ordersToDelete.length === 0) return toast.error('No filtered orders selected');
+    if (!window.confirm(`Are you sure you want to delete ${ordersToDelete.length} selected orders? This action cannot be undone.`)) return;
+
+    try {
+      const token = localStorage.getItem('adminToken');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      await Promise.all(ordersToDelete.map(o =>
+        axios.delete(`${import.meta.env.VITE_API_URL}/admin/orders/${o._id}`, { headers, withCredentials: true })
+      ));
+
+      const deletedIds = ordersToDelete.map(o => o._id);
+      setOrders(orders.filter(o => !deletedIds.includes(o._id)));
+      setSelectedOrders([]);
+      toast.success(`Successfully deleted ${ordersToDelete.length} orders`);
+    } catch (error) {
+      toast.error('Bulk deletion failed');
+    }
+  };
+
   const handleBulkUpdate = async () => {
     if (selectedOrders.length === 0) return toast.error('No orders selected');
     if (!bulkStatus) return toast.error('Select a status for bulk update');
@@ -678,6 +714,9 @@ const AdminDashboard = () => {
                     <button onClick={handleBulkUpdate} className="bg-primary-text text-white px-4 py-2 text-xs font-bold uppercase tracking-widest hover:bg-luxury-gold transition-colors">
                       Apply
                     </button>
+                    <button onClick={handleBulkDelete} className="bg-red-600 text-white px-4 py-2 text-xs font-bold uppercase tracking-widest hover:bg-red-700 transition-colors flex items-center gap-1.5">
+                      <Trash2 size={14} /> Delete Selected
+                    </button>
                   </div>
                 )}
               </div>
@@ -762,6 +801,9 @@ const AdminDashboard = () => {
                             </select>
                             <button onClick={() => handleDownloadPDF(order.orderId)} className="p-1 text-secondary-text hover:text-luxury-gold transition-colors" title="Download Invoice">
                               <FileText size={18} />
+                            </button>
+                            <button onClick={() => handleDeleteOrder(order._id)} className="p-1 text-secondary-text hover:text-red-500 transition-colors" title="Delete Order">
+                              <Trash2 size={18} />
                             </button>
                           </div>
                         </td>
