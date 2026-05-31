@@ -526,7 +526,7 @@ const Home = () => {
                       fontFamily="Outfit, sans-serif"
                       letterSpacing="-0.5"
                     >
-                      350
+                      250 +
                     </text>
                     <text
                       x="60"
