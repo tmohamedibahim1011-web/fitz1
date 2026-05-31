@@ -63,7 +63,7 @@ const seedProducts = async () => {
     {
       name: 'Pro Series Regular Parallettes',
       description: 'Premium Mahogany Wood parallettes for professional training. 45mm ergonomic grip, 450mm length, 140mm base width, 130mm height. 350kg weight capacity.',
-      basePrice: 1599,
+      basePrice: 1499,
       size: 'regular',
       material: 'Premium Mahogany Wood',
       badge: 'Signature Series',
@@ -78,7 +78,7 @@ const seedProducts = async () => {
     {
       name: 'Mini Parallettes',
       description: 'Travel-friendly mini parallettes for training anywhere. Compact 45mm grip, 250mm length, 120mm base width, 100mm height. Perfect for on-the-go.',
-      basePrice: 899,
+      basePrice: 799,
       size: 'mini',
       material: 'Premium Mahogany Wood',
       badge: 'Travel Edition',
