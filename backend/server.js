@@ -15,6 +15,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// Trust reverse proxy (Render, Vercel, Heroku, etc.)
+// This allows express-rate-limit to retrieve the client's real IP address from headers
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(express.json({ 
   limit: '10mb',
@@ -34,9 +38,11 @@ app.use(helmet());
 app.use(morgan('dev'));
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: 'Too many requests from this IP, please try again after 15 minutes'
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500, // Limit each IP to 500 requests per windowMs (more reasonable for standard browsing/testing)
+  message: 'Too many requests from this IP, please try again after 15 minutes',
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 app.use('/api', limiter);
 
