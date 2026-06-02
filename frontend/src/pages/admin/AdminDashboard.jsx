@@ -268,14 +268,19 @@ const AdminDashboard = () => {
   };
 
   const handleDownloadExcel = () => {
-    if (filteredOrders.length === 0) {
-      toast.error('No orders to export');
+    // Filter to include only paid/completed orders
+    const paidFilteredOrders = filteredOrders.filter(
+      order => order.paymentStatus === 'paid' || order.paymentStatus === 'completed'
+    );
+
+    if (paidFilteredOrders.length === 0) {
+      toast.error('No paid orders to export');
       return;
     }
 
     // Create CSV content
     const headers = ['Order ID', 'Date', 'Customer Name', 'Phone', 'Items', 'Total', 'Status'];
-    const rows = filteredOrders.map(order => [
+    const rows = paidFilteredOrders.map(order => [
       order.orderId,
       new Date(order.createdAt).toLocaleDateString(),
       `${order.customerInfo?.firstName || ''} ${order.customerInfo?.lastName || ''}`,
@@ -293,7 +298,7 @@ const AdminDashboard = () => {
     link.download = `orders_export_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
-    toast.success(`Exported ${filteredOrders.length} orders`);
+    toast.success(`Exported ${paidFilteredOrders.length} paid orders`);
   };
 
   // ── Load logo as base64 for jsPDF ──────────────────────────────────────────
@@ -400,6 +405,11 @@ const AdminDashboard = () => {
       return;
     }
 
+    if (order.paymentStatus !== 'paid' && order.paymentStatus !== 'completed') {
+      toast.error('Invoices can only be downloaded for paid orders');
+      return;
+    }
+
     const toastId = toast.loading('Generating PDF...');
     try {
       const logoBase64 = await loadLogoBase64(fitzLogo);
@@ -424,7 +434,17 @@ const AdminDashboard = () => {
       return;
     }
 
-    const toastId = toast.loading(`Generating ${targetOrders.length} PDFs...`);
+    // Filter targetOrders to only include paid/completed orders
+    const paidTargetOrders = targetOrders.filter(
+      o => o.paymentStatus === 'paid' || o.paymentStatus === 'completed'
+    );
+
+    if (paidTargetOrders.length === 0) {
+      toast.error('No paid orders found to download');
+      return;
+    }
+
+    const toastId = toast.loading(`Generating ${paidTargetOrders.length} PDFs...`);
     try {
       const logoBase64 = await loadLogoBase64(fitzLogo);
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a6' });
@@ -469,7 +489,9 @@ const AdminDashboard = () => {
     }
   };
 
-  const totalRevenue = orders.reduce((acc, curr) => acc + curr.totalAmount, 0);
+  const totalRevenue = orders
+    .filter(o => o.paymentStatus === 'paid' || o.paymentStatus === 'completed')
+    .reduce((acc, curr) => acc + curr.totalAmount, 0);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -642,10 +664,10 @@ const AdminDashboard = () => {
                 </button>
                 <button
                   onClick={handleBulkDownload}
-                  disabled={filteredOrders.length === 0}
+                  disabled={filteredOrders.filter(o => o.paymentStatus === 'paid' || o.paymentStatus === 'completed').length === 0}
                   className="flex items-center gap-2 bg-white border border-black/10 px-4 py-2 text-xs font-bold uppercase tracking-widest hover:border-luxury-gold hover:text-luxury-gold transition-colors shadow-sm disabled:opacity-50"
                 >
-                  <FileText size={16} /> Download Filtered Invoices ({filteredOrders.length})
+                  <FileText size={16} /> Download Filtered Invoices ({filteredOrders.filter(o => o.paymentStatus === 'paid' || o.paymentStatus === 'completed').length})
                 </button>
               </div>
             </header>
@@ -799,9 +821,11 @@ const AdminDashboard = () => {
                               <option value="shipping">Shipping</option>
                               <option value="delivered">Delivered</option>
                             </select>
-                            <button onClick={() => handleDownloadPDF(order.orderId)} className="p-1 text-secondary-text hover:text-luxury-gold transition-colors" title="Download Invoice">
-                              <FileText size={18} />
-                            </button>
+                            {(order.paymentStatus === 'paid' || order.paymentStatus === 'completed') && (
+                              <button onClick={() => handleDownloadPDF(order.orderId)} className="p-1 text-secondary-text hover:text-luxury-gold transition-colors" title="Download Invoice">
+                                <FileText size={18} />
+                              </button>
+                            )}
                             <button onClick={() => handleDeleteOrder(order._id)} className="p-1 text-secondary-text hover:text-red-500 transition-colors" title="Delete Order">
                               <Trash2 size={18} />
                             </button>
