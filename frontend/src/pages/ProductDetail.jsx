@@ -53,6 +53,9 @@ const ProductDetail = () => {
   const isMini = product?.size === 'mini' || product?.name?.toLowerCase().includes('mini');
   const isBlack = selectedColor?.id === 'black';
 
+  const isSelectedColorOutOfStock = selectedColor && selectedColor.stock !== undefined && selectedColor.stock < 1;
+  const isSelectedColorLowStock = selectedColor && selectedColor.stock !== undefined && selectedColor.stock > 0 && selectedColor.stock <= 10;
+
   let localImage = '';
   if (isMini && isBlack) localImage = miniblack;
   if (isMini && !isBlack) localImage = mininatural;
@@ -67,8 +70,8 @@ const ProductDetail = () => {
       return;
     }
 
-    if (isOutOfStock) {
-      toast.error('This product is out of stock.');
+    if (isOutOfStock || isSelectedColorOutOfStock) {
+      toast.error('This option is out of stock.');
       return;
     }
 
@@ -179,22 +182,27 @@ const ProductDetail = () => {
           {/* PRODUCT INFO */}
           <div className="w-full lg:w-2/5">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              {(product.badge || showLowStock || isOutOfStock) && (
+              {(product.badge || showLowStock || isOutOfStock || isSelectedColorLowStock || isSelectedColorOutOfStock) && (
                   <div className="flex gap-2 mb-4">
-                    {product.badge && !isOutOfStock && (
+                    {product.badge && !isOutOfStock && !isSelectedColorOutOfStock && (
                       <span className="bg-primary-text text-white px-3 py-1 text-xs font-bold uppercase tracking-widest">
                         {product.badge}
                       </span>
                     )}
-                    {showLowStock && !isOutOfStock && (
-                      <span className="bg-luxury-gold text-white px-3 py-1 text-xs font-bold uppercase tracking-widest flex items-center gap-1">
-                        <AlertTriangle size={12} /> Only {product.stock} left
+                    {isOutOfStock || isSelectedColorOutOfStock ? (
+                      <span className="bg-red-500 text-white px-3 py-1 text-xs font-bold uppercase tracking-widest flex items-center gap-1 shadow">
+                        <AlertTriangle size={12} /> OUT OF STOCK
                       </span>
-                    )}
-                    {isOutOfStock && (
-                      <span className="bg-red-500 text-white px-3 py-1 text-xs font-bold uppercase tracking-widest">
-                        OUT OF STOCK
+                    ) : isSelectedColorLowStock ? (
+                      <span className="bg-luxury-gold text-white px-3 py-1 text-xs font-bold uppercase tracking-widest flex items-center gap-1 shadow">
+                        <AlertTriangle size={12} /> Left {selectedColor.stock} pieces only
                       </span>
+                    ) : (
+                      showLowStock && (
+                        <span className="bg-luxury-gold text-white px-3 py-1 text-xs font-bold uppercase tracking-widest flex items-center gap-1">
+                          <AlertTriangle size={12} /> Only {product.stock} left
+                        </span>
+                      )
                     )}
                   </div>
                 )}
@@ -217,27 +225,46 @@ const ProductDetail = () => {
                   <h3 className="text-sm font-bold uppercase tracking-widest text-primary-text">
                     Select Finish <span className="text-red-500">*</span>
                   </h3>
-                  <span className="text-xs font-medium text-secondary-text">{selectedColor ? selectedColor.name : 'None selected'}</span>
+                  <span className="text-xs font-medium text-secondary-text">
+                    {selectedColor 
+                      ? `${selectedColor.name} ${
+                          selectedColor.stock !== undefined && selectedColor.stock < 1 
+                            ? '(Out of Stock)' 
+                            : (selectedColor.stock !== undefined && selectedColor.stock > 0 && selectedColor.stock <= 10 
+                               ? `- Left ${selectedColor.stock} pieces only` 
+                               : '')
+                        }` 
+                      : 'None selected'}
+                  </span>
                 </div>
                 <div className="flex gap-4">
-                  {colors.map((color) => (
-                    <button
-                      key={color.id}
-                      onClick={() => setSelectedColor(color)}
-                      disabled={isOutOfStock}
-                      className={`relative w-12 h-12 rounded-full border-2 transition-all duration-300 flex items-center justify-center
-                        ${selectedColor?.id === color.id ? 'border-luxury-gold scale-110' : 'border-transparent hover:scale-105'}
-                        ${isOutOfStock ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      style={{ padding: '2px' }}
-                    >
-                      <div className="w-full h-full rounded-full shadow-inner" style={{ backgroundColor: color.hex }}></div>
-                      {selectedColor?.id === color.id && (
-                        <motion.div layoutId="color-check" className="absolute inset-0 flex items-center justify-center text-white mix-blend-difference">
-                          <Check size={16} />
-                        </motion.div>
-                      )}
-                    </button>
-                  ))}
+                  {colors.map((color) => {
+                    const isColorOutOfStock = color.stock !== undefined && color.stock < 1;
+                    return (
+                      <button
+                        key={color.id}
+                        onClick={() => setSelectedColor(color)}
+                        disabled={isOutOfStock || isColorOutOfStock}
+                        className={`relative w-12 h-12 rounded-full border-2 transition-all duration-300 flex items-center justify-center
+                          ${selectedColor?.id === color.id ? 'border-luxury-gold scale-110' : 'border-transparent hover:scale-105'}
+                          ${isOutOfStock || isColorOutOfStock ? 'opacity-40 cursor-not-allowed' : ''}`}
+                        style={{ padding: '2px' }}
+                        title={`${color.name} ${isColorOutOfStock ? '(Out of Stock)' : ''}`}
+                      >
+                        <div className="w-full h-full rounded-full shadow-inner" style={{ backgroundColor: color.hex }}></div>
+                        {selectedColor?.id === color.id && !isColorOutOfStock && (
+                          <motion.div layoutId="color-check" className="absolute inset-0 flex items-center justify-center text-white mix-blend-difference">
+                            <Check size={16} />
+                          </motion.div>
+                        )}
+                        {isColorOutOfStock && (
+                          <div className="absolute inset-0 flex items-center justify-center text-white mix-blend-difference font-bold text-lg select-none">
+                            ×
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -251,16 +278,16 @@ const ProductDetail = () => {
 
                 <button 
                   onClick={handleAddToCart}
-                  disabled={isAdding || isOutOfStock}
+                  disabled={isAdding || isOutOfStock || isSelectedColorOutOfStock}
                   className={`flex-grow text-white py-4 font-bold uppercase tracking-widest text-sm transition-colors relative overflow-hidden
-                    ${isOutOfStock ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary-text hover:bg-luxury-gold'}`}
+                    ${isOutOfStock || isSelectedColorOutOfStock ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary-text hover:bg-luxury-gold'}`}
                 >
                   <AnimatePresence mode="wait">
                     {isAdding ? (
                       <motion.div key="adding" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} className="flex items-center justify-center gap-2">
                         <Check size={18} /> Added
                       </motion.div>
-                    ) : isOutOfStock ? (
+                    ) : isOutOfStock || isSelectedColorOutOfStock ? (
                       <motion.div key="outofstock" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }}>
                         Out of Stock
                       </motion.div>

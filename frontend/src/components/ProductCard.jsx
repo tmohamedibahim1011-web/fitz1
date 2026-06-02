@@ -63,8 +63,9 @@ const ProductCard = ({ product, index }) => {
       return;
     }
 
-    if (product.stock !== undefined && product.stock < 1) {
-      toast.error('This product is out of stock.');
+    const isSelectedColorOutOfStock = selectedColor.stock !== undefined && selectedColor.stock < 1;
+    if (isOutOfStock || isSelectedColorOutOfStock) {
+      toast.error('This option is out of stock.');
       return;
     }
 
@@ -91,9 +92,10 @@ const ProductCard = ({ product, index }) => {
     e.preventDefault();
     e.stopPropagation();
     setShowQuickAdd(true);
-    // Set first color as default
+    // Set first in-stock color as default
     if (!selectedColor && colors.length > 0) {
-      setSelectedColor(colors[0]);
+      const firstInStockColor = colors.find(c => c.stock === undefined || c.stock > 0);
+      setSelectedColor(firstInStockColor || colors[0]);
     }
   };
 
@@ -105,6 +107,9 @@ const ProductCard = ({ product, index }) => {
     setShowQuickAdd(false);
     setSelectedColor(null);
   };
+
+  const isSelectedColorOutOfStock = selectedColor && selectedColor.stock !== undefined && selectedColor.stock < 1;
+  const isSelectedColorLowStock = selectedColor && selectedColor.stock !== undefined && selectedColor.stock > 0 && selectedColor.stock <= 10;
 
   const currentPrice = basePrice + (selectedColor?.priceOffset || 0);
   const currentImage = getProductImage();
@@ -194,28 +199,50 @@ const ProductCard = ({ product, index }) => {
                     {selectedColor.name}
                   </div>
                 )}
+                {/* Out of Stock and Low Stock Badges inside Quick Add */}
+                <div className="absolute top-2 left-2 z-20 flex flex-col gap-2">
+                  {(isOutOfStock || isSelectedColorOutOfStock) && (
+                    <span className="bg-red-500 text-white text-[9px] font-bold uppercase tracking-widest px-2 py-1 shadow">
+                      OUT OF STOCK
+                    </span>
+                  )}
+                  {!isOutOfStock && !isSelectedColorOutOfStock && isSelectedColorLowStock && (
+                    <span className="bg-luxury-gold text-white text-[9px] font-bold uppercase tracking-widest px-2 py-1 flex items-center gap-1 shadow">
+                      <AlertTriangle size={10} /> Left {selectedColor.stock} pieces only
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Color Selection */}
               <div className="mb-4">
                 <div className="flex gap-3 justify-center">
-                  {colors.map((color, idx) => (
-                    <button
-                      key={color.id || idx}
-                      onClick={() => handleColorSelect(color, idx)}
-                      className={`relative w-12 h-12 rounded-full border-2 transition-all ${
-                        selectedColor?.id === color.id ? 'border-luxury-gold scale-110' : 'border-gray-200 hover:scale-105'
-                      }`}
-                      style={{ backgroundColor: color.hex }}
-                      title={color.name}
-                    >
-                      {selectedColor?.id === color.id && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Check size={16} className="text-white drop-shadow" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
+                  {colors.map((color, idx) => {
+                    const isColorOutOfStock = color.stock !== undefined && color.stock < 1;
+                    return (
+                      <button
+                        key={color.id || idx}
+                        onClick={() => handleColorSelect(color, idx)}
+                        disabled={isColorOutOfStock}
+                        className={`relative w-12 h-12 rounded-full border-2 transition-all ${
+                          selectedColor?.id === color.id ? 'border-luxury-gold scale-110' : 'border-gray-200 hover:scale-105'
+                        } ${isColorOutOfStock ? 'opacity-40 cursor-not-allowed' : ''}`}
+                        style={{ backgroundColor: color.hex }}
+                        title={`${color.name} ${isColorOutOfStock ? '(Out of Stock)' : ''}`}
+                      >
+                        {selectedColor?.id === color.id && !isColorOutOfStock && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Check size={16} className="text-white drop-shadow" />
+                          </div>
+                        )}
+                        {isColorOutOfStock && (
+                          <div className="absolute inset-0 flex items-center justify-center text-white mix-blend-difference font-bold text-lg select-none">
+                            ×
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -229,11 +256,12 @@ const ProductCard = ({ product, index }) => {
                 </div>
                 <button 
                   onClick={handleQuickAdd}
-                  disabled={!selectedColor || isOutOfStock}
-                  className="w-full bg-primary-text text-white py-3 text-sm font-bold uppercase flex items-center justify-center gap-2 disabled:opacity-50"
+                  disabled={!selectedColor || isOutOfStock || isSelectedColorOutOfStock}
+                  className={`w-full text-white py-3 text-sm font-bold uppercase flex items-center justify-center gap-2 transition-colors duration-200
+                    ${isOutOfStock || isSelectedColorOutOfStock ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary-text hover:bg-luxury-gold'}`}
                 >
                   <ShoppingBag size={16} />
-                  {isOutOfStock ? 'Sold Out' : `Add - Rs. ${currentPrice.toLocaleString()}`}
+                  {isOutOfStock || isSelectedColorOutOfStock ? 'Sold Out' : `Add - Rs. ${currentPrice.toLocaleString()}`}
                 </button>
               </div>
             </motion.div>
@@ -268,15 +296,33 @@ const ProductCard = ({ product, index }) => {
         
         <div className="mt-auto flex items-center justify-between mb-3">
           <div className="flex gap-1">
-            {colors.map((color, idx) => (
-              <button
-                key={color.id || idx}
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); openQuickAdd(e); handleColorSelect(color, idx); }}
-                className={`w-5 h-5 rounded-full border ${selectedColor?.id === color.id ? 'border-luxury-gold ring-1 ring-luxury-gold' : 'border-gray-300'}`}
-                style={{ backgroundColor: color.hex }}
-                title={color.name}
-              />
-            ))}
+            {colors.map((color, idx) => {
+              const isColorOutOfStock = color.stock !== undefined && color.stock < 1;
+              return (
+                <button
+                  key={color.id || idx}
+                  onClick={(e) => { 
+                    e.preventDefault(); 
+                    e.stopPropagation(); 
+                    if (isColorOutOfStock) {
+                      toast.error(`${color.name} is out of stock.`);
+                      return;
+                    }
+                    openQuickAdd(e); 
+                    handleColorSelect(color, idx); 
+                  }}
+                  className={`relative w-5 h-5 rounded-full border ${selectedColor?.id === color.id ? 'border-luxury-gold ring-1 ring-luxury-gold' : 'border-gray-300'} ${isColorOutOfStock ? 'opacity-40 cursor-not-allowed' : ''}`}
+                  style={{ backgroundColor: color.hex }}
+                  title={`${color.name} ${isColorOutOfStock ? '(Out of Stock)' : ''}`}
+                >
+                  {isColorOutOfStock && (
+                    <div className="absolute inset-0 flex items-center justify-center text-white mix-blend-difference font-bold text-[10px] leading-none select-none">
+                      ×
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 

@@ -75,8 +75,8 @@ const seedProducts = async () => {
       badge: 'Signature Series',
       stock: 50,
       colors: [
-        { id: 'natural', name: 'Natural Finish', hex: '#D7CCC8', priceOffset: 0, image: '/products/regularnatural.jpeg', hoverImage: '/products/regularnatural.jpeg' },
-        { id: 'black', name: 'Shadow Black', hex: '#1C1C1C', priceOffset: 100, image: '/products/regularblack.jpeg', hoverImage: '/products/regularblack.jpeg' }
+        { id: 'natural', name: 'Natural Finish', hex: '#D7CCC8', priceOffset: 0, image: '/products/regularnatural.jpeg', hoverImage: '/products/regularnatural.jpeg', stock: 50 },
+        { id: 'black', name: 'Shadow Black', hex: '#1C1C1C', priceOffset: 100, image: '/products/regularblack.jpeg', hoverImage: '/products/regularblack.jpeg', stock: 0 }
       ],
       rating: 5,
       reviewCount: 124
@@ -88,10 +88,10 @@ const seedProducts = async () => {
       size: 'mini',
       material: 'Premium Mahogany Wood',
       badge: 'Travel Edition',
-      stock: 50,
+      stock: 30,
       colors: [
-        { id: 'natural', name: 'Natural Finish', hex: '#D7CCC8', priceOffset: 0, image: '/products/mininatural.jpeg', hoverImage: '/products/mininatural.jpeg' },
-        { id: 'black', name: 'Shadow Black', hex: '#1C1C1C', priceOffset: 100, image: '/products/miniblack.PNG', hoverImage: '/products/miniblack.PNG' }
+        { id: 'natural', name: 'Natural Finish', hex: '#D7CCC8', priceOffset: 0, image: '/products/mininatural.jpeg', hoverImage: '/products/mininatural.jpeg', stock: 5 },
+        { id: 'black', name: 'Shadow Black', hex: '#1C1C1C', priceOffset: 100, image: '/products/miniblack.PNG', hoverImage: '/products/miniblack.PNG', stock: 25 }
       ],
       rating: 5,
       reviewCount: 89
