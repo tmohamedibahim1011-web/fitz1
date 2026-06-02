@@ -788,9 +788,32 @@ const AdminDashboard = () => {
                         </td>
                         <td className="p-4 font-bold">₹{order.totalAmount.toFixed(2)}</td>
                         <td className="p-4">
-                          <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest border rounded-full ${order.paymentStatus === 'completed' || order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'}`}>
-                            {order.paymentStatus || 'unpaid'}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest border rounded-full ${order.paymentStatus === 'completed' || order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'}`}>
+                              {order.paymentStatus || 'unpaid'}
+                            </span>
+                            {!(order.paymentStatus === 'completed' || order.paymentStatus === 'paid') && (
+                              <a
+                                href={`https://wa.me/${
+                                  order.customerInfo?.phone 
+                                    ? (order.customerInfo.phone.replace(/\D/g, '').length === 10 
+                                        ? '91' + order.customerInfo.phone.replace(/\D/g, '') 
+                                        : order.customerInfo.phone.replace(/\D/g, '')) 
+                                    : ''
+                                }?text=${encodeURIComponent(
+                                  `Hey ${order.customerInfo?.firstName || ''}, you are one step ahead of buying the fitz1 product! May I know what is the reason behind the payment not being done?`
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1.5 bg-green-50 text-green-600 hover:bg-green-500 hover:text-white rounded border border-green-200 transition-all flex items-center justify-center shadow-sm"
+                                title="Send WhatsApp reminder"
+                              >
+                                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" style={{ width: '14px', height: '14px' }}>
+                                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.457L0 24zm6.59-11.585c.124-.075.914-.54 1.129-.665.215-.125.378-.025.539.125.161.15.616.755.756.905.14.15.28.175.495.05.215-.125.909-.34 1.732-1.073.64-.57 1.073-1.275 1.199-1.488.125-.213.013-.327-.093-.433-.096-.095-.215-.25-.323-.375-.108-.125-.144-.213-.215-.363-.072-.15-.036-.282.018-.387.054-.105.536-1.288.732-1.762.193-.462.383-.393.539-.393l.462-.011c.16 0 .42.06.64.3.22.24.84.82.84 2.012 0 1.192-.87 2.343-.99 2.506-.12.162-1.713 2.616-4.148 3.66-.58.248-1.031.396-1.385.508-.583.186-1.113.16-1.533.097-.47-.07-1.447-.592-1.653-1.164-.206-.572-.206-1.063-.144-1.164.062-.101.23-.15.424-.25z"/>
+                                </svg>
+                              </a>
+                            )}
+                          </div>
                         </td>
                         <td className="p-4">
                           <div className="flex flex-col gap-2">
