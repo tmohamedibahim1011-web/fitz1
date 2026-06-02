@@ -5,18 +5,48 @@ const crypto = require('crypto');
 const { generateOrderId } = require('../utils/helpers');
 const mongoose = require('mongoose');
 
+// Helper to decrement stock color-wise and globally
+const decrementProductStock = async (productId, itemColor, quantity) => {
+  if (!productId || !mongoose.Types.ObjectId.isValid(productId)) return;
+  const product = await Product.findById(productId);
+  if (!product) return;
+
+  const qty = quantity || 1;
+  let updated = false;
+
+  const updatedColors = product.colors.map(color => {
+    const isMatch = itemColor && (
+      color.name.toLowerCase() === itemColor.toLowerCase() ||
+      color.id.toLowerCase() === itemColor.toLowerCase()
+    );
+    if (isMatch) {
+      color.stock = Math.max(0, (color.stock || 0) - qty);
+      updated = true;
+    }
+    return color;
+  });
+
+  const newGlobalStock = Math.max(0, product.stock - qty);
+  if (updated) {
+    await Product.findByIdAndUpdate(productId, {
+      colors: updatedColors,
+      stock: newGlobalStock,
+      updatedAt: Date.now()
+    });
+  } else {
+    await Product.findByIdAndUpdate(productId, {
+      stock: newGlobalStock,
+      updatedAt: Date.now()
+    });
+  }
+};
+
 // Create new order
 const createOrder = async (req, res) => {
   try {
     // Decrease stock for each item
     for (const item of req.body.items) {
-      if (item.productId && mongoose.Types.ObjectId.isValid(item.productId)) {
-        const product = await Product.findById(item.productId);
-        if (product) {
-          const newStock = Math.max(0, product.stock - (item.quantity || 1));
-          await Product.findByIdAndUpdate(item.productId, { stock: newStock, updatedAt: Date.now() });
-        }
-      }
+      await decrementProductStock(item.productId, item.color, item.quantity);
     }
 
     // Generate order ID with auto-increment
@@ -62,13 +92,7 @@ const createOrderWithPayment = async (req, res) => {
     
     // Decrease stock for each item
     for (const item of items) {
-      if (item.productId && mongoose.Types.ObjectId.isValid(item.productId)) {
-        const product = await Product.findById(item.productId);
-        if (product) {
-          const newStock = Math.max(0, product.stock - (item.quantity || 1));
-          await Product.findByIdAndUpdate(item.productId, { stock: newStock, updatedAt: Date.now() });
-        }
-      }
+      await decrementProductStock(item.productId, item.color, item.quantity);
     }
 
     const orderId = await generateOrderId(Order);
@@ -163,6 +187,26 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+// Update order details full (admin)
+const updateOrderDetailsFull = async (req, res) => {
+  try {
+    const { customerInfo, shippingAddress, items, totalAmount, paymentStatus } = req.body;
+    const updateData = {};
+    if (customerInfo) updateData.customerInfo = customerInfo;
+    if (shippingAddress) updateData.shippingAddress = shippingAddress;
+    if (items) updateData.items = items;
+    if (totalAmount !== undefined) updateData.totalAmount = totalAmount;
+    if (paymentStatus !== undefined) updateData.paymentStatus = paymentStatus;
+    
+    const order = await Order.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+    
+    res.status(200).json({ success: true, order });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // Delete order (admin)
 const deleteOrder = async (req, res) => {
   try {
@@ -183,5 +227,6 @@ module.exports = {
   getOrder,
   getAllOrders,
   updateOrderStatus,
+  updateOrderDetailsFull,
   deleteOrder
 };

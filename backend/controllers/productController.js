@@ -21,15 +21,21 @@ const getProduct = async (req, res) => {
   }
 };
 
-// Helper to sanitize product body
 const sanitizeProductData = (data) => {
   const sanitized = { ...data };
   if (sanitized.colors && Array.isArray(sanitized.colors)) {
-    sanitized.colors = sanitized.colors.map(c => ({
-      ...c,
-      image: c.image || sanitized.image || '/products/regularnatural.jpeg',
-      hoverImage: c.hoverImage || sanitized.hoverImage || sanitized.image || '/products/regularnatural.jpeg'
-    }));
+    let totalStock = 0;
+    sanitized.colors = sanitized.colors.map(c => {
+      const colorStock = c.stock !== undefined ? parseInt(c.stock) : 25;
+      totalStock += colorStock;
+      return {
+        ...c,
+        stock: colorStock,
+        image: c.image || sanitized.image || '/products/regularnatural.jpeg',
+        hoverImage: c.hoverImage || sanitized.hoverImage || sanitized.image || '/products/regularnatural.jpeg'
+      };
+    });
+    sanitized.stock = totalStock;
   }
   if (!sanitized.size) {
     sanitized.size = 'regular';

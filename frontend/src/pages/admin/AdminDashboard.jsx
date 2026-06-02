@@ -17,6 +17,25 @@ const AdminDashboard = () => {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // New Order Edit State
+  const [showOrderEditModal, setShowOrderEditModal] = useState(false);
+  const [editingOrder, setEditingOrder] = useState(null);
+  const [orderEditForm, setOrderEditForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    doorNo: '',
+    streetName: '',
+    area: '',
+    landmark: '',
+    city: '',
+    state: '',
+    zip: '',
+    paymentStatus: 'pending',
+    items: []
+  });
+
   // Filters
   const [filterProduct, setFilterProduct] = useState('All');
   const [fromDate, setFromDate] = useState('');
@@ -205,6 +224,53 @@ const AdminDashboard = () => {
       toast.success('Order deleted successfully');
     } catch (error) {
       toast.error('Failed to delete order');
+    }
+  };
+
+  const saveOrderEdit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('adminToken');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      const door = orderEditForm.doorNo ? orderEditForm.doorNo.trim() : '';
+      const street = orderEditForm.streetName ? orderEditForm.streetName.trim() : '';
+      const area = orderEditForm.area ? orderEditForm.area.trim() : '';
+      const landmark = orderEditForm.landmark ? orderEditForm.landmark.trim() : '';
+      
+      let fullAddress = `${door}, ${street}, ${area}`;
+      if (landmark) {
+        fullAddress += `, ${landmark}`;
+      }
+
+      const updatedPayload = {
+        customerInfo: {
+          firstName: orderEditForm.firstName,
+          lastName: orderEditForm.lastName,
+          email: orderEditForm.email,
+          phone: orderEditForm.phone
+        },
+        shippingAddress: {
+          address: fullAddress,
+          city: orderEditForm.city,
+          state: orderEditForm.state,
+          zip: orderEditForm.zip,
+          method: editingOrder.shippingAddress?.method || 'Free Shipping'
+        },
+        items: orderEditForm.items,
+        totalAmount: orderEditForm.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        paymentStatus: orderEditForm.paymentStatus
+      };
+
+      const res = await axios.put(`${import.meta.env.VITE_API_URL}/admin/orders/${editingOrder._id}`, updatedPayload, { headers, withCredentials: true });
+      if (res.data.success) {
+        toast.success('Order details updated successfully');
+        setOrders(orders.map(o => o._id === editingOrder._id ? res.data.order : o));
+        setShowOrderEditModal(false);
+      }
+    } catch (error) {
+      toast.error('Failed to update order details');
+      console.error(error);
     }
   };
 
@@ -844,6 +910,32 @@ const AdminDashboard = () => {
                               <option value="shipping">Shipping</option>
                               <option value="delivered">Delivered</option>
                             </select>
+                            <button 
+                              onClick={() => {
+                                setEditingOrder(order);
+                                const addrParts = order.shippingAddress?.address ? order.shippingAddress.address.split(',') : [];
+                                setOrderEditForm({
+                                  firstName: order.customerInfo?.firstName || '',
+                                  lastName: order.customerInfo?.lastName || '',
+                                  email: order.customerInfo?.email || '',
+                                  phone: order.customerInfo?.phone || '',
+                                  doorNo: addrParts[0] || '',
+                                  streetName: addrParts[1]?.trim() || '',
+                                  area: addrParts[2]?.trim() || '',
+                                  landmark: addrParts[3]?.trim() || '',
+                                  city: order.shippingAddress?.city || '',
+                                  state: order.shippingAddress?.state || '',
+                                  zip: order.shippingAddress?.zip || '',
+                                  paymentStatus: order.paymentStatus || 'pending',
+                                  items: order.items ? order.items.map(item => ({ ...item })) : []
+                                });
+                                setShowOrderEditModal(true);
+                              }} 
+                              className="p-1 text-secondary-text hover:text-luxury-gold transition-colors" 
+                              title="Edit Order Details"
+                            >
+                              <Pencil size={18} />
+                            </button>
                             {(order.paymentStatus === 'paid' || order.paymentStatus === 'completed') && (
                               <button onClick={() => handleDownloadPDF(order.orderId)} className="p-1 text-secondary-text hover:text-luxury-gold transition-colors" title="Download Invoice">
                                 <FileText size={18} />
@@ -906,10 +998,22 @@ const AdminDashboard = () => {
                         </td>
                         <td className="p-4 font-bold">₹{product.basePrice?.toLocaleString()}</td>
                         <td className="p-4">
-                          <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest border rounded-full 
-                            ${product.stock < 10 ? 'bg-red-100 text-red-800 border-red-200' : 'bg-green-100 text-green-800 border-green-200'}`}>
-                            {product.stock} units
-                          </span>
+                          <div className="flex flex-col gap-1.5">
+                            <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest border rounded-full w-fit 
+                              ${product.stock < 10 ? 'bg-red-100 text-red-800 border-red-200' : 'bg-green-100 text-green-800 border-green-200'}`}>
+                              Total: {product.stock} units
+                            </span>
+                            {product.colors && product.colors.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 mt-0.5">
+                                {product.colors.map(c => (
+                                  <span key={c.id || c._id} className="text-[9px] font-medium text-secondary-text bg-secondary-white px-2 py-0.5 border border-black/5 rounded-sm flex items-center gap-1" title={`${c.name} Stock`}>
+                                    <span className="w-1.5 h-1.5 rounded-full border border-black/10" style={{ backgroundColor: c.hex }}></span>
+                                    {c.stock !== undefined ? c.stock : Math.round(product.stock / product.colors.length)} units
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </td>
                         <td className="p-4">
                           {product.badge && (
@@ -978,6 +1082,229 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        {/* ORDER EDIT MODAL */}
+        {showOrderEditModal && editingOrder && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b border-black/10 flex justify-between items-center">
+                <h2 className="text-xl font-bold uppercase tracking-widest text-primary-text">
+                  Edit Order #{editingOrder.orderId}
+                </h2>
+                <button onClick={() => setShowOrderEditModal(false)} className="text-secondary-text hover:text-primary-text">
+                  <X size={24} />
+                </button>
+              </div>
+              <form onSubmit={saveOrderEdit} className="p-6 space-y-6">
+                {/* Customer Details */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-luxury-gold pb-2 border-b border-black/5">Customer Details</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">First Name</label>
+                      <input type="text" value={orderEditForm.firstName} onChange={(e) => setOrderEditForm({ ...orderEditForm, firstName: e.target.value })} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold text-primary-text outline-none bg-white" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Last Name</label>
+                      <input type="text" value={orderEditForm.lastName} onChange={(e) => setOrderEditForm({ ...orderEditForm, lastName: e.target.value })} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold text-primary-text outline-none bg-white" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Email</label>
+                      <input type="email" value={orderEditForm.email} onChange={(e) => setOrderEditForm({ ...orderEditForm, email: e.target.value })} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold text-primary-text outline-none bg-white" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Phone</label>
+                      <input type="text" value={orderEditForm.phone} onChange={(e) => setOrderEditForm({ ...orderEditForm, phone: e.target.value })} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold text-primary-text outline-none bg-white" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Shipping Address */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-luxury-gold pb-2 border-b border-black/5">Shipping Address</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Door No</label>
+                      <input type="text" value={orderEditForm.doorNo} onChange={(e) => setOrderEditForm({ ...orderEditForm, doorNo: e.target.value })} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold text-primary-text outline-none bg-white" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Street Name</label>
+                      <input type="text" value={orderEditForm.streetName} onChange={(e) => setOrderEditForm({ ...orderEditForm, streetName: e.target.value })} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold text-primary-text outline-none bg-white" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Area</label>
+                      <input type="text" value={orderEditForm.area} onChange={(e) => setOrderEditForm({ ...orderEditForm, area: e.target.value })} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold text-primary-text outline-none bg-white" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Landmark</label>
+                      <input type="text" value={orderEditForm.landmark} onChange={(e) => setOrderEditForm({ ...orderEditForm, landmark: e.target.value })} className="w-full border border-black/10 px-3 py-2 text-xs font-bold text-primary-text outline-none bg-white" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">City</label>
+                      <input type="text" value={orderEditForm.city} onChange={(e) => setOrderEditForm({ ...orderEditForm, city: e.target.value })} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold text-primary-text outline-none bg-white" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">State</label>
+                      <input type="text" value={orderEditForm.state} onChange={(e) => setOrderEditForm({ ...orderEditForm, state: e.target.value })} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold text-primary-text outline-none bg-white" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Zip Code</label>
+                      <input type="text" value={orderEditForm.zip} onChange={(e) => setOrderEditForm({ ...orderEditForm, zip: e.target.value })} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold text-primary-text outline-none bg-white" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ordered Items */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center pb-2 border-b border-black/5">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-luxury-gold">Ordered Items</h3>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const defaultProduct = products.length > 0 ? products[0] : { name: 'Pro Series Regular', basePrice: 2499 };
+                        const newItem = {
+                          productId: defaultProduct._id || '',
+                          name: defaultProduct.name || 'Pro Series Regular',
+                          color: 'Natural Finish',
+                          price: defaultProduct.basePrice || 2499,
+                          quantity: 1
+                        };
+                        setOrderEditForm({ ...orderEditForm, items: [...orderEditForm.items, newItem] });
+                      }}
+                      className="text-[10px] font-bold uppercase tracking-widest text-luxury-gold hover:text-luxury-gold/80 flex items-center gap-1 transition-colors border border-luxury-gold/20 px-2.5 py-1 rounded"
+                    >
+                      <Plus size={12} /> Add Item
+                    </button>
+                  </div>
+
+                  <div className="max-h-[30vh] overflow-y-auto pr-1">
+                    {orderEditForm.items.map((item, index) => (
+                      <div key={index} className="flex flex-col md:flex-row gap-3 items-end bg-secondary-white p-3 border border-black/5 rounded-sm mb-3">
+                        <div className="flex-grow">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text block mb-1">Product</span>
+                          <select 
+                            value={products.some(p => p._id === item.productId || p.name === item.name) ? (products.find(p => p._id === item.productId || p.name === item.name)?._id) : ''}
+                            onChange={(e) => {
+                              const selectedProd = products.find(p => p._id === e.target.value);
+                              if (selectedProd) {
+                                const updatedItems = [...orderEditForm.items];
+                                updatedItems[index] = { 
+                                  ...item, 
+                                  productId: selectedProd._id,
+                                  name: selectedProd.name,
+                                  price: selectedProd.basePrice 
+                                };
+                                setOrderEditForm({ ...orderEditForm, items: updatedItems });
+                              }
+                            }}
+                            className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text bg-white outline-none cursor-pointer"
+                          >
+                            <option value="" disabled>Select Product...</option>
+                            {products.map(p => (
+                              <option key={p._id} value={p._id}>{p.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="w-36">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text block mb-1">Color</span>
+                          <select 
+                            value={item.color} 
+                            onChange={(e) => {
+                              const updatedItems = [...orderEditForm.items];
+                              updatedItems[index] = { ...item, color: e.target.value };
+                              setOrderEditForm({ ...orderEditForm, items: updatedItems });
+                            }}
+                            className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text bg-white outline-none cursor-pointer"
+                          >
+                            <option value="Standard">Standard</option>
+                            <option value="Natural Finish">Natural Finish</option>
+                            <option value="Shadow Black">Shadow Black</option>
+                          </select>
+                        </div>
+                        <div className="w-20">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text block mb-1">Qty</span>
+                          <input 
+                            type="number" 
+                            value={item.quantity} 
+                            min="1" 
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value) || 1;
+                              const updatedItems = [...orderEditForm.items];
+                              updatedItems[index] = { ...item, quantity: val };
+                              setOrderEditForm({ ...orderEditForm, items: updatedItems });
+                            }}
+                            className="w-full border border-black/10 px-3 py-2 text-xs font-bold text-primary-text bg-white outline-none" 
+                          />
+                        </div>
+                        <div className="w-24">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text block mb-1">Price (₹)</span>
+                          <input 
+                            type="number" 
+                            value={item.price} 
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value) || 0;
+                              const updatedItems = [...orderEditForm.items];
+                              updatedItems[index] = { ...item, price: val };
+                              setOrderEditForm({ ...orderEditForm, items: updatedItems });
+                            }}
+                            className="w-full border border-black/10 px-3 py-2 text-xs font-bold text-primary-text bg-white outline-none" 
+                          />
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const updatedItems = orderEditForm.items.filter((_, i) => i !== index);
+                            setOrderEditForm({ ...orderEditForm, items: updatedItems });
+                          }}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded transition-colors flex items-center justify-center border border-red-100 h-[38px] w-[38px]"
+                          title="Remove Item"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                    {orderEditForm.items.length === 0 && (
+                      <p className="text-xs text-secondary-text text-center italic py-4">No items inside this order. Click "Add Item" to add products.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Total and Payment Status */}
+                <div className="grid grid-cols-2 gap-6 items-center bg-secondary-white p-4 border border-black/5">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text block mb-1">Payment Status</span>
+                    <select 
+                      value={orderEditForm.paymentStatus} 
+                      onChange={(e) => setOrderEditForm({ ...orderEditForm, paymentStatus: e.target.value })}
+                      className="border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none cursor-pointer bg-white"
+                    >
+                      <option value="pending">Pending / Unpaid</option>
+                      <option value="completed">Completed / Paid</option>
+                      <option value="paid">Paid</option>
+                    </select>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text block mb-1">Total Amount</span>
+                    <span className="text-xl font-bold text-primary-text">₹{orderEditForm.items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t border-black/10">
+                  <button type="button" onClick={() => setShowOrderEditModal(false)} className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-secondary-text hover:text-primary-text">Cancel</button>
+                  <button type="submit" disabled={orderEditForm.items.length === 0} className="px-6 py-2 text-xs font-bold uppercase tracking-widest bg-primary-text text-white hover:bg-luxury-gold transition-colors disabled:opacity-50">
+                    Save Order Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
         {/* PRODUCT MODAL */}
         {showProductModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -1011,8 +1338,46 @@ const AdminDashboard = () => {
                     <input type="text" value={productForm.material} onChange={(e) => setProductForm({ ...productForm, material: e.target.value })} className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Stock</label>
-                    <input type="number" value={productForm.stock} onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })} required className="w-full border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Color Stock Levels (Total: {productForm.stock})</label>
+                    <div className="grid grid-cols-2 gap-3 mt-1">
+                      {productForm.colors?.map((color, index) => {
+                        const defaultStock = color.stock !== undefined 
+                          ? color.stock 
+                          : (editingProduct ? Math.round((parseInt(productForm.stock) || 0) / (productForm.colors.length || 2)) : 25);
+                        return (
+                          <div key={color.id || index} className="bg-secondary-white p-2.5 border border-black/5 rounded-sm flex flex-col gap-1">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text flex items-center gap-1.5">
+                              <span className="w-2.5 h-2.5 rounded-full border border-black/10" style={{ backgroundColor: color.hex }}></span>
+                              {color.name}
+                            </span>
+                            <input 
+                              type="number" 
+                              value={defaultStock} 
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value) || 0;
+                                const updatedColors = [...productForm.colors];
+                                updatedColors[index] = { ...color, stock: val };
+                                
+                                // Calculate total stock sum
+                                const totalStock = updatedColors.reduce((sum, c) => {
+                                  const cStock = c.stock !== undefined ? c.stock : (editingProduct ? Math.round((parseInt(productForm.stock) || 0) / (productForm.colors.length || 2)) : 25);
+                                  return sum + (parseInt(cStock) || 0);
+                                }, 0);
+                                
+                                setProductForm({ 
+                                  ...productForm, 
+                                  colors: updatedColors,
+                                  stock: totalStock.toString() 
+                                });
+                              }} 
+                              required 
+                              min="0"
+                              className="w-full border border-black/10 px-2.5 py-1.5 bg-white text-xs font-bold text-primary-text outline-none" 
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">

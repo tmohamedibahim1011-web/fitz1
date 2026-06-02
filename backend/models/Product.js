@@ -14,7 +14,8 @@ const ProductSchema = new mongoose.Schema({
     hex: String,
     priceOffset: { type: Number, default: 0 },
     image: String,
-    hoverImage: String
+    hoverImage: String,
+    stock: { type: Number, default: 25 }
   }],
   rating: { type: Number, default: 5 },
   reviewCount: { type: Number, default: 0 },

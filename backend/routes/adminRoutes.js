@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { protectAdmin } = require('../middleware/authMiddleware');
-const { getAllOrders, updateOrderStatus, deleteOrder } = require('../controllers/orderController');
+const { getAllOrders, updateOrderStatus, updateOrderDetailsFull, deleteOrder } = require('../controllers/orderController');
 
 // Admin login
 router.post('/login', (req, res) => {
@@ -28,6 +28,7 @@ router.post('/login', (req, res) => {
 
 router.get('/orders', protectAdmin, getAllOrders);
 router.put('/orders/:id/status', protectAdmin, updateOrderStatus);
+router.put('/orders/:id', protectAdmin, updateOrderDetailsFull);
 router.delete('/orders/:id', protectAdmin, deleteOrder);
 
 module.exports = router;
