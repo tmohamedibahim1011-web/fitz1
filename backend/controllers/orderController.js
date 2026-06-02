@@ -119,16 +119,22 @@ const createOrderWithPayment = async (req, res) => {
   }
 };
 
-// Track orders by phone (returns all orders for that phone)
+// Track orders by phone or orderId (returns matching orders)
 const trackOrder = async (req, res) => {
   try {
     const { identifier } = req.params;
     
-    // Find all orders by phone number OR exact orderId match
+    if (!identifier) {
+      return res.status(400).json({ success: false, message: 'Tracking identifier is required' });
+    }
+
+    const trimmed = identifier.trim();
+    
+    // Find all orders by phone number OR orderId match (case-insensitive)
     const orders = await Order.find({
       $or: [
-        { 'customerInfo.phone': identifier },
-        { orderId: identifier }
+        { 'customerInfo.phone': trimmed },
+        { orderId: trimmed.toUpperCase() }
       ]
     }).sort({ createdAt: -1 });
 

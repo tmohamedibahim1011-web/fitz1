@@ -15,12 +15,13 @@ const OrderTracking = () => {
 
   const handleTrack = async (e) => {
     e.preventDefault();
-    if (!trackingId.trim()) return;
+    const trimmedId = trackingId.trim();
+    if (!trimmedId) return;
     
     setIsSearching(true);
     setOrders([]);
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/orders/track/${trackingId}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/orders/track/${encodeURIComponent(trimmedId)}`);
       if (res.data.success && res.data.orders) {
         setOrders(res.data.orders);
         if (res.data.orders.length === 0) {
