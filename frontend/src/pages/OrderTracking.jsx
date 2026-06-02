@@ -3,8 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Package, Truck, CheckCircle, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 const OrderTracking = () => {
+  const navigate = useNavigate();
+  const { addToCart, clearCart, closeCart } = useCart();
   const [trackingId, setTrackingId] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -32,15 +36,31 @@ const OrderTracking = () => {
     }
   };
 
-  const statusSteps = [
-    { id: 'processing', label: 'Order Confirmed', icon: Package },
-    { id: 'packing', label: 'Packing', icon: Package },
-    { id: 'shipping', label: 'On Delivery', icon: Truck },
-    { id: 'delivered', label: 'Delivered', icon: CheckCircle },
-  ];
+  const getStatusSteps = (order) => {
+    const isPaid = order.paymentStatus === 'paid' || order.paymentStatus === 'completed';
+    if (!isPaid) {
+      return [
+        { id: 'pending_payment', label: 'Payment Pending', icon: Package },
+        { id: 'processing', label: 'Order Confirmed', icon: CheckCircle },
+        { id: 'packing', label: 'Packing', icon: Package },
+        { id: 'shipping', label: 'On Delivery', icon: Truck },
+        { id: 'delivered', label: 'Delivered', icon: CheckCircle },
+      ];
+    }
+    return [
+      { id: 'processing', label: 'Order Confirmed', icon: Package },
+      { id: 'packing', label: 'Packing', icon: Package },
+      { id: 'shipping', label: 'On Delivery', icon: Truck },
+      { id: 'delivered', label: 'Delivered', icon: CheckCircle },
+    ];
+  };
 
-  const getStepIndex = (status) => {
-    return statusSteps.findIndex(s => s.id === status);
+  const getStepIndex = (order, steps) => {
+    const isPaid = order.paymentStatus === 'paid' || order.paymentStatus === 'completed';
+    if (!isPaid) {
+      return 0; // Only first step active ("Payment Pending")
+    }
+    return steps.findIndex(s => s.id === order.status);
   };
 
   const getStatusColor = (status) => {
@@ -50,6 +70,58 @@ const OrderTracking = () => {
       case 'shipping': return 'bg-purple-500';
       case 'delivered': return 'bg-green-500';
       default: return 'bg-gray-500';
+    }
+  };
+
+  const handlePayNow = async (order) => {
+    const toastId = toast.loading('Preparing checkout...');
+    try {
+      // 1. Fetch all products to get correct image and variant details
+      const productsRes = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
+      if (!productsRes.data.success) {
+        throw new Error('Failed to load product details');
+      }
+      const allProducts = productsRes.data.products;
+
+      // 2. Clear current cart
+      clearCart();
+
+      // 3. Reconstruct cart items and add them
+      for (const item of order.items) {
+        const matchedProduct = allProducts.find(p => p._id === item.productId);
+        if (matchedProduct) {
+          // Find matching color variant
+          const matchedVariant = matchedProduct.colors.find(
+            c => c.name.toLowerCase() === item.color.toLowerCase() || c.id.toLowerCase() === item.color.toLowerCase()
+          );
+
+          // Build product object for cart
+          const cartProduct = {
+            id: matchedProduct._id,
+            name: matchedProduct.name,
+            price: matchedProduct.basePrice,
+            image: matchedVariant ? matchedVariant.image : matchedProduct.image
+          };
+
+          addToCart(cartProduct, item.quantity, matchedVariant);
+        } else {
+          // Fallback if product was deleted from DB
+          const fallbackProduct = {
+            id: item.productId,
+            name: item.name,
+            price: item.price,
+            image: '/products/regularnatural.jpeg'
+          };
+          addToCart(fallbackProduct, item.quantity, { name: item.color, priceOffset: 0 });
+        }
+      }
+
+      toast.success('Cart updated! Redirecting to checkout...', { id: toastId });
+      closeCart();
+      navigate('/checkout');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to initiate payment. Please try again.', { id: toastId });
     }
   };
 
@@ -101,7 +173,14 @@ const OrderTracking = () => {
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 border-b border-black/10 pb-6 gap-4">
                     <div>
                       <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-1">Order Number</p>
-                      <h3 className="text-2xl font-bold font-mono text-luxury-gold">{order.orderId}</h3>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h3 className="text-2xl font-bold font-mono text-luxury-gold">{order.orderId}</h3>
+                        {!(order.paymentStatus === 'paid' || order.paymentStatus === 'completed') && (
+                          <span className="bg-red-50 text-red-600 border border-red-200 px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded font-sans">
+                            Payment Pending
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="md:text-right">
                       <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-1">Order Date</p>
@@ -110,29 +189,41 @@ const OrderTracking = () => {
                   </div>
 
                   {/* Status Timeline */}
-                  <div className="mb-10 relative overflow-x-auto pb-4 hide-scrollbar">
-                    <div className="min-w-[320px] sm:min-w-[400px] relative">
-                      <div className="absolute top-6 left-0 w-full h-[2px] bg-gray-200 z-0"></div>
-                      <div className="absolute top-6 left-0 h-[2px] bg-luxury-gold z-10 transition-all" 
-                           style={{ width: `${(getStepIndex(order.status) / (statusSteps.length - 1)) * 100}%` }}></div>
-                      <div className="flex justify-between relative z-20">
-                        {statusSteps.map((step, idx) => {
-                          const isActive = getStepIndex(order.status) >= idx;
-                          const Icon = step.icon;
-                          return (
-                            <div key={idx} className="flex flex-col items-center gap-2">
-                              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-sm ${isActive ? getStatusColor(order.status) + ' text-white' : 'bg-gray-100 text-gray-400'}`}>
-                                <Icon size={18} className="sm:w-[20px] sm:h-[20px]" />
-                              </div>
-                              <span className={`text-[9px] sm:text-[10px] font-bold uppercase ${isActive ? 'text-primary-text' : 'text-gray-400'} text-center px-1`}>
-                                {step.label}
-                              </span>
-                            </div>
-                          );
-                        })}
+                  {(() => {
+                    const steps = getStatusSteps(order);
+                    const activeIndex = getStepIndex(order, steps);
+                    const isUnpaid = order.paymentStatus !== 'paid' && order.paymentStatus !== 'completed';
+                    
+                    return (
+                      <div className="mb-10 relative overflow-x-auto pb-4 hide-scrollbar">
+                        <div className="min-w-[320px] sm:min-w-[400px] relative">
+                          <div className="absolute top-6 left-0 w-full h-[2px] bg-gray-200 z-0"></div>
+                          <div className="absolute top-6 left-0 h-[2px] bg-luxury-gold z-10 transition-all" 
+                               style={{ width: `${(activeIndex / (steps.length - 1)) * 100}%` }}></div>
+                          <div className="flex justify-between relative z-20">
+                            {steps.map((step, idx) => {
+                              const isActive = activeIndex >= idx;
+                              const Icon = step.icon;
+                              const stepColorClass = isUnpaid && idx === 0 
+                                ? 'bg-amber-500' 
+                                : getStatusColor(order.status);
+                              
+                              return (
+                                <div key={idx} className="flex flex-col items-center gap-2">
+                                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-sm ${isActive ? stepColorClass + ' text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                    <Icon size={18} className="sm:w-[20px] sm:h-[20px]" />
+                                  </div>
+                                  <span className={`text-[9px] sm:text-[10px] font-bold uppercase ${isActive ? 'text-primary-text' : 'text-gray-400'} text-center px-1`}>
+                                    {step.label}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    );
+                  })()}
 
                   {/* Order Details */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -153,6 +244,14 @@ const OrderTracking = () => {
                         <span className="font-bold uppercase">Total</span>
                         <span className="text-xl font-bold text-luxury-gold">Rs. {order.totalAmount.toLocaleString()}</span>
                       </div>
+                      {!(order.paymentStatus === 'paid' || order.paymentStatus === 'completed') && (
+                        <button 
+                          onClick={() => handlePayNow(order)}
+                          className="mt-6 w-full bg-luxury-gold text-white font-bold uppercase tracking-widest text-xs py-4 hover:bg-luxury-gold/90 transition-colors flex items-center justify-center gap-2 shadow-md hover:scale-[1.01] transform duration-200"
+                        >
+                          Pay Now
+                        </button>
+                      )}
                     </div>
 
                     <div>
