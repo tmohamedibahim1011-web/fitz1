@@ -55,23 +55,39 @@ const createOrder = async (req, res) => {
     const baseOrderId = await generateOrderId(Order);
     const savedOrders = [];
 
-    if (items.length <= 1) {
+    // Flatten items so that every single unit is a separate item of quantity 1
+    const flatItems = [];
+    for (const item of items) {
+      const qty = item.quantity || 1;
+      for (let q = 0; q < qty; q++) {
+        flatItems.push({
+          productId: item.productId,
+          name: item.name,
+          color: item.color,
+          price: item.price,
+          quantity: 1
+        });
+      }
+    }
+
+    if (flatItems.length <= 1) {
       const newOrder = new Order({
         ...req.body,
+        items: flatItems,
         orderId: baseOrderId
       });
       await newOrder.save();
       savedOrders.push(newOrder);
     } else {
-      const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const subtotal = flatItems.reduce((sum, item) => sum + item.price, 0);
       const totalShipping = Math.max(0, totalAmount - subtotal);
-      const shippingPerItem = Math.floor(totalShipping / items.length);
-      const remainderShipping = totalShipping - (shippingPerItem * items.length);
+      const shippingPerItem = Math.floor(totalShipping / flatItems.length);
+      const remainderShipping = totalShipping - (shippingPerItem * flatItems.length);
 
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
+      for (let i = 0; i < flatItems.length; i++) {
+        const item = flatItems[i];
         const itemShipping = shippingPerItem + (i === 0 ? remainderShipping : 0);
-        const itemTotal = (item.price * item.quantity) + itemShipping;
+        const itemTotal = item.price + itemShipping;
 
         let shippingMethod = 'Free Shipping';
         if (itemShipping > 0) {
@@ -137,9 +153,25 @@ const createOrderWithPayment = async (req, res) => {
     const baseOrderId = await generateOrderId(Order);
     const savedOrders = [];
 
-    if (items.length <= 1) {
+    // Flatten items so that every single unit is a separate item of quantity 1
+    const flatItems = [];
+    for (const item of items) {
+      const qty = item.quantity || 1;
+      for (let q = 0; q < qty; q++) {
+        flatItems.push({
+          productId: item.productId,
+          name: item.name,
+          color: item.color,
+          price: item.price,
+          quantity: 1
+        });
+      }
+    }
+
+    if (flatItems.length <= 1) {
       const newOrder = new Order({
         ...req.body,
+        items: flatItems,
         orderId: baseOrderId,
         paymentId: razorpayOrderId,
         paymentStatus: 'pending'
@@ -148,15 +180,15 @@ const createOrderWithPayment = async (req, res) => {
       await newOrder.save();
       savedOrders.push(newOrder);
     } else {
-      const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const subtotal = flatItems.reduce((sum, item) => sum + item.price, 0);
       const totalShipping = Math.max(0, totalAmount - subtotal);
-      const shippingPerItem = Math.floor(totalShipping / items.length);
-      const remainderShipping = totalShipping - (shippingPerItem * items.length);
+      const shippingPerItem = Math.floor(totalShipping / flatItems.length);
+      const remainderShipping = totalShipping - (shippingPerItem * flatItems.length);
 
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
+      for (let i = 0; i < flatItems.length; i++) {
+        const item = flatItems[i];
         const itemShipping = shippingPerItem + (i === 0 ? remainderShipping : 0);
-        const itemTotal = (item.price * item.quantity) + itemShipping;
+        const itemTotal = item.price + itemShipping;
 
         let shippingMethod = 'Free Shipping';
         if (itemShipping > 0) {
