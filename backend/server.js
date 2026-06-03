@@ -51,8 +51,13 @@ const migrateOldOrders = async () => {
   try {
     const Order = require('./models/Order');
     
-    // Find all orders that have more than 1 item
-    const ordersToSplit = await Order.find({ 'items.1': { $exists: true } });
+    // Find all orders that have more than 1 item OR any item with quantity > 1
+    const ordersToSplit = await Order.find({
+      $or: [
+        { 'items.1': { $exists: true } },
+        { 'items.quantity': { $gt: 1 } }
+      ]
+    });
     
     if (ordersToSplit.length === 0) {
       console.log('ℹ️ No old orders to split.');
@@ -62,50 +67,84 @@ const migrateOldOrders = async () => {
     console.log(`🔄 Found ${ordersToSplit.length} old orders to split...`);
     
     for (const order of ordersToSplit) {
-      const items = order.items;
       const originalOrderId = order.orderId;
       
-      // Determine original shipping cost
-      let totalShipping = 0;
-      if (order.shippingAddress && order.shippingAddress.method) {
-        const method = order.shippingAddress.method.toLowerCase();
-        if (method.includes('50')) {
-          totalShipping = 50;
-        } else if (method.includes('100')) {
-          totalShipping = 100;
+      // Flatten all items in the order so that every single unit is a separate item of quantity 1
+      const flatItems = [];
+      for (const item of order.items) {
+        const qty = item.quantity || 1;
+        for (let q = 0; q < qty; q++) {
+          flatItems.push({
+            productId: item.productId,
+            name: item.name,
+            color: item.color,
+            price: item.price,
+            quantity: 1
+          });
         }
       }
+
+      if (flatItems.length <= 1) {
+        continue;
+      }
       
-      const shippingPerItem = totalShipping / items.length;
+      // Determine total shipping of this order document
+      const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const totalShipping = Math.max(0, order.totalAmount - subtotal);
+      const shippingPerItem = totalShipping / flatItems.length;
       
-      // The first item remains in the original order document
-      const firstItem = items[0];
-      order.items = [firstItem];
-      order.totalAmount = (firstItem.price * firstItem.quantity) + shippingPerItem;
-      
+      // Update original order to contain only the first flat item unit
+      const newTotalAmount1 = flatItems[0].price + shippingPerItem;
       let shippingMethod = 'Free Shipping';
       if (shippingPerItem > 0) {
-        shippingMethod = shippingPerItem === 50 ? 'Mini Shipping (Rs.50)' : `Standard Shipping (Rs.${shippingPerItem.toFixed(0)})`;
+        shippingMethod = shippingPerItem === 50 ? 'Mini Shipping (Rs.50)' : `Standard Shipping (Rs.${shippingPerItem.toFixed(2)})`;
       }
-      order.shippingAddress.method = shippingMethod;
       
-      // Save the updated first order
+      order.items = [flatItems[0]];
+      order.totalAmount = newTotalAmount1;
+      if (order.shippingAddress) {
+        order.shippingAddress.method = shippingMethod;
+      }
+      order.markModified('items');
+      order.markModified('shippingAddress');
       await order.save();
-      console.log(`   Split order ${originalOrderId}: kept item 1 (${firstItem.name}) in original doc.`);
+      console.log(`   Split order ${originalOrderId}: updated original doc.`);
       
-      // For the rest of the items, create new order documents
-      for (let i = 1; i < items.length; i++) {
-        const item = items[i];
+      // Determine base order ID and find max suffix in DB to avoid collisions
+      const parts = originalOrderId.split('-');
+      let baseOrderId = originalOrderId;
+      if (parts.length > 3) {
+        baseOrderId = parts.slice(0, 3).join('-');
+      }
+      
+      const suffixPattern = new RegExp(`^${baseOrderId}-`);
+      const existingRelated = await Order.find({ orderId: suffixPattern });
+      
+      let maxSuffix = 1;
+      for (const rel of existingRelated) {
+        const p = rel.orderId.split('-');
+        if (p.length > 3) {
+          const suffixVal = parseInt(p[3], 10);
+          if (!isNaN(suffixVal) && suffixVal > maxSuffix) {
+            maxSuffix = suffixVal;
+          }
+        }
+      }
+
+      // Create new order documents for the remaining flat items
+      for (let i = 1; i < flatItems.length; i++) {
+        const nextSuffix = maxSuffix + i;
+        const newOrderId = `${baseOrderId}-${nextSuffix}`;
         const itemShipping = shippingPerItem;
-        const itemTotal = (item.price * item.quantity) + itemShipping;
+        const itemTotal = flatItems[i].price + itemShipping;
 
         let itemShippingMethod = 'Free Shipping';
         if (itemShipping > 0) {
-          itemShippingMethod = itemShipping === 50 ? 'Mini Shipping (Rs.50)' : `Standard Shipping (Rs.${itemShipping.toFixed(0)})`;
+          itemShippingMethod = itemShipping === 50 ? 'Mini Shipping (Rs.50)' : `Standard Shipping (Rs.${itemShipping.toFixed(2)})`;
         }
         
         const splitOrder = new Order({
-          orderId: `${originalOrderId}-${i + 1}`,
+          orderId: newOrderId,
           customerInfo: order.customerInfo,
           shippingAddress: {
             address: order.shippingAddress.address,
@@ -114,7 +153,7 @@ const migrateOldOrders = async () => {
             zip: order.shippingAddress.zip,
             method: itemShippingMethod
           },
-          items: [item],
+          items: [flatItems[i]],
           totalAmount: itemTotal,
           status: order.status,
           trackingId: order.trackingId,
@@ -127,7 +166,7 @@ const migrateOldOrders = async () => {
         });
         
         await splitOrder.save();
-        console.log(`   Split order ${originalOrderId}: created new doc for item ${i + 1} (${item.name}) -> ${splitOrder.orderId}`);
+        console.log(`   Split order ${originalOrderId}: created new doc -> ${splitOrder.orderId}`);
       }
     }
     

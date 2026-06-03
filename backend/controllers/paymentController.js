@@ -23,9 +23,9 @@ const numberToWords = (num) => {
   const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
     'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
   const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-  
+
   if (num === 0) return 'Zero';
-  
+
   const convert = (n) => {
     if (n < 20) return ones[n];
     if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
@@ -34,7 +34,7 @@ const numberToWords = (num) => {
     if (n < 10000000) return convert(Math.floor(n / 100000)) + ' Lakh' + (n % 100000 ? ' ' + convert(n % 100000) : '');
     return convert(Math.floor(n / 10000000)) + ' Crore' + (n % 10000000 ? ' ' + convert(n % 10000000) : '');
   };
-  
+
   return convert(Math.floor(num)) + ' Rupees only';
 };
 
@@ -214,36 +214,36 @@ const generateOrderEmailHtml = (order, isAdmin = false) => {
 const createPaymentOrder = async (req, res) => {
   try {
     const { amount } = req.body;
-    
+
     // Check if Razorpay is properly configured with real credentials
     const keyId = process.env.RAZORPAY_KEY_ID?.trim();
     const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
-    
+
     if (!keyId || !keySecret || keyId === 'rzp_test_demo_key' || keySecret === 'demo_secret') {
       // Return mock order for testing when no real credentials
       const mockOrderId = 'order_' + Math.random().toString(36).substring(7) + Date.now();
       console.log('⚠️ Using mock Razorpay - no valid credentials');
-      return res.status(200).json({ 
-        success: true, 
+      return res.status(200).json({
+        success: true,
         orderId: mockOrderId,
         amount: Math.round(amount * 100),
         currency: 'INR',
         testMode: true
       });
     }
-    
+
     const options = {
       amount: Math.round(amount * 100),
       currency: 'INR',
       receipt: 'order_' + Math.random().toString(36).substring(7)
     };
-    
+
     console.log('🔄 Creating Razorpay order with key:', keyId.substring(0, 10) + '...');
     const order = await razorpay.orders.create(options);
-    
+
     console.log('✅ Razorpay order created:', order.id);
-    res.status(200).json({ 
-      success: true, 
+    res.status(200).json({
+      success: true,
       orderId: order.id,
       amount: order.amount,
       currency: order.currency
@@ -252,8 +252,8 @@ const createPaymentOrder = async (req, res) => {
     console.error('❌ Razorpay Error:', error.message);
     // Return mock order on error for testing
     const mockOrderId = 'order_' + Math.random().toString(36).substring(7) + Date.now();
-    res.status(200).json({ 
-      success: true, 
+    res.status(200).json({
+      success: true,
       orderId: mockOrderId,
       amount: Math.round(req.body.amount * 100),
       currency: 'INR',
@@ -267,9 +267,9 @@ const createPaymentOrder = async (req, res) => {
 const verifyPayment = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, order_id } = req.body;
-    
+
     const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
-    
+
     // Skip real verification if using mock/test credentials
     let isValid = false;
     if (!keySecret || keySecret === 'demo_secret' || keySecret === 'abcdef1234567890abcdef1234567890') {
@@ -280,14 +280,14 @@ const verifyPayment = async (req, res) => {
       const generatedSignature = crypto.createHmac('sha256', keySecret)
         .update(razorpay_order_id + '|' + razorpay_payment_id)
         .digest('hex');
-      
+
       isValid = (generatedSignature === razorpay_signature);
     }
-    
+
     if (isValid) {
       console.log('✅ Payment verified successfully');
       console.log('🔍 [DEBUG] order_id received:', order_id);
-      
+
       // Update order status in DB
       let orders = [];
       if (razorpay_order_id) {
@@ -304,17 +304,17 @@ const verifyPayment = async (req, res) => {
 
       for (const order of orders) {
         console.log(`🔍 [DEBUG] Order ${order.orderId}: paymentStatus is ${order.paymentStatus}, emailSent is ${order.emailSent}`);
-        
+
         let needsEmail = !order.emailSent;
-        
+
         if (order.paymentStatus !== 'paid' || needsEmail) {
           order.paymentStatus = 'paid';
           order.paymentId = razorpay_payment_id;
           await order.save();
-          
+
           if (needsEmail) {
             console.log(`🔍 [DEBUG] Triggering email services in background for order: ${order.orderId}...`);
-            
+
             // Atomically claim the email send slot — prevents duplicate sends from concurrent webhooks
             const updatedOrder = await Order.findOneAndUpdate(
               { _id: order._id, emailSent: false },
@@ -327,7 +327,7 @@ const verifyPayment = async (req, res) => {
               const adminEmailContent = generateOrderEmailHtml(updatedOrder, true);
               const customerEmailContent = generateOrderEmailHtml(updatedOrder, false);
               const adminEmailAddress = process.env.ADMIN_EMAIL || 'kavinath50@gmail.com';
-              
+
               let attachments = [];
               try {
                 const pdfBuffer = generateInvoicePdf(updatedOrder);
@@ -378,7 +378,7 @@ const verifyPayment = async (req, res) => {
           }
         }
       }
-      
+
       res.status(200).json({ success: true, message: 'Payment verified successfully' });
     } else {
       console.log('❌ Invalid payment signature');
@@ -401,11 +401,11 @@ const razorpayWebhook = async (req, res) => {
 
     const signature = req.headers['x-razorpay-signature'];
     const rawBody = req.rawBody ? req.rawBody.toString('utf-8') : JSON.stringify(req.body);
-    
+
     const expectedSignature = crypto.createHmac('sha256', webhookSecret)
       .update(rawBody)
       .digest('hex');
-      
+
     if (signature !== expectedSignature) {
       return res.status(400).json({ success: false, message: 'Invalid webhook signature' });
     }
@@ -416,23 +416,23 @@ const razorpayWebhook = async (req, res) => {
       const paymentEntity = req.body.payload.payment.entity;
       const razorpayOrderId = paymentEntity.order_id;
       const paymentId = paymentEntity.id;
-      
+
       const orders = await Order.find({ paymentId: razorpayOrderId });
       console.log(`✅ Webhook: Found ${orders.length} orders matching paymentId ${razorpayOrderId}`);
-      
+
       for (const order of orders) {
         console.log(`✅ Webhook: Processing order ${order.orderId}. Current emailSent: ${order.emailSent}`);
-        
+
         let needsEmail = !order.emailSent;
-        
+
         if (order.paymentStatus !== 'paid' || needsEmail) {
           order.paymentStatus = 'paid';
           order.paymentId = paymentId;
           await order.save();
-          
+
           if (needsEmail) {
             console.log(`✅ Webhook: Triggering confirmation emails in background for order ${order.orderId}`);
-            
+
             // Atomically claim the email send slot — prevents duplicate sends
             const updatedOrder = await Order.findOneAndUpdate(
               { _id: order._id, emailSent: false },
@@ -444,7 +444,7 @@ const razorpayWebhook = async (req, res) => {
               const adminEmailContent = generateOrderEmailHtml(updatedOrder, true);
               const customerEmailContent = generateOrderEmailHtml(updatedOrder, false);
               const adminEmailAddress = process.env.ADMIN_EMAIL || 'kavinath50@gmail.com';
-              
+
               let attachments = [];
               try {
                 const pdfBuffer = generateInvoicePdf(updatedOrder);
