@@ -134,7 +134,7 @@ const OrderTracking = () => {
             Track Your Order
           </h1>
           <p className="text-secondary-text text-sm md:text-base">
-            Enter your order number (e.g., FZ1-001-20260516) or phone number to see your orders.
+            Enter your phone number to see your orders.
           </p>
         </div>
 
@@ -145,7 +145,7 @@ const OrderTracking = () => {
                 type="text" 
                 value={trackingId}
                 onChange={(e) => setTrackingId(e.target.value)}
-                placeholder="Order Number or Phone" 
+                placeholder="Phone Number" 
                 className="w-full bg-secondary-white border border-transparent focus:border-luxury-gold focus:bg-white transition-colors p-4 pl-12 text-sm outline-none"
               />
               <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary-text" />

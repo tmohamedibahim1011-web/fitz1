@@ -38,6 +38,7 @@ const AdminDashboard = () => {
 
   // Filters
   const [filterProduct, setFilterProduct] = useState('All');
+  const [filterVariant, setFilterVariant] = useState('All');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [exactDate, setExactDate] = useState('');
@@ -532,6 +533,29 @@ const AdminDashboard = () => {
     const orderItemsString = o.items.map(i => i.name).join(' ');
     const productMatch = filterProduct === 'All' || orderItemsString.includes(filterProduct);
 
+    // Variant / Color match
+    let variantMatch = true;
+    if (filterVariant !== 'All') {
+      variantMatch = o.items.some(item => {
+        const name = item.name.toLowerCase();
+        const color = item.color.toLowerCase();
+        
+        if (filterVariant === 'mini-black') {
+          return name.includes('mini') && (color.includes('black') || color.includes('shadow black'));
+        }
+        if (filterVariant === 'mini-natural') {
+          return name.includes('mini') && (color.includes('natural') || color.includes('natural finish'));
+        }
+        if (filterVariant === 'regular-black') {
+          return name.includes('regular') && (color.includes('black') || color.includes('shadow black'));
+        }
+        if (filterVariant === 'regular-natural') {
+          return name.includes('regular') && (color.includes('natural') || color.includes('natural finish'));
+        }
+        return false;
+      });
+    }
+
     const orderDate = new Date(o.createdAt).setHours(0, 0, 0, 0);
 
     if (exactDate) {
@@ -544,7 +568,7 @@ const AdminDashboard = () => {
       if (toD && orderDate > toD) return false;
     }
 
-    return productMatch;
+    return productMatch && variantMatch;
   });
 
   const selectAllFiltered = () => {
@@ -782,6 +806,19 @@ const AdminDashboard = () => {
                         <option value="All">All Products</option>
                         <option value="Regular">Pro Series Regular</option>
                         <option value="Mini">Mini Parallettes</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Color/Variant Filter</label>
+                    <div className="flex items-center gap-2 border border-black/10 px-3 py-2">
+                      <Filter size={16} className="text-secondary-text" />
+                      <select value={filterVariant} onChange={(e) => setFilterVariant(e.target.value)} className="bg-transparent text-xs font-bold uppercase tracking-widest text-primary-text outline-none cursor-pointer">
+                        <option value="All">All Combinations</option>
+                        <option value="mini-black">Mini Black</option>
+                        <option value="mini-natural">Mini Natural</option>
+                        <option value="regular-black">Regular Black</option>
+                        <option value="regular-natural">Regular Natural</option>
                       </select>
                     </div>
                   </div>
