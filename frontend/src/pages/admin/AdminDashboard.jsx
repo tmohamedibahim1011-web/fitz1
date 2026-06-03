@@ -579,9 +579,35 @@ const AdminDashboard = () => {
     }
   };
 
-  const totalRevenue = orders
-    .filter(o => o.paymentStatus === 'paid' || o.paymentStatus === 'completed')
-    .reduce((acc, curr) => acc + curr.totalAmount, 0);
+  // Group orders by base order ID to avoid duplicate calculations in stats cards
+  const getBaseOrderId = (orderId) => {
+    if (!orderId) return '';
+    const parts = orderId.split('-');
+    return parts.length > 3 ? parts.slice(0, 3).join('-') : orderId;
+  };
+
+  const orderGroups = orders.reduce((groups, order) => {
+    const baseId = getBaseOrderId(order.orderId);
+    if (!groups[baseId]) {
+      groups[baseId] = [];
+    }
+    groups[baseId].push(order);
+    return groups;
+  }, {});
+
+  const totalOrdersCount = Object.keys(orderGroups).length;
+
+  const totalRevenue = Object.values(orderGroups).reduce((sum, group) => {
+    const isPaid = group.some(o => o.paymentStatus === 'paid' || o.paymentStatus === 'completed');
+    if (isPaid) {
+      return sum + group.reduce((acc, curr) => acc + curr.totalAmount, 0);
+    }
+    return sum;
+  }, 0);
+
+  const pendingOrdersCount = Object.values(orderGroups).filter(group => {
+    return group.some(o => o.status === 'processing' || o.status === 'packing');
+  }).length;
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -668,7 +694,7 @@ const AdminDashboard = () => {
               </div>
               <div className="bg-white p-6 border border-black/5 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-2">Total Orders</p>
-                <h3 className="text-3xl font-bold text-primary-text">{orders.length}</h3>
+                <h3 className="text-3xl font-bold text-primary-text">{totalOrdersCount}</h3>
               </div>
               <div className="bg-white p-6 border border-black/5 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-2">Total Products</p>
@@ -676,7 +702,7 @@ const AdminDashboard = () => {
               </div>
               <div className="bg-white p-6 border border-black/5 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-2">Pending Orders</p>
-                <h3 className="text-3xl font-bold text-primary-text">{orders.filter(o => o.status === 'processing' || o.status === 'packing').length}</h3>
+                <h3 className="text-3xl font-bold text-primary-text">{pendingOrdersCount}</h3>
               </div>
             </div>
 
@@ -772,12 +798,12 @@ const AdminDashboard = () => {
               <div className="bg-white p-6 border border-black/5 shadow-sm relative overflow-hidden group hover:border-luxury-gold/50 transition-colors">
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><ShoppingCart size={48} /></div>
                 <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-2">Total Orders</p>
-                <h3 className="text-3xl font-bold text-primary-text mb-1">{orders.length}</h3>
+                <h3 className="text-3xl font-bold text-primary-text mb-1">{totalOrdersCount}</h3>
               </div>
               <div className="bg-white p-6 border border-black/5 shadow-sm relative overflow-hidden group hover:border-luxury-gold/50 transition-colors">
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><LayoutDashboard size={48} /></div>
                 <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-2">Pending Fulfillment</p>
-                <h3 className="text-3xl font-bold text-primary-text mb-1">{orders.filter(o => o.status === 'processing' || o.status === 'packing').length}</h3>
+                <h3 className="text-3xl font-bold text-primary-text mb-1">{pendingOrdersCount}</h3>
               </div>
             </div>
 
