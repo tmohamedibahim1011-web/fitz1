@@ -55,7 +55,9 @@ const Confetti = () => {
 const OrderSuccess = () => {
   const { clearCart } = useCart();
   const location = useLocation();
-  const orderId = location.state?.orderId || 'N/A';
+  
+  const orderIds = location.state?.orderIds || (location.state?.orderId ? [location.state.orderId] : ['N/A']);
+  const displayOrderIds = orderIds.join(', ');
 
   useEffect(() => {
     clearCart();
@@ -76,7 +78,7 @@ const OrderSuccess = () => {
         >
           <Check size={48} strokeWidth={3} />
         </motion.div>
-
+ 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -88,7 +90,7 @@ const OrderSuccess = () => {
           <p className="text-secondary-text text-lg max-w-md mx-auto mb-12">
             Thank you for your purchase. Your handcrafted equipment is being prepared for shipment.
           </p>
-
+ 
           <div className="bg-white border border-black/10 p-8 max-w-lg mx-auto text-left relative overflow-hidden group hover:border-luxury-gold/30 transition-colors mb-12">
             <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
               <Package size={120} />
@@ -97,9 +99,9 @@ const OrderSuccess = () => {
             <h2 className="text-sm font-bold uppercase tracking-widest text-primary-text mb-6 border-b border-black/10 pb-4">Order Details</h2>
             
             <div className="space-y-4">
-              <div className="flex justify-between">
-                <span className="text-secondary-text text-sm">Order Number</span>
-                <span className="font-bold font-mono text-sm text-luxury-gold">{orderId}</span>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <span className="text-secondary-text text-sm">Order Number{orderIds.length > 1 ? 's' : ''}</span>
+                <span className="font-bold font-mono text-sm text-luxury-gold text-right break-all">{displayOrderIds}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-secondary-text text-sm">Date</span>
@@ -113,7 +115,7 @@ const OrderSuccess = () => {
             
             <div className="mt-8 pt-6 border-t border-black/10">
               <p className="text-xs text-secondary-text mb-2">Track your order using:</p>
-              <p className="font-bold text-sm">Your Order Number: <span className="text-luxury-gold">{orderId}</span></p>
+              <p className="font-bold text-sm">Your Order Number{orderIds.length > 1 ? 's' : ''}: <span className="text-luxury-gold font-mono">{displayOrderIds}</span></p>
               <p className="text-xs text-secondary-text mt-2">Or call us with your phone number</p>
             </div>
           </div>

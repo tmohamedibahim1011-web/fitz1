@@ -123,7 +123,7 @@ const Checkout = () => {
         throw new Error('Failed to create order');
       }
 
-      const { razorpayOrderId, keyId, order } = orderRes.data;
+      const { razorpayOrderId, keyId, order, orderIds } = orderRes.data;
 
       // 2. Open Razorpay
       const options = {
@@ -145,11 +145,11 @@ const Checkout = () => {
 
             toast.success('Order placed successfully!');
             clearCart();
-            navigate('/success', { state: { orderId: order.orderId } });
+            navigate('/success', { state: { orderIds: orderIds || [order.orderId] } });
           } catch (err) {
             toast.error('Payment verified but issue with server. Your order is placed.');
             clearCart();
-            navigate('/success', { state: { orderId: order.orderId } });
+            navigate('/success', { state: { orderIds: orderIds || [order.orderId] } });
           }
         },
         prefill: {
@@ -173,7 +173,7 @@ const Checkout = () => {
         // Fallback for test mode without Razorpay library
         toast.success('Order placed in test mode!');
         clearCart();
-        navigate('/success', { state: { orderId: order.orderId } });
+        navigate('/success', { state: { orderIds: orderIds || [order.orderId] } });
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -212,7 +212,7 @@ const Checkout = () => {
       if (orderRes.data.success) {
         toast.success('Order placed successfully!');
         clearCart();
-        navigate('/success', { state: { orderId: orderRes.data.order.orderId } });
+        navigate('/success', { state: { orderIds: orderRes.data.orderIds || [orderRes.data.order.orderId] } });
       }
     } catch (error) {
       toast.error('Failed to place order. Please try again.');

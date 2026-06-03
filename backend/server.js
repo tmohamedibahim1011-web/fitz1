@@ -46,9 +46,107 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
+// Migration for old orders with multiple items
+const migrateOldOrders = async () => {
+  try {
+    const Order = require('./models/Order');
+    
+    // Find all orders that have more than 1 item
+    const ordersToSplit = await Order.find({ 'items.1': { $exists: true } });
+    
+    if (ordersToSplit.length === 0) {
+      console.log('ℹ️ No old orders to split.');
+      return;
+    }
+    
+    console.log(`🔄 Found ${ordersToSplit.length} old orders to split...`);
+    
+    for (const order of ordersToSplit) {
+      const items = order.items;
+      const originalOrderId = order.orderId;
+      
+      // Determine original shipping cost
+      let totalShipping = 0;
+      if (order.shippingAddress && order.shippingAddress.method) {
+        const method = order.shippingAddress.method.toLowerCase();
+        if (method.includes('50')) {
+          totalShipping = 50;
+        } else if (method.includes('100')) {
+          totalShipping = 100;
+        }
+      }
+      
+      const shippingPerItem = totalShipping / items.length;
+      
+      // The first item remains in the original order document
+      const firstItem = items[0];
+      order.items = [firstItem];
+      order.totalAmount = (firstItem.price * firstItem.quantity) + shippingPerItem;
+      
+      let shippingMethod = 'Free Shipping';
+      if (shippingPerItem > 0) {
+        shippingMethod = shippingPerItem === 50 ? 'Mini Shipping (Rs.50)' : `Standard Shipping (Rs.${shippingPerItem.toFixed(0)})`;
+      }
+      order.shippingAddress.method = shippingMethod;
+      
+      // Save the updated first order
+      await order.save();
+      console.log(`   Split order ${originalOrderId}: kept item 1 (${firstItem.name}) in original doc.`);
+      
+      // For the rest of the items, create new order documents
+      for (let i = 1; i < items.length; i++) {
+        const item = items[i];
+        const itemShipping = shippingPerItem;
+        const itemTotal = (item.price * item.quantity) + itemShipping;
+
+        let itemShippingMethod = 'Free Shipping';
+        if (itemShipping > 0) {
+          itemShippingMethod = itemShipping === 50 ? 'Mini Shipping (Rs.50)' : `Standard Shipping (Rs.${itemShipping.toFixed(0)})`;
+        }
+        
+        const splitOrder = new Order({
+          orderId: `${originalOrderId}-${i + 1}`,
+          customerInfo: order.customerInfo,
+          shippingAddress: {
+            address: order.shippingAddress.address,
+            city: order.shippingAddress.city,
+            state: order.shippingAddress.state,
+            zip: order.shippingAddress.zip,
+            method: itemShippingMethod
+          },
+          items: [item],
+          totalAmount: itemTotal,
+          status: order.status,
+          trackingId: order.trackingId,
+          courierName: order.courierName,
+          trackingLink: order.trackingLink,
+          paymentId: order.paymentId,
+          paymentStatus: order.paymentStatus,
+          emailSent: order.emailSent,
+          createdAt: order.createdAt
+        });
+        
+        await splitOrder.save();
+        console.log(`   Split order ${originalOrderId}: created new doc for item ${i + 1} (${item.name}) -> ${splitOrder.orderId}`);
+      }
+    }
+    
+    console.log('✅ Migration of old orders complete!');
+  } catch (error) {
+    console.error('❌ Error during old orders migration:', error);
+  }
+};
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ MongoDB Connected Successfully'))
+  .then(async () => {
+    console.log('✅ MongoDB Connected Successfully');
+    try {
+      await migrateOldOrders();
+    } catch (migErr) {
+      console.error('❌ Migration error on startup:', migErr);
+    }
+  })
   .catch((err) => console.error('❌ MongoDB Connection Error:', err));
 
 // SMTP Verification removed since we migrated to the highly reliable HTTP API

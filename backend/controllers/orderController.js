@@ -44,22 +44,62 @@ const decrementProductStock = async (productId, itemColor, quantity) => {
 // Create new order
 const createOrder = async (req, res) => {
   try {
+    const { items, totalAmount, customerInfo, shippingAddress } = req.body;
+
     // Decrease stock for each item
-    for (const item of req.body.items) {
+    for (const item of items) {
       await decrementProductStock(item.productId, item.color, item.quantity);
     }
 
-    // Generate order ID with auto-increment
-    const orderId = await generateOrderId(Order);
+    // Generate base order ID
+    const baseOrderId = await generateOrderId(Order);
+    const savedOrders = [];
 
-    // Create order with new ID format
-    const newOrder = new Order({
-      ...req.body,
-      orderId: orderId
-    });
-    await newOrder.save();
+    if (items.length <= 1) {
+      const newOrder = new Order({
+        ...req.body,
+        orderId: baseOrderId
+      });
+      await newOrder.save();
+      savedOrders.push(newOrder);
+    } else {
+      const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const totalShipping = Math.max(0, totalAmount - subtotal);
+      const shippingPerItem = Math.floor(totalShipping / items.length);
+      const remainderShipping = totalShipping - (shippingPerItem * items.length);
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const itemShipping = shippingPerItem + (i === 0 ? remainderShipping : 0);
+        const itemTotal = (item.price * item.quantity) + itemShipping;
+
+        let shippingMethod = 'Free Shipping';
+        if (itemShipping > 0) {
+          shippingMethod = itemShipping === 50 ? 'Mini Shipping (Rs.50)' : `Standard Shipping (Rs.${itemShipping})`;
+        }
+
+        const newOrder = new Order({
+          customerInfo,
+          shippingAddress: {
+            ...shippingAddress,
+            method: shippingMethod
+          },
+          items: [item],
+          totalAmount: itemTotal,
+          orderId: `${baseOrderId}-${i + 1}`,
+          paymentStatus: req.body.paymentStatus || 'pending'
+        });
+        await newOrder.save();
+        savedOrders.push(newOrder);
+      }
+    }
     
-    res.status(201).json({ success: true, order: newOrder });
+    res.status(201).json({ 
+      success: true, 
+      order: savedOrders[0], 
+      orders: savedOrders,
+      orderIds: savedOrders.map(o => o.orderId)
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -71,8 +111,7 @@ const createOrderWithPayment = async (req, res) => {
     const keyId = process.env.RAZORPAY_KEY_ID?.trim();
     const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
     
-    // Calculate total amount from frontend or recalculate
-    const { totalAmount, items } = req.body;
+    const { totalAmount, items, customerInfo, shippingAddress } = req.body;
     
     let razorpayOrderId = null;
     let isTestMode = false;
@@ -95,20 +134,57 @@ const createOrderWithPayment = async (req, res) => {
       await decrementProductStock(item.productId, item.color, item.quantity);
     }
 
-    const orderId = await generateOrderId(Order);
+    const baseOrderId = await generateOrderId(Order);
+    const savedOrders = [];
 
-    const newOrder = new Order({
-      ...req.body,
-      orderId: orderId,
-      paymentId: razorpayOrderId,
-      paymentStatus: 'pending'
-    });
-    
-    await newOrder.save();
+    if (items.length <= 1) {
+      const newOrder = new Order({
+        ...req.body,
+        orderId: baseOrderId,
+        paymentId: razorpayOrderId,
+        paymentStatus: 'pending'
+      });
+      
+      await newOrder.save();
+      savedOrders.push(newOrder);
+    } else {
+      const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const totalShipping = Math.max(0, totalAmount - subtotal);
+      const shippingPerItem = Math.floor(totalShipping / items.length);
+      const remainderShipping = totalShipping - (shippingPerItem * items.length);
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const itemShipping = shippingPerItem + (i === 0 ? remainderShipping : 0);
+        const itemTotal = (item.price * item.quantity) + itemShipping;
+
+        let shippingMethod = 'Free Shipping';
+        if (itemShipping > 0) {
+          shippingMethod = itemShipping === 50 ? 'Mini Shipping (Rs.50)' : `Standard Shipping (Rs.${itemShipping})`;
+        }
+
+        const newOrder = new Order({
+          customerInfo,
+          shippingAddress: {
+            ...shippingAddress,
+            method: shippingMethod
+          },
+          items: [item],
+          totalAmount: itemTotal,
+          orderId: `${baseOrderId}-${i + 1}`,
+          paymentId: razorpayOrderId,
+          paymentStatus: 'pending'
+        });
+        await newOrder.save();
+        savedOrders.push(newOrder);
+      }
+    }
     
     res.status(201).json({ 
       success: true, 
-      order: newOrder, 
+      order: savedOrders[0], 
+      orders: savedOrders,
+      orderIds: savedOrders.map(o => o.orderId),
       razorpayOrderId, 
       testMode: isTestMode,
       keyId: isTestMode ? 'rzp_test_demo_key' : keyId
