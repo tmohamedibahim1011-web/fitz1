@@ -180,26 +180,35 @@ const migrateOldOrders = async () => {
 const migrateExpectedDeliveryDates = async () => {
   try {
     const Order = require('./models/Order');
+    const { calculateOrderDates } = require('./utils/helpers');
     
-    // Find all orders that don't have expectedDeliveryDate field
-    const ordersToUpdate = await Order.find({ expectedDeliveryDate: { $exists: false } });
+    // Find all orders that don't have expectedDeliveryDate or dispatchDate field
+    const ordersToUpdate = await Order.find({
+      $or: [
+        { expectedDeliveryDate: { $exists: false } },
+        { dispatchDate: { $exists: false } }
+      ]
+    });
     
     if (ordersToUpdate.length === 0) {
-      console.log('ℹ️ All orders have expectedDeliveryDate.');
+      console.log('ℹ️ All orders have expectedDeliveryDate and dispatchDate.');
       return;
     }
     
-    console.log(`🔄 Found ${ordersToUpdate.length} orders without expectedDeliveryDate, updating...`);
+    console.log(`🔄 Found ${ordersToUpdate.length} orders without expected delivery or dispatch date, updating...`);
     
     for (const order of ordersToUpdate) {
       const orderDate = order.createdAt ? new Date(order.createdAt) : new Date();
-      order.expectedDeliveryDate = new Date(orderDate.getTime() + 4 * 24 * 60 * 60 * 1000);
+      const shippingState = order.shippingAddress ? order.shippingAddress.state : '';
+      const { dispatchDate, expectedDeliveryDate } = calculateOrderDates(orderDate, shippingState);
+      order.dispatchDate = dispatchDate;
+      order.expectedDeliveryDate = expectedDeliveryDate;
       await order.save();
     }
     
-    console.log('✅ Migration of expected delivery dates complete!');
+    console.log('✅ Migration of order dates complete!');
   } catch (error) {
-    console.error('❌ Error during expected delivery dates migration:', error);
+    console.error('❌ Error during order dates migration:', error);
   }
 };
 

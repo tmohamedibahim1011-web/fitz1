@@ -34,6 +34,7 @@ const OrderSchema = new mongoose.Schema({
   paymentId: String,
   paymentStatus: { type: String, default: 'pending' },
   emailSent: { type: Boolean, default: false },
+  dispatchDate: { type: Date },
   expectedDeliveryDate: { type: Date },
   createdAt: { type: Date, default: Date.now }
 });

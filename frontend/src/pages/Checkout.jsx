@@ -145,11 +145,11 @@ const Checkout = () => {
 
             toast.success('Order placed successfully!');
             clearCart();
-            navigate('/success', { state: { orderIds: orderIds || [order.orderId] } });
+            navigate('/success', { state: { orderIds: orderIds || [order.orderId], shippingState: formData.state } });
           } catch (err) {
             toast.error('Payment verified but issue with server. Your order is placed.');
             clearCart();
-            navigate('/success', { state: { orderIds: orderIds || [order.orderId] } });
+            navigate('/success', { state: { orderIds: orderIds || [order.orderId], shippingState: formData.state } });
           }
         },
         prefill: {
@@ -173,7 +173,7 @@ const Checkout = () => {
         // Fallback for test mode without Razorpay library
         toast.success('Order placed in test mode!');
         clearCart();
-        navigate('/success', { state: { orderIds: orderIds || [order.orderId] } });
+        navigate('/success', { state: { orderIds: orderIds || [order.orderId], shippingState: formData.state } });
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -212,7 +212,7 @@ const Checkout = () => {
       if (orderRes.data.success) {
         toast.success('Order placed successfully!');
         clearCart();
-        navigate('/success', { state: { orderIds: orderRes.data.orderIds || [orderRes.data.order.orderId] } });
+        navigate('/success', { state: { orderIds: orderRes.data.orderIds || [orderRes.data.order.orderId], shippingState: formData.state } });
       }
     } catch (error) {
       toast.error('Failed to place order. Please try again.');

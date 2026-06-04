@@ -58,6 +58,12 @@ const OrderSuccess = () => {
   
   const orderIds = location.state?.orderIds || (location.state?.orderId ? [location.state.orderId] : ['N/A']);
   const displayOrderIds = orderIds.join(', ');
+  const shippingState = location.state?.shippingState || '';
+  const normalizedState = shippingState ? shippingState.toLowerCase().trim() : '';
+  const isTamilNadu = normalizedState === 'tamil nadu' || normalizedState === 'tamilnadu' || normalizedState === 'tn';
+  const deliveryDays = isTamilNadu ? 6 : 8; // 6 days (7 days inclusive) for Tamil Nadu, 8 days (9 days inclusive) for others
+  const dispatchDate = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const expectedDate = new Date(Date.now() + deliveryDays * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
   useEffect(() => {
     clearCart();
@@ -108,9 +114,13 @@ const OrderSuccess = () => {
                 <span className="font-bold text-sm">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
               </div>
               <div className="flex justify-between">
+                <span className="text-secondary-text text-sm">Dispatch Date</span>
+                <span className="font-bold text-sm">{dispatchDate}</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-secondary-text text-sm">Expected Delivery</span>
                 <span className="font-bold text-sm text-luxury-gold">
-                  {new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                  {expectedDate}
                 </span>
               </div>
               <div className="flex justify-between">

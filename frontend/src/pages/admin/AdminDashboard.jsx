@@ -34,6 +34,7 @@ const AdminDashboard = () => {
     zip: '',
     paymentStatus: 'pending',
     items: [],
+    dispatchDate: '',
     expectedDeliveryDate: ''
   });
 
@@ -262,6 +263,7 @@ const AdminDashboard = () => {
         items: orderEditForm.items,
         totalAmount: orderEditForm.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
         paymentStatus: orderEditForm.paymentStatus,
+        dispatchDate: orderEditForm.dispatchDate ? new Date(orderEditForm.dispatchDate) : undefined,
         expectedDeliveryDate: orderEditForm.expectedDeliveryDate ? new Date(orderEditForm.expectedDeliveryDate) : undefined
       };
 
@@ -737,9 +739,14 @@ const AdminDashboard = () => {
                         </td>
                         <td className="p-4 text-secondary-text text-xs">
                           <div>{new Date(order.createdAt).toLocaleDateString()}</div>
+                          {order.dispatchDate && (
+                            <div className="text-[10px] text-gray-500 mt-1">
+                              Disp: {new Date(order.dispatchDate).toLocaleDateString()}
+                            </div>
+                          )}
                           {order.expectedDeliveryDate && (
-                            <div className="text-[10px] text-luxury-gold font-bold mt-1">
-                              Est: {new Date(order.expectedDeliveryDate).toLocaleDateString()}
+                            <div className="text-[10px] text-luxury-gold font-bold mt-0.5">
+                              Delv: {new Date(order.expectedDeliveryDate).toLocaleDateString()}
                             </div>
                           )}
                         </td>
@@ -918,9 +925,14 @@ const AdminDashboard = () => {
                         <td className="p-4 font-mono font-bold text-xs">{order.orderId}</td>
                         <td className="p-4 text-secondary-text text-xs">
                           <div>{new Date(order.createdAt).toLocaleDateString()}</div>
+                          {order.dispatchDate && (
+                            <div className="text-[10px] text-gray-500 mt-1">
+                              Disp: {new Date(order.dispatchDate).toLocaleDateString()}
+                            </div>
+                          )}
                           {order.expectedDeliveryDate && (
-                            <div className="text-[10px] text-luxury-gold font-bold mt-1">
-                              Est: {new Date(order.expectedDeliveryDate).toLocaleDateString()}
+                            <div className="text-[10px] text-luxury-gold font-bold mt-0.5">
+                              Delv: {new Date(order.expectedDeliveryDate).toLocaleDateString()}
                             </div>
                           )}
                         </td>
@@ -1003,6 +1015,7 @@ const AdminDashboard = () => {
                                   zip: order.shippingAddress?.zip || '',
                                   paymentStatus: order.paymentStatus || 'pending',
                                   items: order.items ? order.items.map(item => ({ ...item })) : [],
+                                  dispatchDate: order.dispatchDate ? new Date(order.dispatchDate).toISOString().split('T')[0] : '',
                                   expectedDeliveryDate: order.expectedDeliveryDate ? new Date(order.expectedDeliveryDate).toISOString().split('T')[0] : ''
                                 });
                                 setShowOrderEditModal(true);
@@ -1350,8 +1363,8 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* Total, Expected Delivery Date, and Payment Status */}
-                <div className="grid grid-cols-3 gap-6 items-center bg-secondary-white p-4 border border-black/5">
+                {/* Total, Dates and Payment Status */}
+                <div className="grid grid-cols-2 gap-6 bg-secondary-white p-4 border border-black/5">
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text block mb-1">Payment Status</span>
                     <select 
@@ -1364,6 +1377,22 @@ const AdminDashboard = () => {
                       <option value="paid">Paid</option>
                     </select>
                   </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text block mb-1">Total Amount</span>
+                    <span className="text-xl font-bold text-primary-text">₹{orderEditForm.items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6 bg-secondary-white p-4 border border-black/5 -mt-4">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text block mb-1">Dispatch Date</span>
+                    <input 
+                      type="date"
+                      value={orderEditForm.dispatchDate}
+                      onChange={(e) => setOrderEditForm({ ...orderEditForm, dispatchDate: e.target.value })}
+                      className="border border-black/10 px-3 py-2 text-xs font-bold text-primary-text outline-none bg-white w-full"
+                    />
+                  </div>
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text block mb-1">Expected Delivery Date</span>
                     <input 
@@ -1372,10 +1401,6 @@ const AdminDashboard = () => {
                       onChange={(e) => setOrderEditForm({ ...orderEditForm, expectedDeliveryDate: e.target.value })}
                       className="border border-black/10 px-3 py-2 text-xs font-bold text-primary-text outline-none bg-white w-full"
                     />
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text block mb-1">Total Amount</span>
-                    <span className="text-xl font-bold text-primary-text">₹{orderEditForm.items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                 </div>
 

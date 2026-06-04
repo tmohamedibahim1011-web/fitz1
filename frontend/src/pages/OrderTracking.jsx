@@ -189,11 +189,25 @@ const OrderTracking = () => {
                         <p className="font-bold text-sm">{new Date(order.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
                       </div>
                       <div>
+                        <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-1">Dispatch Date</p>
+                        <p className="font-bold text-sm">
+                          {order.dispatchDate 
+                            ? new Date(order.dispatchDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                            : new Date(new Date(order.createdAt).getTime() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        </p>
+                      </div>
+                      <div>
                         <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-1">Expected Delivery</p>
                         <p className="font-bold text-sm text-luxury-gold">
                           {order.expectedDeliveryDate 
                             ? new Date(order.expectedDeliveryDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-                            : new Date(new Date(order.createdAt).getTime() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            : (() => {
+                                const shippingState = order.shippingAddress?.state || '';
+                                const normalizedState = shippingState ? shippingState.toLowerCase().trim() : '';
+                                const isTamilNadu = normalizedState === 'tamil nadu' || normalizedState === 'tamilnadu' || normalizedState === 'tn';
+                                const deliveryDays = isTamilNadu ? 6 : 8;
+                                return new Date(new Date(order.createdAt).getTime() + deliveryDays * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                              })()}
                         </p>
                       </div>
                     </div>

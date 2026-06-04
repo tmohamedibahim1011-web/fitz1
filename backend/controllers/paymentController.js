@@ -40,8 +40,19 @@ const numberToWords = (num) => {
 
 const generateOrderEmailHtml = (order, isAdmin = false) => {
   const invoiceDate = new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const expectedDateObj = order.expectedDeliveryDate ? new Date(order.expectedDeliveryDate) : new Date(new Date(order.createdAt).getTime() + 4 * 24 * 60 * 60 * 1000);
-  const expectedDate = expectedDateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+  let dispatchDateObj, expectedDateObj;
+  if (order.dispatchDate && order.expectedDeliveryDate) {
+    dispatchDateObj = new Date(order.dispatchDate);
+    expectedDateObj = new Date(order.expectedDeliveryDate);
+  } else {
+    const { calculateOrderDates } = require('../utils/helpers');
+    const shippingState = order.shippingAddress ? order.shippingAddress.state : '';
+    const dates = calculateOrderDates(order.createdAt, shippingState);
+    dispatchDateObj = dates.dispatchDate;
+    expectedDateObj = dates.expectedDeliveryDate;
+  }
+  const dispatchDateStr = dispatchDateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+  const expectedDateStr = expectedDateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
 
   const itemsHtml = order.items.map((item, index) => `
     <tr>
@@ -123,7 +134,8 @@ const generateOrderEmailHtml = (order, isAdmin = false) => {
                 <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.8;">
                   Invoice No.: <strong style="color: #111;">${order.orderId}</strong><br>
                   Date: <strong style="color: #111;">${invoiceDate}</strong><br>
-                  Expected Delivery: <strong style="color: #111;">${expectedDate}</strong>
+                  Dispatch Date: <strong style="color: #111;">${dispatchDateStr}</strong><br>
+                  Expected Delivery: <strong style="color: #111;">${expectedDateStr}</strong>
                 </p>
               </td>
             </tr>
