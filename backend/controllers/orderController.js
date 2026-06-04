@@ -14,7 +14,7 @@ const decrementProductStock = async (productId, itemColor, quantity) => {
   const qty = quantity || 1;
   let updated = false;
 
-  const updatedColors = product.colors.map(color => {
+  product.colors = product.colors.map(color => {
     const isMatch = itemColor && (
       color.name.toLowerCase() === itemColor.toLowerCase() ||
       color.id.toLowerCase() === itemColor.toLowerCase()
@@ -26,19 +26,9 @@ const decrementProductStock = async (productId, itemColor, quantity) => {
     return color;
   });
 
-  const newGlobalStock = Math.max(0, product.stock - qty);
-  if (updated) {
-    await Product.findByIdAndUpdate(productId, {
-      colors: updatedColors,
-      stock: newGlobalStock,
-      updatedAt: Date.now()
-    });
-  } else {
-    await Product.findByIdAndUpdate(productId, {
-      stock: newGlobalStock,
-      updatedAt: Date.now()
-    });
-  }
+  product.stock = Math.max(0, product.stock - qty);
+  product.updatedAt = Date.now();
+  await product.save();
 };
 
 // Create new order

@@ -193,50 +193,57 @@ mongoose.connect(process.env.MONGODB_URI)
 // Seed default products
 const seedProducts = async () => {
   try {
-    // Drop all products
-    await Product.deleteMany({});
+    const count = await Product.countDocuments();
+    if (count > 0) {
+      console.log('ℹ️ Products already exist in database. Skipping seeding.');
+      return;
+    }
     
     // Drop indexes to avoid duplicate key errors
-    await Product.collection.dropIndexes();
-  } catch (e) {
-    // Indexes might not exist, continue
-  }
-  
-  const defaultProducts = [
-    {
-      name: 'Pro Series Regular Parallettes',
-      description: 'Premium Mahogany Wood parallettes for professional training. 45mm ergonomic grip, 450mm length, 140mm base width, 130mm height. 350kg weight capacity.',
-      basePrice: 1499,
-      size: 'regular',
-      material: 'Premium Mahogany Wood',
-      badge: 'Signature Series',
-      stock: 50,
-      colors: [
-        { id: 'natural', name: 'Natural Finish', hex: '#D7CCC8', priceOffset: 0, image: '/products/regularnatural.jpeg', hoverImage: '/products/regularnatural.jpeg', stock: 50 },
-        { id: 'black', name: 'Shadow Black', hex: '#1C1C1C', priceOffset: 100, image: '/products/regularblack.jpeg', hoverImage: '/products/regularblack.jpeg', stock: 0 }
-      ],
-      rating: 5,
-      reviewCount: 124
-    },
-    {
-      name: 'Mini Parallettes',
-      description: 'Travel-friendly mini parallettes for training anywhere. Compact 45mm grip, 250mm length, 120mm base width, 100mm height. Perfect for on-the-go.',
-      basePrice: 799,
-      size: 'mini',
-      material: 'Premium Mahogany Wood',
-      badge: 'Travel Edition',
-      stock: 30,
-      colors: [
-        { id: 'natural', name: 'Natural Finish', hex: '#D7CCC8', priceOffset: 0, image: '/products/mininatural.jpeg', hoverImage: '/products/mininatural.jpeg', stock: 5 },
-        { id: 'black', name: 'Shadow Black', hex: '#1C1C1C', priceOffset: 100, image: '/products/miniblack.PNG', hoverImage: '/products/miniblack.PNG', stock: 25 }
-      ],
-      rating: 5,
-      reviewCount: 89
+    try {
+      await Product.collection.dropIndexes();
+    } catch (e) {
+      // Indexes might not exist, continue
     }
-  ];
-  
-  await Product.insertMany(defaultProducts);
-  console.log('✅ Products seeded with colors');
+    
+    const defaultProducts = [
+      {
+        name: 'Pro Series Regular Parallettes',
+        description: 'Premium Mahogany Wood parallettes for professional training. 45mm ergonomic grip, 450mm length, 140mm base width, 130mm height. 350kg weight capacity.',
+        basePrice: 1499,
+        size: 'regular',
+        material: 'Premium Mahogany Wood',
+        badge: 'Signature Series',
+        stock: 50,
+        colors: [
+          { id: 'natural', name: 'Natural Finish', hex: '#D7CCC8', priceOffset: 0, image: '/products/regularnatural.jpeg', hoverImage: '/products/regularnatural.jpeg', stock: 25 },
+          { id: 'black', name: 'Shadow Black', hex: '#1C1C1C', priceOffset: 100, image: '/products/regularblack.jpeg', hoverImage: '/products/regularblack.jpeg', stock: 25 }
+        ],
+        rating: 5,
+        reviewCount: 124
+      },
+      {
+        name: 'Mini Parallettes',
+        description: 'Travel-friendly mini parallettes for training anywhere. Compact 45mm grip, 250mm length, 120mm base width, 100mm height. Perfect for on-the-go.',
+        basePrice: 799,
+        size: 'mini',
+        material: 'Premium Mahogany Wood',
+        badge: 'Travel Edition',
+        stock: 30,
+        colors: [
+          { id: 'natural', name: 'Natural Finish', hex: '#D7CCC8', priceOffset: 0, image: '/products/mininatural.jpeg', hoverImage: '/products/mininatural.jpeg', stock: 5 },
+          { id: 'black', name: 'Shadow Black', hex: '#1C1C1C', priceOffset: 100, image: '/products/miniblack.PNG', hoverImage: '/products/miniblack.PNG', stock: 25 }
+        ],
+        rating: 5,
+        reviewCount: 89
+      }
+    ];
+    
+    await Product.insertMany(defaultProducts);
+    console.log('✅ Products seeded with colors');
+  } catch (error) {
+    console.error('❌ Error during product seeding:', error);
+  }
 };
 seedProducts();
 
