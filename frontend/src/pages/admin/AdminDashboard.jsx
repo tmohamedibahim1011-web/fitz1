@@ -930,7 +930,7 @@ const AdminDashboard = () => {
                                         : order.customerInfo.phone.replace(/\D/g, '')) 
                                     : ''
                                 }?text=${encodeURIComponent(
-                                  `Hi ${order.customerInfo?.firstName ? `${order.customerInfo.firstName} ${order.customerInfo.lastName || ''}`.trim() : 'Customer'},\n\nI am Mr.Dhayanath from Fitz1 Official Sales and Customer support!\nYou are one step away from purchasing our Parallettes.\n\nDo you need any assistance in completing the order sir? Please Ignore if already paid .`
+                                  `Hi ${order.customerInfo?.firstName ? `${order.customerInfo.firstName} ${order.customerInfo.lastName || ''}`.trim() : 'Customer'},\n\nI am Dhayanath from Fitz1 Official Sales and Customer support!\nYou are one step away from purchasing our Parallettes.\n\nDo you need any assistance in completing the order? \n\nPlease Ignore if already paid! Thank you`
                                 )}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
