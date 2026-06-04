@@ -176,12 +176,40 @@ const migrateOldOrders = async () => {
   }
 };
 
+// Migration for missing expectedDeliveryDates
+const migrateExpectedDeliveryDates = async () => {
+  try {
+    const Order = require('./models/Order');
+    
+    // Find all orders that don't have expectedDeliveryDate field
+    const ordersToUpdate = await Order.find({ expectedDeliveryDate: { $exists: false } });
+    
+    if (ordersToUpdate.length === 0) {
+      console.log('ℹ️ All orders have expectedDeliveryDate.');
+      return;
+    }
+    
+    console.log(`🔄 Found ${ordersToUpdate.length} orders without expectedDeliveryDate, updating...`);
+    
+    for (const order of ordersToUpdate) {
+      const orderDate = order.createdAt ? new Date(order.createdAt) : new Date();
+      order.expectedDeliveryDate = new Date(orderDate.getTime() + 4 * 24 * 60 * 60 * 1000);
+      await order.save();
+    }
+    
+    console.log('✅ Migration of expected delivery dates complete!');
+  } catch (error) {
+    console.error('❌ Error during expected delivery dates migration:', error);
+  }
+};
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log('✅ MongoDB Connected Successfully');
     try {
       await migrateOldOrders();
+      await migrateExpectedDeliveryDates();
     } catch (migErr) {
       console.error('❌ Migration error on startup:', migErr);
     }

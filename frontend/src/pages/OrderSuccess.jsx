@@ -108,6 +108,12 @@ const OrderSuccess = () => {
                 <span className="font-bold text-sm">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
               </div>
               <div className="flex justify-between">
+                <span className="text-secondary-text text-sm">Expected Delivery</span>
+                <span className="font-bold text-sm text-luxury-gold">
+                  {new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                </span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-secondary-text text-sm">Payment Status</span>
                 <span className="font-bold text-sm text-green-600">Paid</span>
               </div>

@@ -183,9 +183,19 @@ const OrderTracking = () => {
                         )}
                       </div>
                     </div>
-                    <div className="md:text-right">
-                      <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-1">Order Date</p>
-                      <p className="font-bold text-sm">{new Date(order.createdAt).toLocaleDateString()}</p>
+                    <div className="md:text-right flex flex-col md:items-end gap-3 sm:gap-2">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-1">Order Date</p>
+                        <p className="font-bold text-sm">{new Date(order.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-widest text-secondary-text mb-1">Expected Delivery</p>
+                        <p className="font-bold text-sm text-luxury-gold">
+                          {order.expectedDeliveryDate 
+                            ? new Date(order.expectedDeliveryDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                            : new Date(new Date(order.createdAt).getTime() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        </p>
+                      </div>
                     </div>
                   </div>
 

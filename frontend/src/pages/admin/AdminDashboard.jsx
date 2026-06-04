@@ -33,7 +33,8 @@ const AdminDashboard = () => {
     state: '',
     zip: '',
     paymentStatus: 'pending',
-    items: []
+    items: [],
+    expectedDeliveryDate: ''
   });
 
   // Filters
@@ -260,7 +261,8 @@ const AdminDashboard = () => {
         },
         items: orderEditForm.items,
         totalAmount: orderEditForm.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-        paymentStatus: orderEditForm.paymentStatus
+        paymentStatus: orderEditForm.paymentStatus,
+        expectedDeliveryDate: orderEditForm.expectedDeliveryDate ? new Date(orderEditForm.expectedDeliveryDate) : undefined
       };
 
       const res = await axios.put(`${import.meta.env.VITE_API_URL}/admin/orders/${editingOrder._id}`, updatedPayload, { headers, withCredentials: true });
@@ -733,7 +735,14 @@ const AdminDashboard = () => {
                             {order.status}
                           </span>
                         </td>
-                        <td className="p-4 text-secondary-text text-xs">{new Date(order.createdAt).toLocaleDateString()}</td>
+                        <td className="p-4 text-secondary-text text-xs">
+                          <div>{new Date(order.createdAt).toLocaleDateString()}</div>
+                          {order.expectedDeliveryDate && (
+                            <div className="text-[10px] text-luxury-gold font-bold mt-1">
+                              Est: {new Date(order.expectedDeliveryDate).toLocaleDateString()}
+                            </div>
+                          )}
+                        </td>
                       </tr>
                     ))}
                     {orders.length === 0 && (
@@ -907,7 +916,14 @@ const AdminDashboard = () => {
                           />
                         </td>
                         <td className="p-4 font-mono font-bold text-xs">{order.orderId}</td>
-                        <td className="p-4 text-secondary-text text-xs">{new Date(order.createdAt).toLocaleDateString()}</td>
+                        <td className="p-4 text-secondary-text text-xs">
+                          <div>{new Date(order.createdAt).toLocaleDateString()}</div>
+                          {order.expectedDeliveryDate && (
+                            <div className="text-[10px] text-luxury-gold font-bold mt-1">
+                              Est: {new Date(order.expectedDeliveryDate).toLocaleDateString()}
+                            </div>
+                          )}
+                        </td>
                         <td className="p-4">
                           <p className="font-medium">{order.customerInfo?.firstName} {order.customerInfo?.lastName}</p>
                           <p className="text-[10px] text-secondary-text">{order.customerInfo?.phone}</p>
@@ -986,7 +1002,8 @@ const AdminDashboard = () => {
                                   state: order.shippingAddress?.state || '',
                                   zip: order.shippingAddress?.zip || '',
                                   paymentStatus: order.paymentStatus || 'pending',
-                                  items: order.items ? order.items.map(item => ({ ...item })) : []
+                                  items: order.items ? order.items.map(item => ({ ...item })) : [],
+                                  expectedDeliveryDate: order.expectedDeliveryDate ? new Date(order.expectedDeliveryDate).toISOString().split('T')[0] : ''
                                 });
                                 setShowOrderEditModal(true);
                               }} 
@@ -1333,19 +1350,28 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* Total and Payment Status */}
-                <div className="grid grid-cols-2 gap-6 items-center bg-secondary-white p-4 border border-black/5">
+                {/* Total, Expected Delivery Date, and Payment Status */}
+                <div className="grid grid-cols-3 gap-6 items-center bg-secondary-white p-4 border border-black/5">
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text block mb-1">Payment Status</span>
                     <select 
                       value={orderEditForm.paymentStatus} 
                       onChange={(e) => setOrderEditForm({ ...orderEditForm, paymentStatus: e.target.value })}
-                      className="border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none cursor-pointer bg-white"
+                      className="border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none cursor-pointer bg-white w-full"
                     >
                       <option value="pending">Pending / Unpaid</option>
                       <option value="completed">Completed / Paid</option>
                       <option value="paid">Paid</option>
                     </select>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text block mb-1">Expected Delivery Date</span>
+                    <input 
+                      type="date"
+                      value={orderEditForm.expectedDeliveryDate}
+                      onChange={(e) => setOrderEditForm({ ...orderEditForm, expectedDeliveryDate: e.target.value })}
+                      className="border border-black/10 px-3 py-2 text-xs font-bold text-primary-text outline-none bg-white w-full"
+                    />
                   </div>
                   <div className="text-right">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-secondary-text block mb-1">Total Amount</span>

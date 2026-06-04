@@ -60,11 +60,14 @@ const createOrder = async (req, res) => {
       }
     }
 
+    const expectedDeliveryDate = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000);
+
     if (flatItems.length <= 1) {
       const newOrder = new Order({
         ...req.body,
         items: flatItems,
-        orderId: baseOrderId
+        orderId: baseOrderId,
+        expectedDeliveryDate
       });
       await newOrder.save();
       savedOrders.push(newOrder);
@@ -93,7 +96,8 @@ const createOrder = async (req, res) => {
           items: [item],
           totalAmount: itemTotal,
           orderId: `${baseOrderId}-${i + 1}`,
-          paymentStatus: req.body.paymentStatus || 'pending'
+          paymentStatus: req.body.paymentStatus || 'pending',
+          expectedDeliveryDate
         });
         await newOrder.save();
         savedOrders.push(newOrder);
@@ -158,13 +162,16 @@ const createOrderWithPayment = async (req, res) => {
       }
     }
 
+    const expectedDeliveryDate = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000);
+
     if (flatItems.length <= 1) {
       const newOrder = new Order({
         ...req.body,
         items: flatItems,
         orderId: baseOrderId,
         paymentId: razorpayOrderId,
-        paymentStatus: 'pending'
+        paymentStatus: 'pending',
+        expectedDeliveryDate
       });
       
       await newOrder.save();
@@ -195,7 +202,8 @@ const createOrderWithPayment = async (req, res) => {
           totalAmount: itemTotal,
           orderId: `${baseOrderId}-${i + 1}`,
           paymentId: razorpayOrderId,
-          paymentStatus: 'pending'
+          paymentStatus: 'pending',
+          expectedDeliveryDate
         });
         await newOrder.save();
         savedOrders.push(newOrder);
@@ -291,13 +299,14 @@ const updateOrderStatus = async (req, res) => {
 // Update order details full (admin)
 const updateOrderDetailsFull = async (req, res) => {
   try {
-    const { customerInfo, shippingAddress, items, totalAmount, paymentStatus } = req.body;
+    const { customerInfo, shippingAddress, items, totalAmount, paymentStatus, expectedDeliveryDate } = req.body;
     const updateData = {};
     if (customerInfo) updateData.customerInfo = customerInfo;
     if (shippingAddress) updateData.shippingAddress = shippingAddress;
     if (items) updateData.items = items;
     if (totalAmount !== undefined) updateData.totalAmount = totalAmount;
     if (paymentStatus !== undefined) updateData.paymentStatus = paymentStatus;
+    if (expectedDeliveryDate !== undefined) updateData.expectedDeliveryDate = expectedDeliveryDate;
     
     const order = await Order.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
