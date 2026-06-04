@@ -110,7 +110,7 @@ const OrderSuccess = () => {
                 <span className="font-bold font-mono text-sm text-luxury-gold text-right break-all">{displayOrderIds}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-secondary-text text-sm">Date</span>
+                <span className="text-secondary-text text-sm">Ordered Date :</span>
                 <span className="font-bold text-sm">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
               </div>
               <div className="flex justify-between">
