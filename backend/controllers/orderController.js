@@ -2,7 +2,7 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
-const { generateOrderId, calculateExpectedDeliveryDate } = require('../utils/helpers');
+const { generateOrderId, calculateExpectedDeliveryDate, calculateOrderDates } = require('../utils/helpers');
 const mongoose = require('mongoose');
 
 // Helper to decrement stock color-wise and globally
