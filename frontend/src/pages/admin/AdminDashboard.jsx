@@ -53,6 +53,8 @@ const AdminDashboard = () => {
   const [showTrackingModal, setShowTrackingModal] = useState(false);
   const [trackingOrder, setTrackingOrder] = useState(null);
   const [trackingInputId, setTrackingInputId] = useState('');
+  const [downloadFormat, setDownloadFormat] = useState('indian');
+  const [courierNameInput, setCourierNameInput] = useState('Indian Courier');
 
   // Product Form State
   const [showProductModal, setShowProductModal] = useState(false);
@@ -469,6 +471,123 @@ const AdminDashboard = () => {
     }
   };
 
+  const drawSTCourierLabel = (doc, order, logoBase64, isFirstPage) => {
+    if (!isFirstPage) doc.addPage();
+
+    // Border around the whole page margin
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.8);
+    doc.rect(5, 5, 138, 95);
+
+    // Split lines
+    // Vertical line down the middle of upper section
+    doc.line(74, 5, 74, 60);
+    // Horizontal line for return address split
+    doc.line(5, 38, 74, 38);
+    // Horizontal line separating upper section and product details
+    doc.line(5, 60, 143, 60);
+    // Horizontal line separating product details and note
+    doc.line(5, 87, 143, 87);
+
+    // --- Delivery Address Section ---
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('Delivery Address:', 8, 10);
+
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(8.5);
+    let deliveryY = 14.5;
+    const customerName = `${order.customerInfo?.firstName || ''} ${order.customerInfo?.lastName || ''}`.trim();
+    doc.text(customerName, 8, deliveryY);
+    deliveryY += 3.8;
+
+    const addr = order.shippingAddress?.address || '';
+    if (addr) {
+      const addrLines = doc.splitTextToSize(addr, 62);
+      const linesToPrint = addrLines.slice(0, 3);
+      linesToPrint.forEach(line => {
+        doc.text(line, 8, deliveryY);
+        deliveryY += 3.8;
+      });
+    }
+
+    const city = order.shippingAddress?.city || '';
+    const state = order.shippingAddress?.state || '';
+    const zip = order.shippingAddress?.zip || '';
+    let locStr = '';
+    if (city) locStr += city;
+    if (state) locStr += (locStr ? `, ${state}` : state);
+    if (zip) locStr += (locStr ? ` - ${zip}` : zip);
+    
+    if (locStr) {
+      const locLines = doc.splitTextToSize(locStr, 62);
+      locLines.slice(0, 1).forEach(line => {
+        doc.text(line, 8, deliveryY);
+        deliveryY += 3.8;
+      });
+    }
+
+    const phone = order.customerInfo?.phone || '';
+    if (phone) {
+      doc.text(`Ph No- ${phone}`, 8, 36);
+    }
+
+    // --- Return Address Section ---
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.text('If undelivered, return to:', 8, 41.5);
+
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text('Fitz1,', 8, 45);
+    doc.text('5/1293 Thai nagar,', 8, 48.5);
+    doc.text('Mapillaiyurani, Tuticorin.', 8, 52);
+    doc.text('628002.', 8, 55.5);
+    doc.text('Ph No:. 8072210156', 8, 59);
+
+    // --- Logo Area (Right Side) ---
+    if (logoBase64) {
+      try {
+        // Centered inside x=74..143 (width 69) and y=5..60 (height 55)
+        doc.addImage(logoBase64, 'PNG', 83.5, 12.5, 50, 40);
+      } catch (e) {
+        console.error('Logo error', e);
+      }
+    }
+
+    // --- Product Details Section ---
+    const firstItem = order.items?.[0] || { name: 'Parallettes', color: 'Natural', quantity: 1 };
+    const prodName = 'Parallettes'; // Template has "Parallettes"
+    const prodSize = firstItem.name.toLowerCase().includes('mini') ? 'Mini' : 'Regular';
+    const prodQty = firstItem.quantity || 1;
+    const prodColor = firstItem.color || 'Natural';
+    const priceStr = `Rs. ${order.totalAmount}/-`;
+
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.text('Product Details: -', 8, 65);
+
+    // Table Headers
+    doc.text('Product', 28, 71, { align: 'center' });
+    doc.text('Size', 55, 71, { align: 'center' });
+    doc.text('Qty', 78, 71, { align: 'center' });
+    doc.text('Color', 100, 71, { align: 'center' });
+    doc.text('Prepaid', 125, 71, { align: 'center' });
+
+    // Table Values
+    doc.setFont('Helvetica', 'normal');
+    doc.text(prodName, 28, 79, { align: 'center' });
+    doc.text(prodSize, 55, 79, { align: 'center' });
+    doc.text(String(prodQty), 78, 79, { align: 'center' });
+    doc.text(prodColor, 100, 79, { align: 'center' });
+    doc.text(priceStr, 125, 79, { align: 'center' });
+
+    // --- Bottom Note Section ---
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.text('Note: Please handle with care.', 8, 93);
+  };
+
   const handleDownloadPDF = async (orderId) => {
     const order = orders.find(o => o.orderId === orderId);
     if (!order) {
@@ -485,7 +604,11 @@ const AdminDashboard = () => {
     try {
       const logoBase64 = await loadLogoBase64(fitzLogo);
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a6' });
-      drawShippingLabel(doc, order, logoBase64, true);
+      if (downloadFormat === 'st') {
+        drawSTCourierLabel(doc, order, logoBase64, true);
+      } else {
+        drawShippingLabel(doc, order, logoBase64, true);
+      }
       doc.save(`Invoice_${order.orderId}.pdf`);
       toast.success(`Downloaded invoice for ${orderId}`, { id: toastId });
     } catch (error) {
@@ -519,16 +642,21 @@ const AdminDashboard = () => {
     try {
       const logoBase64 = await loadLogoBase64(fitzLogo);
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a6' });
-      for (let i = 0; i < targetOrders.length; i++) {
-        drawShippingLabel(doc, targetOrders[i], logoBase64, i === 0);
+      for (let i = 0; i < paidTargetOrders.length; i++) {
+        if (downloadFormat === 'st') {
+          drawSTCourierLabel(doc, paidTargetOrders[i], logoBase64, i === 0);
+        } else {
+          drawShippingLabel(doc, paidTargetOrders[i], logoBase64, i === 0);
+        }
       }
       doc.save(`Bulk_Invoices_${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success(`Downloaded ${targetOrders.length} invoices`, { id: toastId });
+      toast.success(`Downloaded ${paidTargetOrders.length} invoices`, { id: toastId });
     } catch (error) {
       console.error(error);
       toast.error('Failed to generate bulk PDFs', { id: toastId });
     }
   };
+
 
 
 
@@ -791,6 +919,17 @@ const AdminDashboard = () => {
                 <p className="text-secondary-text text-sm">Manage and track customer orders.</p>
               </div>
               <div className="flex gap-3">
+                <div className="flex items-center gap-2 bg-white border border-black/10 px-3 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest shadow-sm">
+                  <span className="text-secondary-text">Format:</span>
+                  <select 
+                    value={downloadFormat} 
+                    onChange={(e) => setDownloadFormat(e.target.value)} 
+                    className="bg-transparent text-primary-text outline-none cursor-pointer"
+                  >
+                    <option value="indian">Indian Courier</option>
+                    <option value="st">ST Courier</option>
+                  </select>
+                </div>
                 <button onClick={handleDownloadExcel} className="flex items-center gap-2 bg-white border border-black/10 px-4 py-2 text-xs font-bold uppercase tracking-widest hover:border-luxury-gold hover:text-luxury-gold transition-colors shadow-sm">
                   <FileSpreadsheet size={16} /> Export Excel
                 </button>
@@ -802,6 +941,7 @@ const AdminDashboard = () => {
                   <FileText size={16} /> Download Filtered Invoices ({filteredOrders.filter(o => o.paymentStatus === 'paid' || o.paymentStatus === 'completed').length})
                 </button>
               </div>
+
             </header>
 
             {/* ANALYTICS CARDS */}
@@ -977,12 +1117,19 @@ const AdminDashboard = () => {
                               onClick={() => {
                                 setTrackingOrder(order);
                                 setTrackingInputId(order.trackingId || '');
+                                setCourierNameInput(order.courierName || 'Indian Courier');
                                 setShowTrackingModal(true);
                               }}
                               className="mt-2 text-[10px] font-bold uppercase tracking-widest border border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-white transition-colors px-3 py-1.5 w-fit flex items-center gap-1.5"
                             >
                               <Package size={12} /> {order.trackingId ? 'Edit Tracking' : 'Add Tracking'}
                             </button>
+                            {order.trackingId && (
+                              <span className="text-[10px] font-mono text-secondary-text mt-1">
+                                {order.courierName || 'Indian Courier'}: {order.trackingId}
+                              </span>
+                            )}
+
                           </div>
                         </td>
                         <td className="p-4 pr-6">
@@ -1537,6 +1684,17 @@ const AdminDashboard = () => {
             </h2>
             <div className="space-y-4">
               <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-secondary-text mb-2">Courier Name</label>
+                <select 
+                  value={courierNameInput} 
+                  onChange={(e) => setCourierNameInput(e.target.value)} 
+                  className="w-full border border-black/20 p-3 text-sm outline-none focus:border-luxury-gold bg-white font-bold uppercase tracking-widest cursor-pointer"
+                >
+                  <option value="Indian Courier">Indian Courier</option>
+                  <option value="ST Courier">ST Courier</option>
+                </select>
+              </div>
+              <div>
                 <label className="block text-xs font-bold uppercase tracking-widest text-secondary-text mb-2">Tracking ID</label>
                 <input 
                   type="text" 
@@ -1548,11 +1706,14 @@ const AdminDashboard = () => {
               </div>
               <button 
                 onClick={() => {
+                  const link = courierNameInput === 'ST Courier' 
+                    ? 'https://stcourier.com/' 
+                    : 'https://www.indiapost.gov.in/';
                   updateOrderDetails(trackingOrder._id, { 
                     status: trackingOrder.status,
                     trackingId: trackingInputId, 
-                    courierName: 'India Post', 
-                    trackingLink: 'https://www.indiapost.gov.in/' 
+                    courierName: courierNameInput, 
+                    trackingLink: link 
                   });
                   setShowTrackingModal(false);
                 }}
@@ -1560,9 +1721,6 @@ const AdminDashboard = () => {
               >
                 Save Tracking Details
               </button>
-              <p className="text-[10px] text-secondary-text text-center italic mt-2">
-                *Courier defaults to India Post automatically.
-              </p>
             </div>
           </div>
         </div>

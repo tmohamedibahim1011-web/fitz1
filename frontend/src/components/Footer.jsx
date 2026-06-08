@@ -40,6 +40,17 @@ const Footer = () => {
           <p className="text-secondary-text text-xs">
             &copy; {new Date().getFullYear()} FITZONE. All rights reserved.
           </p>
+          <p className="text-secondary-text text-xs">
+            Designed and built with ❤️ by{' '}
+            <a
+              href="https://gofstech.in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-luxury-gold transition-colors font-semibold"
+            >
+              Gofs Tech
+            </a>
+          </p>
           <div className="flex gap-6 text-xs text-secondary-text">
             <Link to="/privacy" className="hover:text-luxury-gold transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-luxury-gold transition-colors">Terms of Service</Link>
