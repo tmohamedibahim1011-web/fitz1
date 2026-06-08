@@ -549,7 +549,7 @@ const AdminDashboard = () => {
     if (logoBase64) {
       try {
         // Centered inside x=74..143 (width 69) and y=5..60 (height 55)
-        doc.addImage(logoBase64, 'PNG', 83.5, 12.5, 50, 40);
+        doc.addImage(logoBase64, 'PNG', 83.5, 17.5, 50, 30);
       } catch (e) {
         console.error('Logo error', e);
       }
