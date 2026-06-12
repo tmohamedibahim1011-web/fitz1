@@ -17,7 +17,20 @@ import miniblack from "../assets/products/miniblack.webp"
 import bannerImg from '../assets/banner.webp';
 import processVideo from '../assets/how-its-made.mp4';
 
-// Video Reviews — Cloudinary CDN (no local MP4 bandwidth)
+// Video Reviews — Local Compressed Hosting
+import reviewVid1 from '../assets/reviews/video-1.mp4';
+import reviewVid2 from '../assets/reviews/video-2.mp4';
+import reviewVid3 from '../assets/reviews/video-3.mp4';
+import reviewVid4 from '../assets/reviews/video-4.mp4';
+import reviewVid5 from '../assets/reviews/video-5.mp4';
+import reviewVid6 from '../assets/reviews/video-6.mp4';
+
+import reviewPoster1 from '../assets/reviews/video-1.jpg';
+import reviewPoster2 from '../assets/reviews/video-2.jpg';
+import reviewPoster3 from '../assets/reviews/video-3.jpg';
+import reviewPoster4 from '../assets/reviews/video-4.jpg';
+import reviewPoster5 from '../assets/reviews/video-5.jpg';
+import reviewPoster6 from '../assets/reviews/video-6.jpg';
 
 // Photoshoot Images
 import photo1 from '../assets/photoshoot/165547.webp';
@@ -54,12 +67,12 @@ import rev21 from '../assets/reviews/165623.webp';
 import rev22 from '../assets/reviews/165625.webp';
 
 const VIDEO_REVIEWS = [
-  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716333/video-1_qwydqo.mp4', poster: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/so_0/v1779716333/video-1_qwydqo.jpg', username: '@fitness_pro', text: "Best parallettes I've ever used!" },
-  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716343/video-2_gd3at4.mp4', poster: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/so_0/v1779716343/video-2_gd3at4.jpg', username: '@calisthenics_king', text: "Game changer for my training" },
-  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716340/video-3_fccfny.mp4', poster: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/so_0/v1779716340/video-3_fccfny.jpg', username: '@gymnast_life', text: "The grip is unbelievable" },
-  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716338/video-4_fboorm.mp4', poster: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/so_0/v1779716338/video-4_fboorm.jpg', username: '@athlete_mike', text: "Worth every penny" },
-  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716337/video-5_tzwvdr.mp4', poster: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/so_0/v1779716337/video-5_tzwvdr.jpg', username: '@coach_jones', text: "Highly recommended" },
-  { src: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/v1779716340/video-6_utoffd.mp4', poster: 'https://res.cloudinary.com/dp2yxb1xu/video/upload/so_0/v1779716340/video-6_utoffd.jpg', username: '@workout_junkie', text: "Premium quality" },
+  { src: reviewVid1, poster: reviewPoster1, username: '@fitness_pro', text: "Best parallettes I've ever used!" },
+  { src: reviewVid2, poster: reviewPoster2, username: '@calisthenics_king', text: "Game changer for my training" },
+  { src: reviewVid3, poster: reviewPoster3, username: '@gymnast_life', text: "The grip is unbelievable" },
+  { src: reviewVid4, poster: reviewPoster4, username: '@athlete_mike', text: "Worth every penny" },
+  { src: reviewVid5, poster: reviewPoster5, username: '@coach_jones', text: "Highly recommended" },
+  { src: reviewVid6, poster: reviewPoster6, username: '@workout_junkie', text: "Premium quality" },
 ];
 
 const IMAGE_REVIEWS = [
