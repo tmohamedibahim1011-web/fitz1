@@ -44,6 +44,7 @@ const AdminDashboard = () => {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [exactDate, setExactDate] = useState('');
+  const [filterDispatchDate, setFilterDispatchDate] = useState('');
 
   // Bulk Selection
   const [selectedOrders, setSelectedOrders] = useState([]);
@@ -54,7 +55,7 @@ const AdminDashboard = () => {
   const [trackingOrder, setTrackingOrder] = useState(null);
   const [trackingInputId, setTrackingInputId] = useState('');
   const [downloadFormat, setDownloadFormat] = useState('indian');
-  const [courierNameInput, setCourierNameInput] = useState('Indian Courier');
+  const [courierNameInput, setCourierNameInput] = useState('Indian Post');
 
   // Product Form State
   const [showProductModal, setShowProductModal] = useState(false);
@@ -700,6 +701,14 @@ const AdminDashboard = () => {
       if (toD && orderDate > toD) return false;
     }
 
+    // Dispatch date filter
+    if (filterDispatchDate) {
+      const filterD = new Date(filterDispatchDate).setHours(0, 0, 0, 0);
+      if (!o.dispatchDate) return false;
+      const dispatchD = new Date(o.dispatchDate).setHours(0, 0, 0, 0);
+      if (dispatchD !== filterD) return false;
+    }
+
     return productMatch && variantMatch;
   });
 
@@ -926,7 +935,7 @@ const AdminDashboard = () => {
                     onChange={(e) => setDownloadFormat(e.target.value)} 
                     className="bg-transparent text-primary-text outline-none cursor-pointer"
                   >
-                    <option value="indian">Indian Courier</option>
+                    <option value="indian">Indian Post</option>
                     <option value="st">ST Courier</option>
                   </select>
                 </div>
@@ -979,6 +988,15 @@ const AdminDashboard = () => {
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Specific Date</label>
                     <input type="date" value={exactDate} onChange={(e) => { setExactDate(e.target.value); setFromDate(''); setToDate(''); }} className="border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">🚚 Dispatch Date</label>
+                    <input
+                      type="date"
+                      value={filterDispatchDate}
+                      onChange={(e) => setFilterDispatchDate(e.target.value)}
+                      className="border border-black/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary-text outline-none"
+                    />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-secondary-text mb-1">Product Filter</label>
@@ -1117,7 +1135,7 @@ const AdminDashboard = () => {
                               onClick={() => {
                                 setTrackingOrder(order);
                                 setTrackingInputId(order.trackingId || '');
-                                setCourierNameInput(order.courierName || 'Indian Courier');
+                                setCourierNameInput(order.courierName || 'Indian Post');
                                 setShowTrackingModal(true);
                               }}
                               className="mt-2 text-[10px] font-bold uppercase tracking-widest border border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-white transition-colors px-3 py-1.5 w-fit flex items-center gap-1.5"
@@ -1126,7 +1144,7 @@ const AdminDashboard = () => {
                             </button>
                             {order.trackingId && (
                               <span className="text-[10px] font-mono text-secondary-text mt-1">
-                                {order.courierName || 'Indian Courier'}: {order.trackingId}
+                                {order.courierName || 'Indian Post'}: {order.trackingId}
                               </span>
                             )}
 
@@ -1690,7 +1708,7 @@ const AdminDashboard = () => {
                   onChange={(e) => setCourierNameInput(e.target.value)} 
                   className="w-full border border-black/20 p-3 text-sm outline-none focus:border-luxury-gold bg-white font-bold uppercase tracking-widest cursor-pointer"
                 >
-                  <option value="Indian Courier">Indian Courier</option>
+                  <option value="Indian Post">Indian Post</option>
                   <option value="ST Courier">ST Courier</option>
                 </select>
               </div>

@@ -65,16 +65,19 @@ const Checkout = () => {
   const isTamilNadu = formData.state.toLowerCase().trim() === 'tamil nadu' || formData.state.toLowerCase().trim() === 'tn';
   
   const getShippingCost = () => {
-    // Default to Free Shipping if no state is entered yet
+    // Default to 0 if no state is entered yet
     if (!formData.state.trim()) return 0;
-    
-    if (isTamilNadu) return 0;
     
     // Check if any item is "Mini" product
     const hasMini = cartItems.some(item => 
       item.name.toLowerCase().includes('mini')
     );
-    return hasMini ? 50 : 100;
+
+    if (isTamilNadu) {
+      return hasMini ? 50 : 80;
+    }
+    
+    return hasMini ? 80 : 100;
   };
   
   const shipping = getShippingCost();
@@ -107,7 +110,7 @@ const Checkout = () => {
           city: formData.district,
           state: formData.state,
           zip: formData.zip,
-          method: shipping === 0 ? 'Free Shipping' : (shipping === 50 ? 'Mini Shipping (Rs.50)' : 'Standard Shipping (Rs.100)')
+          method: shipping === 0 ? 'Free Shipping' : (isTamilNadu ? (shipping === 50 ? 'Mini Shipping TN (Rs.50)' : 'Standard Shipping TN (Rs.80)') : (shipping === 80 ? 'Mini Shipping (Rs.80)' : 'Standard Shipping (Rs.100)'))
         },
         items: cartItems.map(item => ({
           productId: item.id,
@@ -196,7 +199,7 @@ const Checkout = () => {
           city: formData.district,
           state: formData.state,
           zip: formData.zip,
-          method: shipping === 0 ? 'Free Shipping' : (shipping === 50 ? 'Mini Shipping (Rs.50)' : 'Standard Shipping (Rs.100)')
+          method: shipping === 0 ? 'Free Shipping' : (isTamilNadu ? (shipping === 50 ? 'Mini Shipping TN (Rs.50)' : 'Standard Shipping TN (Rs.80)') : (shipping === 80 ? 'Mini Shipping (Rs.80)' : 'Standard Shipping (Rs.100)'))
         },
         items: cartItems.map(item => ({
           productId: item.id,
@@ -263,9 +266,9 @@ const Checkout = () => {
                 {shipping === 0 ? 'Free' : `Rs. ${shipping}`}
               </span>
             </div>
-            {shipping === 0 && !formData.state.trim() && (
+            {!formData.state.trim() && (
               <p className="text-[11px] text-secondary-text text-right -mt-1 italic">
-                Free shipping in Tamil Nadu. Other states calculated upon entering address.
+                Shipping calculated upon entering address.
               </p>
             )}
             <div className="flex justify-between text-lg font-bold pt-2 border-t border-black/5">

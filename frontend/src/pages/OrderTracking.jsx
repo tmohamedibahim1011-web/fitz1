@@ -293,12 +293,12 @@ const OrderTracking = () => {
                       {order.trackingId && (
                         <div className="mt-6 p-4 bg-luxury-gold/5 border border-luxury-gold/20">
                           <h4 className="text-xs font-bold uppercase tracking-widest text-luxury-gold mb-2">
-                            {order.courierName === 'ST Courier' ? 'ST Courier Tracking' : order.courierName === 'Indian Courier' ? 'Indian Courier Tracking' : 'Tracking Information'}
+                            {order.courierName === 'ST Courier' ? 'ST Courier Tracking' : order.courierName === 'Indian Post' ? 'Indian Post Tracking' : 'Tracking Information'}
                           </h4>
                           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div className="w-full">
                               <p className="text-sm font-mono text-primary-text mb-1">
-                                {order.courierName === 'ST Courier' ? 'ST Courier Tracking Number Added' : order.courierName === 'Indian Courier' ? 'Indian Courier Tracking Number Added' : 'ID'}: <span className="font-bold">{order.trackingId}</span>
+                                {order.courierName === 'ST Courier' ? 'ST Courier Tracking Number Added' : order.courierName === 'Indian Post' ? 'Indian Post Tracking Number Added' : 'ID'}: <span className="font-bold">{order.trackingId}</span>
                               </p>
                               {order.courierName && (
                                 <p className="text-xs text-secondary-text uppercase tracking-widest font-bold">Courier: {order.courierName}</p>
