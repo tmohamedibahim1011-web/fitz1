@@ -304,7 +304,7 @@ const ProductDetail = () => {
               <div className="grid grid-cols-2 gap-4 mb-12 py-6 border-y border-black/10">
                 <div className="flex flex-col items-center text-center gap-2">
                   <Truck size={24} className="text-luxury-gold" strokeWidth={1.5} />
-                  <span className="text-[10px] uppercase tracking-widest text-secondary-text font-bold">Tamil Nadu<br/>Free Shipping</span>
+                  <span className="text-[10px] uppercase tracking-widest text-secondary-text font-bold">Pan India<br/>Delivery</span>
                 </div>
                 <div className="flex flex-col items-center text-center gap-2">
                   <Shield size={24} className="text-luxury-gold" strokeWidth={1.5} />
@@ -350,7 +350,7 @@ const ProductDetail = () => {
                           <li>Tamil Nadu: 2-3 working days (may take longer in remote areas).</li>
                           <li>Other States: 4-5 working days (may take longer in remote areas).</li>
                         </ul>
-                        <p><strong>Shipping Charges:</strong> No shipping charge within Tamil Nadu.</p>
+             
                       </div>
                     )
                   },
