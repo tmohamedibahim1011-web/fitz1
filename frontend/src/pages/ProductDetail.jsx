@@ -52,6 +52,7 @@ const ProductDetail = () => {
   const isOutOfStock = product?.stock !== undefined && product.stock < 1;
   const isMini = product?.size === 'mini' || product?.name?.toLowerCase().includes('mini');
   const isBlack = selectedColor?.id === 'black';
+  const isColoured = product?.name?.toLowerCase().includes('coloured') || product?.name?.toLowerCase().includes('colored');
 
   const isSelectedColorOutOfStock = selectedColor && selectedColor.stock !== undefined && selectedColor.stock < 1;
   const isSelectedColorLowStock = selectedColor && selectedColor.stock !== undefined && selectedColor.stock > 0 && selectedColor.stock <= 10;
@@ -344,13 +345,13 @@ const ProductDetail = () => {
                     title: 'Shipping Policy', 
                     content: (
                       <div className="space-y-4">
-                        <p><strong>Processing / Crafting Time:</strong> Orders are handmade after you place them. It takes about 4-5 working days to make and pack. It may take a little longer during festivals or holidays.</p>
+                        <p><strong>Processing / Crafting Time:</strong> Orders are handmade after you place them. It takes about {isColoured ? '7' : '4-5'} working days to make and pack. It may take a little longer during festivals or holidays.</p>
                         <p><strong>Delivery Time (After Dispatch):</strong></p>
                         <ul className="list-disc pl-5">
                           <li>Tamil Nadu: 2-3 working days (may take longer in remote areas).</li>
                           <li>Other States: 4-5 working days (may take longer in remote areas).</li>
                         </ul>
-             
+              
                       </div>
                     )
                   },

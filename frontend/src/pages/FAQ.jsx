@@ -13,11 +13,11 @@ const FAQS = [
   },
   {
     question: "Do you ship internationally?",
-    answer: "Currently, we focus on domestic shipping within India. Shipping within Tamil Nadu is free of charge and takes 2-3 working days. For other states, it takes 4-5 working days. Please note that each pair is handcrafted, which takes 4-5 working days before dispatch."
+    answer: "Currently, we focus on domestic shipping within India. Shipping within Tamil Nadu is free of charge and takes 2-3 working days. For other states, it takes 4-5 working days. Please note that each pair is handcrafted, which takes 4-5 working days before dispatch (7 days for Coloured Parallettes)."
   },
   {
     question: "What is your shipping policy?",
-    answer: "Orders are handmade after you place them. Crafting takes 4-5 working days. Delivery within Tamil Nadu takes 2-3 working days (Free shipping). Other states take 4-5 working days."
+    answer: "Orders are handmade after you place them. Crafting takes 4-5 working days (7 days for Coloured Parallettes). Delivery within Tamil Nadu takes 2-3 working days (Free shipping). Other states take 4-5 working days."
   },
   {
     question: "How do I maintain the wood finish?",

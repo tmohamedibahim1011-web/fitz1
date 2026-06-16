@@ -200,7 +200,7 @@ const migrateExpectedDeliveryDates = async () => {
     for (const order of ordersToUpdate) {
       const orderDate = order.createdAt ? new Date(order.createdAt) : new Date();
       const shippingState = order.shippingAddress ? order.shippingAddress.state : '';
-      const { dispatchDate, expectedDeliveryDate } = calculateOrderDates(orderDate, shippingState);
+      const { dispatchDate, expectedDeliveryDate } = calculateOrderDates(orderDate, shippingState, order.items);
       order.dispatchDate = dispatchDate;
       order.expectedDeliveryDate = expectedDeliveryDate;
       await order.save();
@@ -212,6 +212,39 @@ const migrateExpectedDeliveryDates = async () => {
   }
 };
 
+// Migration for missing product image/hoverImage fields
+const migrateProductImages = async () => {
+  try {
+    const Product = require('./models/Product');
+    const productsToUpdate = await Product.find({
+      $or: [
+        { image: { $exists: false } },
+        { image: '' },
+        { hoverImage: { $exists: false } },
+        { hoverImage: '' }
+      ]
+    });
+
+    if (productsToUpdate.length === 0) {
+      console.log('ℹ️ All products have image and hoverImage populated.');
+      return;
+    }
+
+    console.log(`🔄 Found ${productsToUpdate.length} products without image or hoverImage, updating...`);
+
+    for (const prod of productsToUpdate) {
+      const firstColor = prod.colors?.[0] || {};
+      prod.image = prod.image || firstColor.image || '/products/regularnatural.jpeg';
+      prod.hoverImage = prod.hoverImage || firstColor.hoverImage || firstColor.image || '/products/regularnatural.jpeg';
+      await prod.save();
+    }
+
+    console.log('✅ Migration of product images complete!');
+  } catch (error) {
+    console.error('❌ Error during product image migration:', error);
+  }
+};
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
@@ -219,6 +252,7 @@ mongoose.connect(process.env.MONGODB_URI)
     try {
       await migrateOldOrders();
       await migrateExpectedDeliveryDates();
+      await migrateProductImages();
     } catch (migErr) {
       console.error('❌ Migration error on startup:', migErr);
     }
@@ -252,6 +286,8 @@ const seedProducts = async () => {
         material: 'Premium Mahogany Wood',
         badge: 'Signature Series',
         stock: 50,
+        image: '/products/regularnatural.jpeg',
+        hoverImage: '/products/regularnatural.jpeg',
         colors: [
           { id: 'natural', name: 'Natural Finish', hex: '#D7CCC8', priceOffset: 0, image: '/products/regularnatural.jpeg', hoverImage: '/products/regularnatural.jpeg', stock: 25 },
           { id: 'black', name: 'Shadow Black', hex: '#1C1C1C', priceOffset: 100, image: '/products/regularblack.jpeg', hoverImage: '/products/regularblack.jpeg', stock: 25 }
@@ -267,6 +303,8 @@ const seedProducts = async () => {
         material: 'Premium Mahogany Wood',
         badge: 'Travel Edition',
         stock: 30,
+        image: '/products/mininatural.jpeg',
+        hoverImage: '/products/mininatural.jpeg',
         colors: [
           { id: 'natural', name: 'Natural Finish', hex: '#D7CCC8', priceOffset: 0, image: '/products/mininatural.jpeg', hoverImage: '/products/mininatural.jpeg', stock: 5 },
           { id: 'black', name: 'Shadow Black', hex: '#1C1C1C', priceOffset: 100, image: '/products/miniblack.PNG', hoverImage: '/products/miniblack.PNG', stock: 25 }

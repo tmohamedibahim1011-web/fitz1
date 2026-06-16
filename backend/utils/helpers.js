@@ -28,24 +28,33 @@ const formatDate = (date) => {
   });
 };
 
-const calculateExpectedDeliveryDate = (orderDate, state) => {
+const calculateOrderDates = (orderDate, state, items = []) => {
   const date = new Date(orderDate);
-  const normalizedState = state ? state.toLowerCase().trim() : '';
-  const isTamilNadu = normalizedState === 'tamil nadu' || normalizedState === 'tamilnadu' || normalizedState === 'tn';
-  const daysToAdd = isTamilNadu ? 7 : 9;
-  return new Date(date.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
-};
+  
+  // Check if any item in the order is "Coloured Parallettes" (case-insensitive check for 'coloured' or 'colored')
+  const hasColouredParallettes = items.some(item => {
+    const name = (item.name || '').toLowerCase();
+    return name.includes('coloured') || name.includes('colored');
+  });
 
-const calculateOrderDates = (orderDate, state) => {
-  const date = new Date(orderDate);
-  const dispatchDate = new Date(date.getTime() + 4 * 24 * 60 * 60 * 1000);
+  const dispatchDays = hasColouredParallettes ? 7 : 4;
+  const dispatchDate = new Date(date.getTime() + dispatchDays * 24 * 60 * 60 * 1000);
   
   const normalizedState = state ? state.toLowerCase().trim() : '';
   const isTamilNadu = normalizedState === 'tamil nadu' || normalizedState === 'tamilnadu' || normalizedState === 'tn';
-  const deliveryDays = isTamilNadu ? 6 : 8; // 6 days (7 days inclusive) for Tamil Nadu, 8 days (9 days inclusive) for others
+  
+  // Standard expected delivery was: Tamil Nadu = 6 days, Others = 8 days
+  // User wants to add 2 days to expected delivery: Tamil Nadu = 8 days, Others = 10 days
+  // If dispatch is pushed by 3 extra days (for Coloured Parallettes), we shift expected delivery accordingly.
+  const extraDaysForColoured = dispatchDays - 4; // 3 days for Coloured, 0 for standard
+  const deliveryDays = (isTamilNadu ? 8 : 10) + extraDaysForColoured;
   const expectedDeliveryDate = new Date(date.getTime() + deliveryDays * 24 * 60 * 60 * 1000);
   
   return { dispatchDate, expectedDeliveryDate };
+};
+
+const calculateExpectedDeliveryDate = (orderDate, state) => {
+  return calculateOrderDates(orderDate, state, []).expectedDeliveryDate;
 };
 
 module.exports = {

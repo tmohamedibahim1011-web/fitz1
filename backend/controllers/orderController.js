@@ -61,7 +61,7 @@ const createOrder = async (req, res) => {
     }
 
     const shippingState = shippingAddress ? shippingAddress.state : '';
-    const { dispatchDate, expectedDeliveryDate } = calculateOrderDates(Date.now(), shippingState);
+    const { dispatchDate, expectedDeliveryDate } = calculateOrderDates(Date.now(), shippingState, flatItems);
 
     if (flatItems.length <= 1) {
       const newOrder = new Order({
@@ -166,7 +166,7 @@ const createOrderWithPayment = async (req, res) => {
     }
 
     const shippingState = shippingAddress ? shippingAddress.state : '';
-    const { dispatchDate, expectedDeliveryDate } = calculateOrderDates(Date.now(), shippingState);
+    const { dispatchDate, expectedDeliveryDate } = calculateOrderDates(Date.now(), shippingState, flatItems);
 
     if (flatItems.length <= 1) {
       const newOrder = new Order({

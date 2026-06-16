@@ -83,6 +83,11 @@ const Checkout = () => {
   const shipping = getShippingCost();
   const finalTotal = cartTotal + shipping;
 
+  const hasColouredParallettes = cartItems.some(item => {
+    const name = (item.name || '').toLowerCase();
+    return name.includes('coloured') || name.includes('colored');
+  });
+
   const handleContinue = (e) => {
     e.preventDefault();
     setShowConfirmModal(true);
@@ -148,11 +153,11 @@ const Checkout = () => {
 
             toast.success('Order placed successfully!');
             clearCart();
-            navigate('/success', { state: { orderIds: orderIds || [order.orderId], shippingState: formData.state } });
+            navigate('/success', { state: { orderIds: orderIds || [order.orderId], shippingState: formData.state, hasColouredParallettes } });
           } catch (err) {
             toast.error('Payment verified but issue with server. Your order is placed.');
             clearCart();
-            navigate('/success', { state: { orderIds: orderIds || [order.orderId], shippingState: formData.state } });
+            navigate('/success', { state: { orderIds: orderIds || [order.orderId], shippingState: formData.state, hasColouredParallettes } });
           }
         },
         prefill: {
@@ -176,7 +181,7 @@ const Checkout = () => {
         // Fallback for test mode without Razorpay library
         toast.success('Order placed in test mode!');
         clearCart();
-        navigate('/success', { state: { orderIds: orderIds || [order.orderId], shippingState: formData.state } });
+        navigate('/success', { state: { orderIds: orderIds || [order.orderId], shippingState: formData.state, hasColouredParallettes } });
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -215,7 +220,7 @@ const Checkout = () => {
       if (orderRes.data.success) {
         toast.success('Order placed successfully!');
         clearCart();
-        navigate('/success', { state: { orderIds: orderRes.data.orderIds || [orderRes.data.order.orderId], shippingState: formData.state } });
+        navigate('/success', { state: { orderIds: orderRes.data.orderIds || [orderRes.data.order.orderId], shippingState: formData.state, hasColouredParallettes } });
       }
     } catch (error) {
       toast.error('Failed to place order. Please try again.');

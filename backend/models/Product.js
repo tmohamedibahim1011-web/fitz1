@@ -7,6 +7,8 @@ const ProductSchema = new mongoose.Schema({
   size: { type: String, enum: ['regular', 'mini'], required: true },
   material: String,
   badge: String,
+  image: String,
+  hoverImage: String,
   stock: { type: Number, default: 50 },
   colors: [{
     id: String,

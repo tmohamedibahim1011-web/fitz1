@@ -61,8 +61,13 @@ const OrderSuccess = () => {
   const shippingState = location.state?.shippingState || '';
   const normalizedState = shippingState ? shippingState.toLowerCase().trim() : '';
   const isTamilNadu = normalizedState === 'tamil nadu' || normalizedState === 'tamilnadu' || normalizedState === 'tn';
-  const deliveryDays = isTamilNadu ? 6 : 8; // 6 days (7 days inclusive) for Tamil Nadu, 8 days (9 days inclusive) for others
-  const dispatchDate = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const hasColouredParallettes = location.state?.hasColouredParallettes || false;
+
+  const dispatchDays = hasColouredParallettes ? 7 : 4;
+  const extraDaysForColoured = dispatchDays - 4; // 3 days for Coloured, 0 for standard
+  const deliveryDays = (isTamilNadu ? 8 : 10) + extraDaysForColoured;
+
+  const dispatchDate = new Date(Date.now() + dispatchDays * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const expectedDate = new Date(Date.now() + deliveryDays * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
   useEffect(() => {

@@ -1243,7 +1243,7 @@ const AdminDashboard = () => {
                       <tr key={product._id} className="border-b border-black/5 hover:bg-secondary-white/20 transition-colors text-sm">
                         <td className="p-4">
                           <div className="flex items-center gap-4">
-                            <img src={product.image} alt={product.name} className="w-12 h-12 object-cover rounded" />
+                            <img src={product.image || product.colors?.[0]?.image || ''} alt={product.name} className="w-12 h-12 object-cover rounded" />
                             <div>
                               <p className="font-bold text-primary-text">{product.name}</p>
                               <p className="text-[10px] text-secondary-text">{product.material}</p>
