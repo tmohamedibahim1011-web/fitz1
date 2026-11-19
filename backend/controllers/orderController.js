@@ -84,7 +84,7 @@ const createOrder = async (req, res) => {
         const itemShipping = shippingPerItem + (i === 0 ? remainderShipping : 0);
         const itemTotal = item.price + itemShipping;
 
-        let shippingMethod = 'Free Shipping';
+        let shippingMethod = 'Standard Shipping';
         if (itemShipping > 0) {
           shippingMethod = itemShipping === 50 ? 'Mini Shipping (Rs.50)' : `Standard Shipping (Rs.${itemShipping})`;
         }
@@ -192,7 +192,7 @@ const createOrderWithPayment = async (req, res) => {
         const itemShipping = shippingPerItem + (i === 0 ? remainderShipping : 0);
         const itemTotal = item.price + itemShipping;
 
-        let shippingMethod = 'Free Shipping';
+        let shippingMethod = 'Standard Shipping';
         if (itemShipping > 0) {
           shippingMethod = itemShipping === 50 ? 'Mini Shipping (Rs.50)' : `Standard Shipping (Rs.${itemShipping})`;
         }

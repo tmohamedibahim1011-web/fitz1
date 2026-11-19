@@ -62,11 +62,12 @@ const Checkout = () => {
     doorNo: '', streetName: '', area: '', landmark: '', district: '', state: '', zip: ''
   });
 
-  const isTamilNadu = formData.state.toLowerCase().trim() === 'tamil nadu' || formData.state.toLowerCase().trim() === 'tn';
+  const isStateSelected = Boolean(formData.state && formData.state.trim());
+  const isTamilNadu = isStateSelected && (formData.state.toLowerCase().trim() === 'tamil nadu' || formData.state.toLowerCase().trim() === 'tn');
   
   const getShippingCost = () => {
-    // Default to 0 if no state is entered yet
-    if (!formData.state.trim()) return 0;
+    // Only calculate shipping when state is selected
+    if (!isStateSelected) return null;
     
     // Check if any item is "Mini" product
     const hasMini = cartItems.some(item => 
@@ -81,7 +82,15 @@ const Checkout = () => {
   };
   
   const shipping = getShippingCost();
-  const finalTotal = cartTotal + shipping;
+  const finalTotal = cartTotal + (shipping !== null ? shipping : 0);
+
+  const getShippingMethod = () => {
+    if (!isStateSelected) return 'Standard Shipping';
+    if (isTamilNadu) {
+      return shipping === 50 ? 'Mini Shipping TN (Rs.50)' : 'Standard Shipping TN (Rs.80)';
+    }
+    return shipping === 80 ? 'Mini Shipping (Rs.80)' : 'Standard Shipping (Rs.100)';
+  };
 
   const hasColouredParallettes = cartItems.some(item => {
     const name = (item.name || '').toLowerCase();
@@ -115,7 +124,7 @@ const Checkout = () => {
           city: formData.district,
           state: formData.state,
           zip: formData.zip,
-          method: shipping === 0 ? 'Free Shipping' : (isTamilNadu ? (shipping === 50 ? 'Mini Shipping TN (Rs.50)' : 'Standard Shipping TN (Rs.80)') : (shipping === 80 ? 'Mini Shipping (Rs.80)' : 'Standard Shipping (Rs.100)'))
+          method: getShippingMethod()
         },
         items: cartItems.map(item => ({
           productId: item.id,
@@ -204,7 +213,7 @@ const Checkout = () => {
           city: formData.district,
           state: formData.state,
           zip: formData.zip,
-          method: shipping === 0 ? 'Free Shipping' : (isTamilNadu ? (shipping === 50 ? 'Mini Shipping TN (Rs.50)' : 'Standard Shipping TN (Rs.80)') : (shipping === 80 ? 'Mini Shipping (Rs.80)' : 'Standard Shipping (Rs.100)'))
+          method: getShippingMethod()
         },
         items: cartItems.map(item => ({
           productId: item.id,
@@ -265,20 +274,31 @@ const Checkout = () => {
               <span className="text-secondary-text">Subtotal</span>
               <span>Rs. {cartTotal.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm items-center">
               <span className="text-secondary-text">Shipping</span>
-              <span className={shipping === 0 ? 'text-green-600 font-medium' : ''}>
-                {shipping === 0 ? 'Free' : `Rs. ${shipping}`}
-              </span>
+              {isStateSelected ? (
+                <span className="font-semibold text-primary-text">
+                  Rs. {shipping}
+                </span>
+              ) : (
+                <span className="text-xs text-secondary-text italic">
+                  Calculated with address
+                </span>
+              )}
             </div>
-            {!formData.state.trim() && (
+            {!isStateSelected && (
               <p className="text-[11px] text-secondary-text text-right -mt-1 italic">
                 Shipping calculated upon entering address.
               </p>
             )}
-            <div className="flex justify-between text-lg font-bold pt-2 border-t border-black/5">
+            <div className="flex justify-between text-lg font-bold pt-2 border-t border-black/5 items-center">
               <span>Total</span>
-              <span className="text-luxury-gold">Rs. {finalTotal.toLocaleString()}</span>
+              <span className="text-luxury-gold">
+                Rs. {finalTotal.toLocaleString()}
+                {!isStateSelected && (
+                  <span className="text-[11px] font-normal text-secondary-text ml-1.5">(+ shipping)</span>
+                )}
+              </span>
             </div>
           </div>
         </div>
@@ -352,6 +372,11 @@ const Checkout = () => {
                       <option key={state} value={state}>{state}</option>
                     ))}
                   </select>
+                  {isStateSelected && (
+                    <p className="text-[11px] text-luxury-gold font-medium mt-1">
+                      Shipping: Rs. {shipping} ({isTamilNadu ? 'Tamil Nadu' : 'Other States'})
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-secondary-text mb-2 font-bold">Zip Code *</label>
@@ -365,7 +390,7 @@ const Checkout = () => {
             type="submit"
             className="w-full bg-primary-text text-white py-5 font-bold uppercase tracking-widest text-lg hover:bg-luxury-gold transition-colors flex items-center justify-center gap-2"
           >
-            Review Order - Rs. {finalTotal.toLocaleString()}
+            {isStateSelected ? `Review Order - Rs. ${finalTotal.toLocaleString()}` : 'Review Order'}
           </button>
         </form>
 
@@ -442,8 +467,8 @@ const Checkout = () => {
                   </div>
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-secondary-text">Shipping</span>
-                    <span className={shipping === 0 ? 'text-green-600 font-medium' : ''}>
-                      {shipping === 0 ? 'Free' : `Rs. ${shipping}`}
+                    <span className="font-semibold text-primary-text">
+                      {shipping !== null ? `Rs. ${shipping}` : 'Calculated with address'}
                     </span>
                   </div>
                   <div className="border-t border-black/10 pt-2 flex justify-between">
