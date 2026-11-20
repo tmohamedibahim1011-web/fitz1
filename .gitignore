@@ -6,6 +6,7 @@ xlsx/
 # Build outputs
 dist/
 dist-ssr/
+build/
 *.egg-info/
 
 # Environment variables
