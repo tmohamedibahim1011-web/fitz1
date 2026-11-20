@@ -65,31 +65,50 @@ const Checkout = () => {
   const isStateSelected = Boolean(formData.state && formData.state.trim());
   const isTamilNadu = isStateSelected && (formData.state.toLowerCase().trim() === 'tamil nadu' || formData.state.toLowerCase().trim() === 'tn');
   
+  const getItemShippingRate = (item) => {
+    const isMini = (item.name || '').toLowerCase().includes('mini') || item.size === 'mini';
+    if (isTamilNadu) {
+      return isMini ? 50 : 80;
+    }
+    return isMini ? 80 : 100;
+  };
+
   const getShippingCost = () => {
     // Only calculate shipping when state is selected
     if (!isStateSelected) return null;
     
-    // Check if any item is "Mini" product
-    const hasMini = cartItems.some(item => 
-      item.name.toLowerCase().includes('mini')
-    );
-
-    if (isTamilNadu) {
-      return hasMini ? 50 : 80;
-    }
-    
-    return hasMini ? 80 : 100;
+    return cartItems.reduce((total, item) => {
+      const rate = getItemShippingRate(item);
+      return total + (rate * (item.quantity || 1));
+    }, 0);
   };
   
   const shipping = getShippingCost();
   const finalTotal = cartTotal + (shipping !== null ? shipping : 0);
 
+  const getShippingBreakdown = () => {
+    if (!isStateSelected) return '';
+    return cartItems.map(item => {
+      const isMini = (item.name || '').toLowerCase().includes('mini') || item.size === 'mini';
+      const label = isMini ? 'Mini' : 'Regular';
+      const rate = getItemShippingRate(item);
+      const qty = item.quantity || 1;
+      return qty > 1 ? `${qty}x ${label} (Rs. ${rate * qty})` : `1x ${label} (Rs. ${rate})`;
+    }).join(' + ');
+  };
+
   const getShippingMethod = () => {
     if (!isStateSelected) return 'Standard Shipping';
-    if (isTamilNadu) {
-      return shipping === 50 ? 'Mini Shipping TN (Rs.50)' : 'Standard Shipping TN (Rs.80)';
+    const hasMini = cartItems.some(item => (item.name || '').toLowerCase().includes('mini') || item.size === 'mini');
+    const hasRegular = cartItems.some(item => !((item.name || '').toLowerCase().includes('mini') || item.size === 'mini'));
+
+    if (hasMini && hasRegular) {
+      return `Combined Shipping (${isTamilNadu ? 'TN' : 'Standard'} - Rs.${shipping})`;
     }
-    return shipping === 80 ? 'Mini Shipping (Rs.80)' : 'Standard Shipping (Rs.100)';
+    if (hasMini) {
+      return `Mini Shipping (${isTamilNadu ? 'TN' : 'Standard'} - Rs.${shipping})`;
+    }
+    return `Standard Shipping (${isTamilNadu ? 'TN' : 'Standard'} - Rs.${shipping})`;
   };
 
   const hasColouredParallettes = cartItems.some(item => {
@@ -255,6 +274,8 @@ const Checkout = () => {
           <div className="space-y-3 max-h-[30vh] overflow-y-auto">
             {cartItems.map((item) => {
               const itemPrice = item.variant ? item.price + item.variant.priceOffset : item.price;
+              const rate = getItemShippingRate(item);
+              const itemShippingTotal = rate * (item.quantity || 1);
               return (
                 <div key={`${item.id}-${item.variant?.id}`} className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
@@ -262,6 +283,11 @@ const Checkout = () => {
                     <div>
                       <p className="font-bold text-sm text-primary-text">{item.name}</p>
                       <p className="text-xs text-secondary-text">{item.variant?.name || 'Standard'} x {item.quantity}</p>
+                      {isStateSelected && (
+                        <p className="text-[11px] text-luxury-gold font-medium mt-0.5">
+                          Shipping: Rs. {itemShippingTotal} ({item.quantity > 1 ? `Rs. ${rate} × ${item.quantity}` : `Rs. ${rate}`})
+                        </p>
+                      )}
                     </div>
                   </div>
                   <span className="font-medium text-sm">Rs. {(itemPrice * item.quantity).toLocaleString()}</span>
@@ -286,6 +312,11 @@ const Checkout = () => {
                 </span>
               )}
             </div>
+            {isStateSelected && (cartItems.length > 1 || cartItems.some(i => (i.quantity || 1) > 1)) && (
+              <p className="text-[11px] text-secondary-text text-right -mt-1 italic">
+                {getShippingBreakdown()}
+              </p>
+            )}
             {!isStateSelected && (
               <p className="text-[11px] text-secondary-text text-right -mt-1 italic">
                 Shipping calculated upon entering address.
@@ -374,7 +405,7 @@ const Checkout = () => {
                   </select>
                   {isStateSelected && (
                     <p className="text-[11px] text-luxury-gold font-medium mt-1">
-                      Shipping: Rs. {shipping} ({isTamilNadu ? 'Tamil Nadu' : 'Other States'})
+                      Shipping: Rs. {shipping} ({getShippingBreakdown()} for {isTamilNadu ? 'Tamil Nadu' : 'Other States'})
                     </p>
                   )}
                 </div>
@@ -446,13 +477,20 @@ const Checkout = () => {
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-xs font-bold uppercase tracking-widest text-secondary-text">Items</span>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {cartItems.map((item) => {
                       const itemPrice = item.variant ? item.price + item.variant.priceOffset : item.price;
+                      const rate = getItemShippingRate(item);
+                      const itemShippingTotal = rate * (item.quantity || 1);
                       return (
-                        <div key={`${item.id}-${item.variant?.id}`} className="flex justify-between text-sm">
-                          <span className="text-primary-text">{item.name} ({item.variant?.name}) x {item.quantity}</span>
-                          <span className="font-medium">Rs. {(itemPrice * item.quantity).toLocaleString()}</span>
+                        <div key={`${item.id}-${item.variant?.id}`} className="space-y-0.5">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-primary-text">{item.name} ({item.variant?.name}) x {item.quantity}</span>
+                            <span className="font-medium">Rs. {(itemPrice * item.quantity).toLocaleString()}</span>
+                          </div>
+                          <p className="text-[11px] text-secondary-text">
+                            Shipping: Rs. {itemShippingTotal} ({item.quantity > 1 ? `Rs. ${rate} × ${item.quantity}` : `Rs. ${rate}`})
+                          </p>
                         </div>
                       );
                     })}
@@ -465,12 +503,17 @@ const Checkout = () => {
                     <span className="text-secondary-text">Subtotal</span>
                     <span>Rs. {cartTotal.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-sm mb-2">
+                  <div className="flex justify-between text-sm mb-1">
                     <span className="text-secondary-text">Shipping</span>
                     <span className="font-semibold text-primary-text">
                       {shipping !== null ? `Rs. ${shipping}` : 'Calculated with address'}
                     </span>
                   </div>
+                  {(cartItems.length > 1 || cartItems.some(i => (i.quantity || 1) > 1)) && (
+                    <p className="text-[11px] text-secondary-text text-right mb-2 italic">
+                      {getShippingBreakdown()}
+                    </p>
+                  )}
                   <div className="border-t border-black/10 pt-2 flex justify-between">
                     <span className="font-bold">Total</span>
                     <span className="text-xl font-bold text-luxury-gold">Rs. {finalTotal.toLocaleString()}</span>

@@ -74,20 +74,31 @@ const createOrder = async (req, res) => {
       await newOrder.save();
       savedOrders.push(newOrder);
     } else {
+      const isTN = shippingState.toLowerCase().trim() === 'tamil nadu' || shippingState.toLowerCase().trim() === 'tn';
       const subtotal = flatItems.reduce((sum, item) => sum + item.price, 0);
       const totalShipping = Math.max(0, totalAmount - subtotal);
-      const shippingPerItem = Math.floor(totalShipping / flatItems.length);
-      const remainderShipping = totalShipping - (shippingPerItem * flatItems.length);
+
+      const getDefaultItemShipping = (item) => {
+        const isMini = (item.name || '').toLowerCase().includes('mini');
+        return isTN ? (isMini ? 50 : 80) : (isMini ? 80 : 100);
+      };
+
+      const sumDefaultShipping = flatItems.reduce((sum, item) => sum + getDefaultItemShipping(item), 0);
+      const useDefaultRates = sumDefaultShipping === totalShipping;
+      const fallbackShippingPerItem = Math.floor(totalShipping / flatItems.length);
+      const fallbackRemainder = totalShipping - (fallbackShippingPerItem * flatItems.length);
 
       for (let i = 0; i < flatItems.length; i++) {
         const item = flatItems[i];
-        const itemShipping = shippingPerItem + (i === 0 ? remainderShipping : 0);
+        const isMini = (item.name || '').toLowerCase().includes('mini');
+        const itemShipping = useDefaultRates 
+          ? getDefaultItemShipping(item)
+          : fallbackShippingPerItem + (i === 0 ? fallbackRemainder : 0);
         const itemTotal = item.price + itemShipping;
 
-        let shippingMethod = 'Standard Shipping';
-        if (itemShipping > 0) {
-          shippingMethod = itemShipping === 50 ? 'Mini Shipping (Rs.50)' : `Standard Shipping (Rs.${itemShipping})`;
-        }
+        let shippingMethod = isMini 
+          ? `Mini Shipping (${isTN ? 'TN ' : ''}Rs.${itemShipping})` 
+          : `Standard Shipping (${isTN ? 'TN ' : ''}Rs.${itemShipping})`;
 
         const newOrder = new Order({
           customerInfo,
@@ -182,20 +193,31 @@ const createOrderWithPayment = async (req, res) => {
       await newOrder.save();
       savedOrders.push(newOrder);
     } else {
+      const isTN = shippingState.toLowerCase().trim() === 'tamil nadu' || shippingState.toLowerCase().trim() === 'tn';
       const subtotal = flatItems.reduce((sum, item) => sum + item.price, 0);
       const totalShipping = Math.max(0, totalAmount - subtotal);
-      const shippingPerItem = Math.floor(totalShipping / flatItems.length);
-      const remainderShipping = totalShipping - (shippingPerItem * flatItems.length);
+
+      const getDefaultItemShipping = (item) => {
+        const isMini = (item.name || '').toLowerCase().includes('mini');
+        return isTN ? (isMini ? 50 : 80) : (isMini ? 80 : 100);
+      };
+
+      const sumDefaultShipping = flatItems.reduce((sum, item) => sum + getDefaultItemShipping(item), 0);
+      const useDefaultRates = sumDefaultShipping === totalShipping;
+      const fallbackShippingPerItem = Math.floor(totalShipping / flatItems.length);
+      const fallbackRemainder = totalShipping - (fallbackShippingPerItem * flatItems.length);
 
       for (let i = 0; i < flatItems.length; i++) {
         const item = flatItems[i];
-        const itemShipping = shippingPerItem + (i === 0 ? remainderShipping : 0);
+        const isMini = (item.name || '').toLowerCase().includes('mini');
+        const itemShipping = useDefaultRates 
+          ? getDefaultItemShipping(item)
+          : fallbackShippingPerItem + (i === 0 ? fallbackRemainder : 0);
         const itemTotal = item.price + itemShipping;
 
-        let shippingMethod = 'Standard Shipping';
-        if (itemShipping > 0) {
-          shippingMethod = itemShipping === 50 ? 'Mini Shipping (Rs.50)' : `Standard Shipping (Rs.${itemShipping})`;
-        }
+        let shippingMethod = isMini 
+          ? `Mini Shipping (${isTN ? 'TN ' : ''}Rs.${itemShipping})` 
+          : `Standard Shipping (${isTN ? 'TN ' : ''}Rs.${itemShipping})`;
 
         const newOrder = new Order({
           customerInfo,
